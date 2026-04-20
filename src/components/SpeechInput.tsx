@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Mic, MicOff, Loader2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Mic, MicOff } from "lucide-react";
 
 type SpeechInputProps = {
   onResult: (text: string) => void;
@@ -9,25 +9,36 @@ type SpeechInputProps = {
   className?: string;
 };
 
+// Define types for Web Speech API
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionErrorEvent extends Event {
+  error: string;
+}
+
 export default function SpeechInput({ onResult, language = "en-IN", className = "" }: SpeechInputProps) {
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<any>(null);
+  const recognitionRef = useRef<any>(null);
+  const [isSupported, setIsSupported] = useState(false);
 
   useEffect(() => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
+      setIsSupported(true);
       const recog = new SpeechRecognition();
       recog.continuous = false;
       recog.interimResults = false;
       recog.lang = language;
 
-      recog.onresult = (event: any) => {
+      recog.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         onResult(transcript);
         setIsListening(false);
       };
 
-      recog.onerror = (event: any) => {
+      recog.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error("Speech recognition error", event.error);
         setIsListening(false);
       };
@@ -36,16 +47,16 @@ export default function SpeechInput({ onResult, language = "en-IN", className = 
         setIsListening(false);
       };
 
-      setRecognition(recog);
+      recognitionRef.current = recog;
     }
   }, [language, onResult]);
 
   const toggleListening = () => {
     if (isListening) {
-      recognition?.stop();
+      recognitionRef.current?.stop();
     } else {
       try {
-        recognition?.start();
+        recognitionRef.current?.start();
         setIsListening(true);
       } catch (err) {
         console.error("Speech recognition start error", err);
@@ -53,7 +64,7 @@ export default function SpeechInput({ onResult, language = "en-IN", className = 
     }
   };
 
-  if (!recognition) return null;
+  if (!isSupported) return null;
 
   return (
     <button
