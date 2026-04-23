@@ -147,13 +147,41 @@ export default function ArchitecturePage() {
       </div>
 
       {/* Technical Summary Footer */}
-      <div className="mt-32 card p-10 text-center border-[#007AFF]/20 bg-[#007AFF]/5">
-        <h4 className="text-sm font-black text-[#007AFF] uppercase tracking-[0.3em] mb-4">Architecture Compliance</h4>
-        <p className="text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
-          The SkillSync architecture implements Vygotsky&apos;s Zone of Proximal Development (ZPD) 
-          through a Bayesian Knowledge Tracing (BKT) engine, ensuring that all AI interventions 
-          are pedagogically grounded and measurable.
-        </p>
+      <div className="mt-32 grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="card p-10 border-[#007AFF]/20 bg-[#007AFF]/5">
+          <h4 className="text-sm font-black text-[#007AFF] uppercase tracking-[0.3em] mb-4">Architecture Compliance</h4>
+          <p className="text-slate-600 font-medium leading-relaxed">
+            The SkillSync architecture implements Vygotsky&apos;s Zone of Proximal Development (ZPD) 
+            through a Bayesian Knowledge Tracing (BKT) engine, ensuring that all AI interventions 
+            are pedagogically grounded and measurable.
+          </p>
+        </div>
+
+        <div className="card p-10 border-[#5856D6]/20 bg-[#5856D6]/5">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#007AFF] to-[#5856D6] flex items-center justify-center shadow-lg shadow-blue-500/10">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <h4 className="text-sm font-black text-[#5856D6] uppercase tracking-[0.3em]">Zero-Trust AI Security</h4>
+          </div>
+          <p className="text-slate-600 font-medium leading-relaxed mb-4 italic">
+            &quot;We employ a Zero-Trust AI Architecture. By combining model-level safety (ShieldGemma/Phi-4 DPO) with application-level grounding (BKT State + JSON Schema Enforcement), we ensure the LLM acts strictly as an educational mentor.&quot;
+          </p>
+          <ul className="text-xs text-slate-500 font-bold space-y-2 uppercase tracking-wider">
+            <li className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#5856D6]" />
+              Input Sanitization (Prompt Shields)
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#5856D6]" />
+              Strict Schema Validation (Zod)
+            </li>
+            <li className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-[#5856D6]" />
+              Immutable System Instruction Layer
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
