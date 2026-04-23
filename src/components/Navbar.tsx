@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, Brain, TrendingUp, BookOpen, LogOut, Globe } from "lucide-react";
+import { Sparkles, Brain, TrendingUp, BookOpen, LogOut, Globe, Briefcase } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { signOut } from "next-auth/react";
@@ -18,6 +18,7 @@ export default function Navbar() {
   const links = isLandingPage ? [] : [
     { href: "/learn", label: "Dashboard", icon: BookOpen },
     { href: "/analytics", label: "Analytics", icon: TrendingUp },
+    { href: "/opportunities", label: "Jobs", icon: Briefcase },
     { href: "/architecture", label: "Architecture", icon: Brain },
   ];
 
