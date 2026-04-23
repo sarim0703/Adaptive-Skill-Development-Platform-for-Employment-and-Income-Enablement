@@ -587,13 +587,14 @@ export async function getAnalyticsData() {
   const userId = session.user.id;
 
   // Fetch all required data in parallel
-  const [model, roadmap, quizzes, outcomeRecords, events, profile] = await Promise.all([
+  const [model, roadmap, quizzes, outcomeRecords, events, profile, user] = await Promise.all([
     db.query.userModel.findFirst({ where: (um, { eq }) => eq(um.userId, userId) }),
     db.query.roadmaps.findFirst({ where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')) }),
     db.query.quizAttempts.findMany({ where: (q, { eq }) => eq(q.userId, userId) }),
     db.query.outcomes.findMany({ where: (o, { eq }) => eq(o.userId, userId) }),
     db.query.learningEvents.findMany({ where: (e, { eq }) => eq(e.userId, userId) }),
     db.query.profiles.findFirst({ where: (p, { eq }) => eq(p.userId, userId) }),
+    db.query.users.findFirst({ where: (u, { eq }) => eq(u.id, userId) }),
   ]);
 
   if (!model || !roadmap) return null;
@@ -656,7 +657,7 @@ export async function getAnalyticsData() {
 
   return {
     // User info
-    userName: profile?.location ?? 'Unknown',
+    userName: user?.name ?? 'Student',
     pathTitle: roadmap.pathTitle,
 
     // BKT Summary
