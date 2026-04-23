@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, integer, jsonb, boolean } from 'drizzle-orm/pg-core';
 
-export const users = pgTable('user', {
+export const users = pgTable('users', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   name: text('name'),
   email: text('email').notNull(),
@@ -82,6 +82,11 @@ export const userModel = pgTable('user_model', {
   consecutivePassCount: integer('consecutive_pass_count').default(0),
   consecutiveFailCount: integer('consecutive_fail_count').default(0),
   pathSwitchSuggested: boolean('path_switch_suggested').default(false),
+  // BKT Knowledge Tracing fields
+  knowledgeState: jsonb('knowledge_state').default({}),
+  preTestScore: integer('pre_test_score'),
+  preTestCompletedAt: timestamp('pre_test_completed_at'),
+  normalizedLearningGain: integer('normalized_learning_gain'),
   updatedAt: timestamp('updated_at').defaultNow(),
 });
 
@@ -116,5 +121,15 @@ export const systemEvents = pgTable('system_event', {
   triggerCondition: text('trigger_condition'),
   actionTaken: text('action_taken'),
   subtopicId: text('subtopic_id'),
+  occurredAt: timestamp('occurred_at').defaultNow(),
+});
+
+// Granular learning event log for BKT analytics and research data export
+export const learningEvents = pgTable('learning_event', {
+  id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+  userId: text('userId').notNull().references(() => users.id),
+  eventType: text('event_type').notNull(),  // 'quiz_answer' | 'bkt_update' | 'module_complete' | 'pre_test'
+  subtopicId: text('subtopic_id'),
+  data: jsonb('data').notNull(),            // Flexible payload per event type
   occurredAt: timestamp('occurred_at').defaultNow(),
 });

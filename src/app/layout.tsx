@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
+import Navbar from "@/components/Navbar";
 
-const poppins = Poppins({
-  variable: "--font-poppins",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -20,10 +20,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${poppins.variable}`} suppressHydrationWarning>
-      <body className="min-h-screen font-sans bg-slate-50 text-slate-800 antialiased" suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
+      <body className="min-h-screen font-sans bg-[#F2F2F7] text-[#1D1D1F] antialiased" suppressHydrationWarning>
         <LanguageProvider>
-          {children}
+          <Navbar />
+          <main className="pt-24 min-h-screen">
+            {children}
+          </main>
         </LanguageProvider>
       </body>
     </html>

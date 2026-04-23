@@ -10,7 +10,7 @@ const quizSchema = z.object({
       options: z.array(z.string()).length(4).describe("Exactly 4 options"),
       correct_index: z.number().min(0).max(3).describe("The index (0-3) of the correct option"),
     })
-  ).length(2).describe("Generate exactly 2 questions"),
+  ).length(4).describe("Generate exactly 4 questions"),
 });
 
 export async function POST(req: Request) {

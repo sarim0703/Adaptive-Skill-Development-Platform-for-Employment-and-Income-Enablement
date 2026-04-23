@@ -1,13 +1,14 @@
 "use server";
 
 import { db } from "@/db";
-import { users, authCredentials, profiles, pathOptions, roadmaps, userModel, quizAttempts, outcomes } from "@/db/schema";
+import { users, authCredentials, profiles, pathOptions, roadmaps, userModel, quizAttempts, outcomes, learningEvents } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { generatePathOptionsAI } from "@/lib/ai/generate-paths";
 import { generateInitialRoadmapAI } from "@/lib/ai/generate-roadmap";
 import { recalibrateAndGenerateNextModule } from "@/lib/ai/recalibrate-module";
 import { updateUserModel } from "@/lib/adaptive/update-user-model";
 import { checkProactiveTriggers as checkTriggers } from "@/lib/adaptive/triggers";
+import { batchUpdateFromQuiz, computeCapabilityFromBKT, initializeKC, getKnowledgeStateSummary, computeNormalizedLearningGain, getZPDStatus, type KnowledgeState } from "@/lib/adaptive/bkt-engine";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
@@ -45,14 +46,59 @@ export async function registerUser(formData: FormData) {
   return { success: true };
 }
 
+// Step 1.1: Determine correct redirect for returning users
+export async function checkUserState(): Promise<string> {
+  const session = await auth();
+  if (!session?.user?.id) return '/auth';
+
+  const userId = session.user.id;
+
+  // 1. Check if user has a profile
+  const profile = await db.query.profiles.findFirst({
+    where: (p, { eq }) => eq(p.userId, userId),
+  });
+
+  if (!profile) {
+    console.log(`[checkUserState] User ${userId} has no profile. Redirecting to /onboarding`);
+    return '/onboarding';
+  }
+
+  // 2. Check if user has an active roadmap
+  const roadmap = await db.query.roadmaps.findFirst({
+    where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')),
+  });
+
+  if (roadmap) {
+    // 3. Check if pre-test is done
+    const model = await db.query.userModel.findFirst({
+      where: (um, { eq }) => eq(um.userId, userId),
+    });
+    if (model && (model.preTestScore === null || model.preTestScore === undefined)) {
+      return '/pre-test';
+    }
+    return '/learn';
+  }
+
+  // 4. Has profile but no roadmap — check for path options
+  const paths = await db.query.pathOptions.findMany({
+    where: (p, { eq }) => eq(p.userId, userId),
+  });
+
+  if (paths.length > 0) return '/path-selection';
+
+  // 5. Default fallback for users with profile but no paths/roadmap
+  return '/path-selection';
+}
+
+// Step 1.2: Upsert profile to prevent crash on re-onboarding
 export async function saveOnboardingProfile(answers: Record<number, string>) {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
   }
 
-  await db.insert(profiles).values({
-    userId: session.user.id,
+  const userId = session.user.id;
+  const profileData = {
     location: answers[1] || "",
     educationLevel: answers[2] || "",
     timeAvailability: answers[3] || "",
@@ -61,7 +107,20 @@ export async function saveOnboardingProfile(answers: Record<number, string>) {
     targetIncomeExact: answers[6] ? parseInt(answers[6]) : null,
     languagePreference: answers[7] || "",
     confidenceLevel: answers[8] ? parseInt(answers[8]) : null,
+  };
+
+  // Check if profile already exists for this user
+  const existing = await db.query.profiles.findFirst({
+    where: (p, { eq }) => eq(p.userId, userId),
   });
+
+  if (existing) {
+    // Update existing profile
+    await db.update(profiles).set(profileData).where(eq(profiles.id, existing.id));
+  } else {
+    // Insert new profile
+    await db.insert(profiles).values({ userId, ...profileData });
+  }
 
   redirect("/path-selection");
 }
@@ -137,7 +196,7 @@ export async function selectPath(pathId: string) {
   // Generate initial roadmap
   await createInitialRoadmap(path, profile!);
 
-  redirect("/learn");
+  redirect("/pre-test");
 }
 
 type GeneratedSubtopic = {
@@ -327,7 +386,7 @@ export async function submitQuizResult(params: {
   // Update roadmap JSONB
   await db.update(roadmaps).set({ modules: updatedModules }).where(eq(roadmaps.id, params.roadmapId));
 
-  // 3. Recalculate User Model
+  // 3. Recalculate User Model (legacy)
   const modelUpdate = await updateUserModel(userId, {
     subtopicId: params.subtopicId,
     moduleId: params.moduleId,
@@ -338,6 +397,58 @@ export async function submitQuizResult(params: {
     difficultyRating: null,
     isFirstTimeComplete,
   });
+
+  // 4. BKT Knowledge Tracing Update
+  const currentModel = await db.query.userModel.findFirst({
+    where: (um, { eq }) => eq(um.userId, userId),
+  });
+
+  if (currentModel) {
+    const currentKS = (currentModel.knowledgeState as KnowledgeState) || {};
+    const questions = params.questions as { correct_index: number }[];
+    const userAnswers = params.userAnswers as number[];
+
+    // Map each quiz question to a BKT observation
+    const answers = questions.map((q, i) => ({
+      isCorrect: userAnswers[i] === q.correct_index,
+    }));
+
+    // Run BKT update
+    const { updatedState, deltas } = batchUpdateFromQuiz(
+      currentKS,
+      params.subtopicId,
+      answers
+    );
+
+    // Recompute capability score from BKT mastery probabilities
+    const newCapability = computeCapabilityFromBKT(updatedState);
+
+    // Persist updated knowledge state and BKT-derived capability
+    await db.update(userModel)
+      .set({
+        knowledgeState: updatedState,
+        capabilityScore: newCapability,
+      })
+      .where(eq(userModel.userId, userId));
+
+    // 5. Log granular learning event for analytics
+    await db.insert(learningEvents).values({
+      userId,
+      eventType: 'bkt_update',
+      subtopicId: params.subtopicId,
+      data: {
+        moduleId: params.moduleId,
+        quizScore: params.score,
+        passed: params.passed,
+        attemptNumber: params.attemptNumber,
+        bktBefore: deltas.before,
+        bktAfter: deltas.after,
+        bktDelta: Math.round((deltas.after - deltas.before) * 1000) / 1000,
+        answers: deltas.answers,
+        capabilityScore: newCapability,
+      },
+    });
+  }
 
   return {
     nextAction: params.passed ? 'continue' : 'needs_review',
@@ -406,4 +517,170 @@ export async function saveOutcome(roadmapId: string, moduleId: number, outcomeTy
   });
 
   return { success: true };
+}
+
+// Step 3.3: Submit pre-test results and initialize BKT knowledge state
+export async function submitPreTestResults(params: {
+  score: number;
+  questionResults: { topic_area: string; isCorrect: boolean; difficulty: string }[];
+}) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const userId = session.user.id;
+
+  // Initialize BKT knowledge state from pre-test answers
+  // Correct answers get higher initial mastery (informed prior)
+  const knowledgeState: KnowledgeState = {};
+  for (const result of params.questionResults) {
+    const topicId = result.topic_area;
+    if (!knowledgeState[topicId]) {
+      // Set initial mastery based on whether they answered correctly
+      // and the difficulty of the question
+      let initialMastery = 0.05; // default very low
+      if (result.isCorrect) {
+        switch (result.difficulty) {
+          case 'easy': initialMastery = 0.20; break;
+          case 'medium': initialMastery = 0.35; break;
+          case 'hard': initialMastery = 0.50; break;
+        }
+      } else {
+        switch (result.difficulty) {
+          case 'easy': initialMastery = 0.03; break;
+          case 'medium': initialMastery = 0.05; break;
+          case 'hard': initialMastery = 0.08; break;
+        }
+      }
+      knowledgeState[topicId] = initializeKC(topicId, initialMastery);
+    }
+  }
+
+  // Save pre-test score and initialized knowledge state
+  await db.update(userModel)
+    .set({
+      preTestScore: params.score,
+      preTestCompletedAt: new Date(),
+      knowledgeState,
+      capabilityScore: params.score, // Initial capability = pre-test score
+    })
+    .where(eq(userModel.userId, userId));
+
+  // Log pre-test event
+  await db.insert(learningEvents).values({
+    userId,
+    eventType: 'pre_test',
+    data: {
+      score: params.score,
+      questionResults: params.questionResults,
+      initialKnowledgeState: knowledgeState,
+    },
+  });
+
+  return { success: true };
+}
+
+// Phase 4: Analytics Dashboard Data
+export async function getAnalyticsData() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  const userId = session.user.id;
+
+  // Fetch all required data in parallel
+  const [model, roadmap, quizzes, outcomeRecords, events, profile] = await Promise.all([
+    db.query.userModel.findFirst({ where: (um, { eq }) => eq(um.userId, userId) }),
+    db.query.roadmaps.findFirst({ where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')) }),
+    db.query.quizAttempts.findMany({ where: (q, { eq }) => eq(q.userId, userId) }),
+    db.query.outcomes.findMany({ where: (o, { eq }) => eq(o.userId, userId) }),
+    db.query.learningEvents.findMany({ where: (e, { eq }) => eq(e.userId, userId) }),
+    db.query.profiles.findFirst({ where: (p, { eq }) => eq(p.userId, userId) }),
+  ]);
+
+  if (!model || !roadmap) return null;
+
+  const knowledgeState = (model.knowledgeState as KnowledgeState) || {};
+  const ksSummary = getKnowledgeStateSummary(knowledgeState);
+
+  // Compute quiz performance over time for the learning curve
+  const bktEvents = events
+    .filter(e => e.eventType === 'bkt_update')
+    .sort((a, b) => new Date(a.occurredAt!).getTime() - new Date(b.occurredAt!).getTime());
+
+  const learningCurve = bktEvents.map((e, i) => {
+    const data = e.data as { bktAfter?: number; quizScore?: number; capabilityScore?: number };
+    return {
+      attempt: i + 1,
+      mastery: Math.round((data.bktAfter ?? 0) * 100),
+      quizScore: data.quizScore ?? 0,
+      capability: data.capabilityScore ?? 50,
+    };
+  });
+
+  // BKT mastery per subtopic
+  const masteryGrid = Object.entries(knowledgeState).map(([subtopicId, kc]) => ({
+    subtopicId,
+    mastery: Math.round(kc.pMastery * 100),
+    attempts: kc.attempts,
+    correct: kc.correctCount,
+    zpd: getZPDStatus(kc.pMastery),
+  }));
+
+  // Normalized Learning Gain
+  const preTestScore = model.preTestScore ?? null;
+  const currentAvg = quizzes.length > 0
+    ? Math.round(quizzes.reduce((sum, q) => sum + q.score, 0) / quizzes.length)
+    : null;
+  const nlg = preTestScore !== null && currentAvg !== null
+    ? computeNormalizedLearningGain(preTestScore, currentAvg)
+    : null;
+
+  // Outcome distribution
+  const outcomeDistribution = outcomeRecords.reduce((acc, o) => {
+    acc[o.outcomeType] = (acc[o.outcomeType] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Module progress from roadmap
+  const modules = roadmap.modules as { module_id: number; module_title: string; subtopics: { status: string; subtopic_id: string; title: string }[] }[];
+  const moduleProgress = modules.map(mod => {
+    const total = mod.subtopics?.length || 0;
+    const completed = mod.subtopics?.filter(s => s.status === 'complete').length || 0;
+    return {
+      moduleId: mod.module_id,
+      title: mod.module_title,
+      total,
+      completed,
+      percent: total > 0 ? Math.round((completed / total) * 100) : 0,
+    };
+  });
+
+  return {
+    // User info
+    userName: profile?.location ?? 'Unknown',
+    pathTitle: roadmap.pathTitle,
+
+    // BKT Summary
+    capabilityScore: model.capabilityScore ?? 50,
+    knowledgeSummary: ksSummary,
+    masteryGrid,
+
+    // Learning Metrics
+    preTestScore,
+    currentAvgScore: currentAvg,
+    normalizedLearningGain: nlg,
+    learningCurve,
+
+    // Activity
+    totalQuizzes: quizzes.length,
+    currentStreak: model.currentStreak ?? 0,
+    longestStreak: model.longestStreak ?? 0,
+    consistencyScore: model.consistencyScore ?? 50,
+
+    // Module Progress
+    moduleProgress,
+
+    // Outcomes (SDG 8)
+    outcomeDistribution,
+    totalOutcomes: outcomeRecords.length,
+  };
 }

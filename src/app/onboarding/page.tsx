@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { saveOnboardingProfile } from "../actions";
-import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, CheckCircle2, Loader2, Sparkles } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 import SpeechInput from "@/components/SpeechInput";
 
 const STEP_EMOJIS = ["📍", "🎓", "⏰", "🛠️", "💼", "💰", "🗣️", "💪"];
@@ -52,28 +51,35 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-warm-gradient flex flex-col items-center justify-center p-4">
-      {/* Top Switcher */}
-      <div className="fixed top-6 right-6">
-        <LanguageSwitcher />
-      </div>
-
-      <div className="w-full max-w-lg animate-fadeInUp">
-        {/* Progress */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium text-slate-600">
-              {t("onboarding.step")} {currentStep + 1} {t("onboarding.of")} {QUESTIONS.length}
-            </span>
-            <span className="text-2xl">{STEP_EMOJIS[currentStep]}</span>
+    <div className="max-w-2xl mx-auto px-6 py-12">
+      <div className="w-full animate-fadeInUp">
+        
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-600 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider mb-4">
+            <Sparkles className="w-3 h-3" />
+            {t("onboarding.title") || "Getting Started"}
           </div>
-          <div className="flex gap-1.5">
+          <h1 className="text-3xl font-bold text-slate-800">
+            Let&apos;s build your career path
+          </h1>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="mb-10 px-4">
+          <div className="flex items-center justify-between mb-4">
+            <span className="text-sm font-bold text-slate-400">
+              {t("onboarding.step")} {currentStep + 1} / {QUESTIONS.length}
+            </span>
+            <span className="text-xl filter drop-shadow-sm">{STEP_EMOJIS[currentStep]}</span>
+          </div>
+          <div className="flex gap-2">
             {QUESTIONS.map((_, i) => (
               <div
                 key={i}
-                className={`h-2 flex-1 rounded-full transition-all duration-300 ${
-                  i < currentStep ? "bg-indigo-500" :
-                  i === currentStep ? "bg-indigo-400 animate-pulse-soft" : "bg-slate-200"
+                className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
+                  i < currentStep ? "bg-[#34C759]" :
+                  i === currentStep ? "bg-[#007AFF] shadow-[0_0_10px_rgba(0,122,255,0.4)]" : "bg-slate-200"
                 }`}
               />
             ))}
@@ -81,29 +87,35 @@ export default function OnboardingPage() {
         </div>
 
         {/* Question Card */}
-        <div className="card p-8" key={currentStep}>
-          <h2 className="text-xl font-bold text-slate-800 mb-2">
-            {STEP_EMOJIS[currentStep]} {question.text}
-          </h2>
-          <p className="text-sm text-slate-400 mb-6">{question.hint}</p>
+        <div className="card p-8 md:p-12 mb-8" key={currentStep}>
+          <div className="mb-8">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-800 mb-3 leading-tight">
+              {question.text}
+            </h2>
+            <p className="text-lg text-slate-400 font-medium">{question.hint}</p>
+          </div>
 
-          <div className="space-y-3 mb-8">
+          <div className="space-y-4 mb-10">
             {question.type === "select" && (
-              <div className="grid gap-2.5">
+              <div className="grid gap-3">
                 {question.options?.map((opt) => {
                   const isSelected = answers[question.id] === opt;
                   return (
                     <button
                       key={opt}
                       onClick={() => setAnswers({ ...answers, [question.id]: opt })}
-                      className={`w-full flex items-center justify-between p-4 rounded-xl border-1.5 transition-all text-left ${
+                      className={`w-full flex items-center justify-between p-5 rounded-2xl border-2 transition-all text-left group ${
                         isSelected
-                          ? "bg-indigo-50 border-indigo-300 text-indigo-700"
-                          : "bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                          ? "bg-blue-50/50 border-[#007AFF] text-[#007AFF] shadow-sm"
+                          : "bg-white border-slate-100 text-slate-600 hover:border-slate-200 hover:bg-slate-50/50"
                       }`}
                     >
-                      <span className="font-medium text-sm">{opt}</span>
-                      {isSelected && <CheckCircle2 className="w-5 h-5 text-indigo-500" />}
+                      <span className="font-bold text-base md:text-lg">{opt}</span>
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
+                        isSelected ? "bg-[#007AFF] border-[#007AFF]" : "border-slate-200 group-hover:border-slate-300"
+                      }`}>
+                        {isSelected && <CheckCircle2 className="w-4 h-4 text-white" />}
+                      </div>
                     </button>
                   );
                 })}
@@ -117,37 +129,52 @@ export default function OnboardingPage() {
                   placeholder={question.placeholder || "Type your answer..."}
                   value={answers[question.id] || ""}
                   onChange={(e) => setAnswers({ ...answers, [question.id]: e.target.value })}
-                  className="input pr-12"
+                  className="input p-6 text-lg md:text-xl font-medium !rounded-2xl"
                   autoFocus
                 />
-                <div className="absolute right-2 top-1/2 -translate-y-1/2">
+                <div className="absolute right-4 top-1/2 -translate-y-1/2">
                   <SpeechInput 
                     language={LANG_MAP[language]} 
                     onResult={(text) => setAnswers(prev => ({ ...prev, [question.id]: prev[question.id] ? `${prev[question.id]} ${text}` : text }))}
-                    className="w-9 h-9"
+                    className="w-10 h-10 shadow-sm"
                   />
                 </div>
               </div>
             )}
           </div>
 
-          <button
-            onClick={handleNext}
-            disabled={!answers[question.id] || loading}
-            className="btn-primary w-full py-3.5 text-base"
-          >
-            {loading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : isLastStep ? (
-              t("onboarding.finish")
-            ) : (
-              <>
-                {t("onboarding.continue")}
-                <ArrowRight className="w-4 h-4" />
-              </>
+          <div className="flex flex-col sm:flex-row gap-4">
+            {currentStep > 0 && (
+              <button
+                onClick={() => setCurrentStep(s => s - 1)}
+                className="btn-secondary flex items-center justify-center gap-2 py-4 px-8 font-bold"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                {t("onboarding.back")}
+              </button>
             )}
-          </button>
+            <button
+              onClick={handleNext}
+              disabled={!answers[question.id] || loading}
+              className="btn-primary flex-1 py-4 text-lg shadow-lg shadow-blue-500/20"
+            >
+              {loading ? (
+                <Loader2 className="w-6 h-6 animate-spin" />
+              ) : isLastStep ? (
+                t("onboarding.finish")
+              ) : (
+                <>
+                  {t("onboarding.continue")}
+                  <ArrowRight className="w-5 h-5" />
+                </>
+              )}
+            </button>
+          </div>
         </div>
+        
+        <p className="text-center text-xs text-slate-400 font-medium">
+          Your data is used only to personalize your career roadmap.
+        </p>
       </div>
     </div>
   );

@@ -31,11 +31,11 @@ export default function MentorChat({ subtopicId, triggerType, timeSpentSeconds, 
       case 'stuck':
         return t("mentor.chat.msg1");
       case 'repeated_failure':
-        return "I see you've been trying hard on this assessment. Don't worry — struggling is part of learning! Let me help you understand the concepts better before your next attempt.";
+        return t("mentor.proactive.repeated_failure");
       case 'performing_well':
-        return "You're doing amazing! 🔥 You've been consistently crushing it. Want me to challenge you with something a bit harder?";
+        return t("mentor.proactive.performing_well");
       default:
-        return "Hi there! How can I help you with your current task?";
+        return t("mentor.proactive.default");
     }
   };
 

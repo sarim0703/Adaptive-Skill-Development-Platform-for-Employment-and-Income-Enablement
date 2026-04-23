@@ -1,14 +1,13 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { PlayCircle, Clock, CheckCircle2, AlertTriangle, BookOpen, Flame, LogOut, TrendingUp, Target, Circle } from "lucide-react";
+import { PlayCircle, Clock, CheckCircle2, AlertTriangle, BookOpen, Flame, LogOut, TrendingUp, Target, Circle, Sparkles, ChevronRight, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 import QuizModal from "@/components/QuizModal";
 import MentorChat from "@/components/MentorChat";
 import { checkProactiveTriggers } from "@/app/actions";
 import { signOut } from "next-auth/react";
 import { useLanguage } from "@/context/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 type LearnClientProps = {
   roadmapId: string;
@@ -82,199 +81,133 @@ export default function LearnClient({
   const overallProgress = totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-warm-gradient">
-      {/* Top Nav */}
-      <nav className="bg-white/80 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center">
-              <span className="text-white text-xs font-bold">S</span>
-            </div>
-            <span className="font-semibold text-slate-800 text-sm">SkillSync</span>
-            <span className="text-slate-300">|</span>
-            <span className="text-sm text-slate-500 truncate max-w-[150px] md:max-w-none">{pathTitle}</span>
+    <div className="max-w-7xl mx-auto px-6 py-6 animate-fadeInUp">
+      
+      {/* Dynamic Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 bg-[#007AFF]/10 text-[#007AFF] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3">
+            <LayoutDashboard className="w-3 h-3" />
+            {pathTitle}
           </div>
-          <div className="flex items-center gap-4">
-            <LanguageSwitcher />
-            <div className="hidden sm:flex items-center gap-1.5 text-sm text-slate-400">
-              <Clock className="w-3.5 h-3.5" />
-              <span className="font-mono text-xs">{formatTime(timeSpent)}</span>
-            </div>
-            <button
-              onClick={() => signOut({ callbackUrl: "/auth" })}
-              className="text-slate-400 hover:text-slate-600 transition-colors"
-              title="Sign out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 animate-fadeInUp">
-        {/* Greeting */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-3xl font-bold text-slate-800 leading-tight">
             {getGreetingText()}, {userName || 'Learner'} 👋
           </h1>
-          <p className="text-slate-500 text-sm mt-0.5">
-            {userLocation && `${userLocation} · `}{t("learn.module")} {currentModuleNumber} {t("onboarding.of")} {totalModules} · {pathTitle}
+          <p className="text-slate-500 font-medium mt-1">
+            {t("learn.module")} {currentModuleNumber} / {totalModules}: {currentModuleTitle}
           </p>
         </div>
 
-        {/* Status Banners */}
-        {subtopic.status === 'needs_review' && (
-          <div className="bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl mb-5 flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="font-semibold text-sm">{t("learn.review.title")}</p>
-              <p className="text-sm text-amber-600 mt-0.5">{t("learn.review.sub")}</p>
-            </div>
+        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Session Timer</span>
+            <span className="text-sm font-mono font-bold text-slate-700">{formatTime(timeSpent)}</span>
           </div>
-        )}
+          <div className="w-px h-8 bg-slate-100" />
+          <div className="flex items-center gap-2 px-1">
+            <Flame className="w-5 h-5 text-amber-500" />
+            <span className="text-sm font-bold text-slate-800">{streak}</span>
+          </div>
+        </div>
+      </div>
 
-        {userModel?.pathSwitchSuggested && (
-          <div className="bg-red-50 border border-red-200 text-red-800 p-4 rounded-xl mb-5 flex flex-col sm:flex-row items-start sm:items-center gap-4 justify-between">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+      {/* Main Workspace Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left/Main Column: Focused Task */}
+        <div className="lg:col-span-8 space-y-6">
+          
+          {/* Status Banners */}
+          {subtopic.status === 'needs_review' && (
+            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-5 rounded-2xl flex items-start gap-3 shadow-sm">
+              <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0" />
               <div>
-                <p className="font-semibold text-sm">{t("learn.pathSwitch.title")}</p>
-                <p className="text-sm text-red-600 mt-0.5">{t("learn.pathSwitch.sub")}</p>
+                <p className="font-bold text-sm uppercase tracking-wide">{t("learn.review.title")}</p>
+                <p className="text-sm text-amber-700 mt-1">{t("learn.review.sub")}</p>
               </div>
             </div>
-            <Link href="/path-selection" className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap">
-              {t("learn.pathSwitch.btn")}
-            </Link>
-          </div>
-        )}
+          )}
 
-        {/* Dashboard Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-          {/* Left Column — Main Task (2 cols) */}
-          <div className="lg:col-span-2 space-y-5">
-            {/* Task Card */}
-            <div className="card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-xl">{TASK_ICONS[subtopic.task_type] || '📝'}</span>
-                  <span className="badge badge-indigo text-xs uppercase tracking-wide">{subtopic.task_type}</span>
-                </div>
-                <span className="text-xs text-slate-400">{t("learn.task")} {currentSubtopicIndex + 1} {t("onboarding.of")} {currentModuleSubtopics.length}</span>
-              </div>
-
-              <h2 className="text-lg font-bold text-slate-800 mb-4">{subtopic.title}</h2>
-
-              {/* Practical Task */}
-              <div className="bg-indigo-50 border-l-4 border-indigo-400 p-4 rounded-r-xl mb-5">
-                <h3 className="text-xs font-semibold text-indigo-400 uppercase tracking-wider mb-1.5">{t("learn.whatToDo")}</h3>
-                <p className="text-slate-700 leading-relaxed">{subtopic.practical_task}</p>
-              </div>
-
-              <div className="flex items-center gap-3 mb-5">
-                <a
-                  href={`https://www.youtube.com/results?search_query=${encodeURIComponent(subtopic.youtube_search_query)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-sm font-medium text-red-500 hover:text-red-600 transition-colors bg-red-50 px-3 py-1.5 rounded-lg"
-                >
-                  <PlayCircle className="w-4 h-4" />
-                  {t("learn.watchTutorial")}
-                </a>
-              </div>
-
-              <button
-                onClick={() => setShowQuiz(true)}
-                className="btn-primary w-full py-3.5 text-base"
-              >
-                <CheckCircle2 className="w-5 h-5" />
-                {t("learn.complete")}
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column — Sidebar */}
-          <div className="space-y-5">
-            {/* Progress Card */}
-            <div className="card p-5">
-              <h3 className="text-sm font-semibold text-slate-800 mb-4">{t("learn.progress")}</h3>
-              <div className="space-y-4">
-                {/* Overall Progress */}
+          {userModel?.pathSwitchSuggested && (
+            <div className="bg-rose-50 border border-rose-200 text-rose-800 p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-4 justify-between shadow-sm">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-6 h-6 text-rose-500 flex-shrink-0" />
                 <div>
-                  <div className="flex justify-between items-center mb-1.5">
-                    <span className="text-xs text-slate-500">{t("learn.overall")}</span>
-                    <span className="text-xs font-semibold text-indigo-600">{overallProgress}%</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-indigo-500 rounded-full transition-all duration-700" style={{ width: `${overallProgress}%` }} />
-                  </div>
+                  <p className="font-bold text-sm uppercase tracking-wide">{t("learn.pathSwitch.title")}</p>
+                  <p className="text-sm text-rose-700 mt-1">{t("learn.pathSwitch.sub")}</p>
                 </div>
+              </div>
+              <Link href="/path-selection" className="btn-primary py-2 px-5 text-xs rounded-full">
+                {t("learn.pathSwitch.btn")}
+              </Link>
+            </div>
+          )}
 
-                {/* Capability Score */}
-                <div className="flex items-center justify-between py-2 border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4 text-indigo-400" />
-                    <span className="text-sm text-slate-600">{t("learn.capability")}</span>
-                  </div>
-                  <span className="text-sm font-bold text-slate-800">{capScore}/100</span>
+          {/* Core Task Card */}
+          <div className="card p-8 md:p-10 relative overflow-hidden group">
+            {/* Type Accent */}
+            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#007AFF]" />
+            
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl shadow-inner border border-slate-100">
+                  {TASK_ICONS[subtopic.task_type] || '📝'}
                 </div>
-
-                {/* Streak */}
-                <div className="flex items-center justify-between py-2 border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-amber-400" />
-                    <span className="text-sm text-slate-600">{t("learn.streak")}</span>
-                  </div>
-                  <span className="text-sm font-bold text-slate-800">
-                    {streak > 0 ? `${streak} day${streak > 1 ? 's' : ''} 🔥` : t("learn.streakStart")}
-                  </span>
-                </div>
-
-                {/* Tasks Completed */}
-                <div className="flex items-center justify-between py-2 border-t border-slate-100">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-4 h-4 text-green-400" />
-                    <span className="text-sm text-slate-600">{t("learn.completedTasks")}</span>
-                  </div>
-                  <span className="text-sm font-bold text-slate-800">{completedSubtopics}/{totalSubtopics} {t("learn.task").toLowerCase()}s</span>
+                <div>
+                  <span className="text-[10px] font-black text-[#007AFF] uppercase tracking-[0.2em]">Step {currentSubtopicIndex + 1} of {currentModuleSubtopics.length}</span>
+                  <h2 className="text-2xl font-bold text-slate-800 mt-0.5">{subtopic.title}</h2>
                 </div>
               </div>
             </div>
 
-            {/* Module Progress Card */}
-            <div className="card p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-slate-800">{t("learn.module")} {currentModuleNumber}</h3>
-                <Link href="/learn/outline" className="text-xs text-indigo-500 hover:text-indigo-600 font-medium flex items-center gap-1">
-                  <BookOpen className="w-3.5 h-3.5" />
-                  {t("learn.fullOutline")}
-                </Link>
+            {/* Practical Task Instructions */}
+            <div className="bg-slate-50/80 rounded-3xl p-8 mb-8 border border-slate-100">
+              <div className="flex items-center gap-2 mb-4">
+                <Target className="w-5 h-5 text-[#007AFF]" />
+                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t("learn.whatToDo")}</h3>
               </div>
-              <p className="text-xs text-slate-400 mb-3">{currentModuleTitle}</p>
-              <div className="space-y-2">
-                {currentModuleSubtopics.map((sub, idx) => (
-                  <div key={idx} className={`flex items-center gap-2.5 py-1.5 px-2 rounded-lg text-sm ${
-                    idx === currentSubtopicIndex ? 'bg-indigo-50 text-indigo-700 font-medium' : ''
-                  }`}>
-                    {sub.status === 'complete' ? (
-                      <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    ) : sub.status === 'active' || sub.status === 'needs_review' ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-indigo-400 flex-shrink-0 animate-pulse-soft" />
-                    ) : (
-                      <Circle className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                    )}
-                    <span className={`truncate ${sub.status === 'complete' ? 'text-slate-400 line-through' : sub.status === 'locked' ? 'text-slate-400' : 'text-slate-700'}`}>
-                      {sub.title}
-                    </span>
-                  </div>
-                ))}
+              <p className="text-xl font-medium text-slate-700 leading-relaxed italic">
+                &quot;{subtopic.practical_task}&quot;
+              </p>
+            </div>
+
+            {/* Resource Buttons */}
+            <div className="flex flex-wrap items-center gap-4 mb-10">
+              <a
+                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(subtopic.youtube_search_query)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 bg-[#FF0000]/5 text-[#FF0000] px-5 py-3 rounded-2xl text-sm font-bold border border-[#FF0000]/10 hover:bg-[#FF0000]/10 transition-all"
+              >
+                <PlayCircle className="w-5 h-5" />
+                {t("learn.watchTutorial")}
+              </a>
+              
+              <div className="flex items-center gap-2 bg-slate-100 text-slate-500 px-4 py-3 rounded-2xl text-sm font-bold border border-slate-200">
+                <BookOpen className="w-5 h-5" />
+                Documentation
               </div>
             </div>
 
-            {/* Quick Tips Card */}
-            <div className="card p-5 bg-gradient-to-br from-indigo-50 to-white border-indigo-100">
-              <h3 className="text-sm font-semibold text-indigo-800 mb-2">💡 {t("learn.quickTip")}</h3>
-              <p className="text-xs text-indigo-600 leading-relaxed">
+            {/* Primary Action */}
+            <button
+              onClick={() => setShowQuiz(true)}
+              className="btn-primary w-full py-5 text-xl font-bold shadow-2xl shadow-blue-500/20 group rounded-2xl"
+            >
+              <CheckCircle2 className="w-6 h-6" />
+              {t("learn.complete")}
+              <ChevronRight className="w-5 h-5 ml-auto group-hover:translate-x-1 transition-transform" />
+            </button>
+          </div>
+
+          {/* Quick Tip Widget */}
+          <div className="glass-card p-6 flex items-start gap-4">
+            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-5 h-5 text-amber-600" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-amber-800 uppercase tracking-widest mb-1">{t("learn.quickTip")}</h4>
+              <p className="text-sm text-slate-600 font-medium leading-relaxed">
                 {subtopic.task_type === 'install' && t("learn.tip.install")}
                 {subtopic.task_type === 'create' && t("learn.tip.create")}
                 {subtopic.task_type === 'apply' && t("learn.tip.apply")}
@@ -283,6 +216,85 @@ export default function LearnClient({
                 {subtopic.task_type === 'call' && t("learn.tip.call")}
                 {!TASK_ICONS[subtopic.task_type] && t("learn.tip.default")}
               </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Information & Overview */}
+        <div className="lg:col-span-4 space-y-8">
+          
+          {/* Progress Summary Widget */}
+          <div className="card p-6 border-b-4 border-b-[#34C759]">
+            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Learning Analytics</h3>
+            <div className="space-y-6">
+              {/* Radial or Visual Progress */}
+              <div>
+                <div className="flex justify-between items-end mb-2">
+                  <span className="text-sm font-bold text-slate-700">Path Completion</span>
+                  <span className="text-2xl font-black text-[#007AFF]">{overallProgress}%</span>
+                </div>
+                <div className="h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
+                  <div className="h-full bg-gradient-to-r from-[#007AFF] to-[#5856D6] rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(0,122,255,0.4)]" style={{ width: `${overallProgress}%` }} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capability</div>
+                  <div className="flex items-center gap-1.5">
+                    <TrendingUp className="w-4 h-4 text-[#007AFF]" />
+                    <span className="text-lg font-black text-slate-800">{capScore}</span>
+                  </div>
+                </div>
+                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Milestones</div>
+                  <div className="flex items-center gap-1.5">
+                    <Target className="w-4 h-4 text-[#34C759]" />
+                    <span className="text-lg font-black text-slate-800">{completedSubtopics}/{totalSubtopics}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Module Roadmap Widget */}
+          <div className="card p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Module Roadmap</h3>
+              <Link href="/learn/outline" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center hover:bg-blue-50 hover:text-blue-500 transition-colors border border-slate-100">
+                <BookOpen className="w-4 h-4" />
+              </Link>
+            </div>
+            
+            <div className="space-y-4 relative">
+              {/* Vertical Line */}
+              <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100" />
+              
+              {currentModuleSubtopics.map((sub, idx) => (
+                <div key={idx} className={`flex items-start gap-4 relative group ${
+                  idx === currentSubtopicIndex ? '' : 'opacity-60'
+                }`}>
+                  <div className={`mt-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black z-10 border-2 transition-all ${
+                    sub.status === 'complete' ? 'bg-[#34C759] border-[#34C759] text-white' :
+                    idx === currentSubtopicIndex ? 'bg-white border-[#007AFF] text-[#007AFF] shadow-lg shadow-blue-500/20' :
+                    'bg-white border-slate-200 text-slate-300'
+                  }`}>
+                    {sub.status === 'complete' ? <CheckCircle2 className="w-3.5 h-3.5" /> : idx + 1}
+                  </div>
+                  <div className="flex-1">
+                    <span className={`text-sm font-bold block leading-tight ${
+                      idx === currentSubtopicIndex ? 'text-slate-800' : 'text-slate-500'
+                    }`}>
+                      {sub.title}
+                    </span>
+                    {idx === currentSubtopicIndex && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-[#007AFF] uppercase mt-1">
+                        Current Focus
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -302,6 +314,7 @@ export default function LearnClient({
         />
       )}
 
+      {/* AI Assistant */}
       <MentorChat
         subtopicId={subtopic.subtopic_id}
         triggerType={activeTrigger}

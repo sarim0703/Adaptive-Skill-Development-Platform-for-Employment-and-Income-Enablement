@@ -83,7 +83,7 @@ export default function QuizModal({
     });
 
     const score = (correctCount / questions.length) * 100;
-    const passed = score >= 50;
+    const passed = score >= 75;
 
     await submitQuizResult({
       roadmapId,

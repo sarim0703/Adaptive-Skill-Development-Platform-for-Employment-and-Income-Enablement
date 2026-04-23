@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { signIn } from "next-auth/react";
-import { registerUser } from "../actions";
+import { registerUser, checkUserState } from "../actions";
 import { useRouter } from "next/navigation";
 import { Loader2, Sparkles } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -34,7 +34,9 @@ export default function AuthPage() {
         if (res?.error) {
           setError(res.error);
         } else {
-          router.push("/onboarding");
+          // Route returning users to the correct page
+          const destination = await checkUserState();
+          router.push(destination);
         }
       } else {
         await registerUser(formData);

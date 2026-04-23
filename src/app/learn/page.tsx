@@ -1,5 +1,6 @@
 import { getUserRoadmap, getUserModel, getUserProfile } from "../actions";
 import LearnClient from "./LearnClient";
+import ModuleComplete from "./ModuleComplete";
 import { redirect } from "next/navigation";
 
 export default async function LearnPage() {
@@ -29,28 +30,58 @@ export default async function LearnPage() {
     if (activeSubtopic) break;
   }
 
-  if (!activeSubtopic) {
-    return <div className="p-8 text-slate-600">No active tasks. You might have finished everything! 🎉</div>;
-  }
-
   // Calculate progress stats
   let totalSubtopics = 0;
   let completedSubtopics = 0;
   let currentModuleTitle = '';
   let currentModuleSubtopics: { title: string; status: string }[] = [];
   let currentSubtopicIndex = 0;
+  let lastCompletedModuleId = 0;
 
   for (const mod of modules) {
     if (!mod.subtopics) continue;
+    let allComplete = true;
     for (const st of mod.subtopics) {
       totalSubtopics++;
-      if (st.status === 'complete') completedSubtopics++;
+      if (st.status === 'complete') {
+        completedSubtopics++;
+      } else {
+        allComplete = false;
+      }
     }
-    if (mod.module_id === activeModuleId) {
+    if (allComplete && mod.subtopics.length > 0) {
+      lastCompletedModuleId = mod.module_id;
+    }
+    if (activeModuleId && mod.module_id === activeModuleId) {
       currentModuleTitle = mod.module_title;
       currentModuleSubtopics = mod.subtopics.map(s => ({ title: s.title, status: s.status }));
       currentSubtopicIndex = mod.subtopics.findIndex(s => s.subtopic_id === activeSubtopic!.subtopic_id);
     }
+  }
+
+  // No active subtopic = module/path complete
+  if (!activeSubtopic) {
+    const hasNextModule = modules.some(m => m.module_id > lastCompletedModuleId && (!m.subtopics || m.subtopics.length === 0 || m.subtopics.some(s => s.status !== 'complete')));
+    
+    // Fetch analytics data just for the learning gain calculation on completion
+    const { getAnalyticsData } = await import('@/app/actions');
+    const analytics = await getAnalyticsData();
+    const learningGain = analytics?.normalizedLearningGain ?? null;
+    
+    return (
+      <ModuleComplete
+        roadmapId={roadmap.id}
+        pathTitle={roadmap.pathTitle}
+        completedSubtopics={completedSubtopics}
+        totalSubtopics={totalSubtopics}
+        totalModules={modules.length}
+        lastCompletedModuleId={lastCompletedModuleId}
+        hasNextModule={hasNextModule}
+        capabilityScore={(userModel as { capabilityScore?: number } | null)?.capabilityScore}
+        currentStreak={(userModel as { currentStreak?: number } | null)?.currentStreak}
+        learningGain={learningGain}
+      />
+    );
   }
 
   return (
