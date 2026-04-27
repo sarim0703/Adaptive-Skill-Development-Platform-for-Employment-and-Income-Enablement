@@ -54,7 +54,8 @@ export default function LearnClient({
   roadmapId, moduleId, subtopic, userModel, pathTitle, userName,
   totalSubtopics, completedSubtopics, currentModuleTitle,
   currentSubtopicIndex, totalModules, currentModuleNumber, allModules,
-}: LearnClientProps) {
+  isExploring
+}: LearnClientProps & { isExploring?: boolean }) {
   const { t } = useLanguage();
   const [timeSpent, setTimeSpent] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
@@ -184,6 +185,27 @@ export default function LearnClient({
             )}
           </div>
         </div>
+
+        {/* Exploration Banner */}
+        {isExploring && (
+          <div className="relative group mb-6">
+            <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-violet-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+            <div className="relative flex items-center justify-between p-4 rounded-2xl bg-[#0F1115] border border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                  <Sparkles className="w-5 h-5 text-blue-400" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-white tracking-tight">Exploration Mode Active</h4>
+                  <p className="text-[11px] text-slate-400">You are viewing a future lesson. Mastery quizzes are locked until you reach this stage.</p>
+                </div>
+              </div>
+              <Link href="/learn" className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+                Return to Active Task
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Banners */}
         {subtopic.status === "needs_review" && (
@@ -363,12 +385,21 @@ export default function LearnClient({
             </div>
 
             {/* CTA */}
-            <button onClick={() => setShowQuiz(true)}
-              className="w-full py-5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm uppercase tracking-[0.2em] shadow-[0_15px_40px_rgba(59,130,246,0.25)] flex items-center justify-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-all group">
-              <CheckCircle2 className="w-5 h-5" />
-              {t("learn.complete")}
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
+            {isExploring ? (
+              <Link href="/learn"
+                className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all group">
+                <PlayCircle className="w-5 h-5 text-blue-400" />
+                Return to Active Lesson
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            ) : (
+              <button onClick={() => setShowQuiz(true)}
+                className="w-full py-5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm uppercase tracking-[0.2em] shadow-[0_15px_40px_rgba(59,130,246,0.25)] flex items-center justify-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-all group">
+                <CheckCircle2 className="w-5 h-5" />
+                {t("learn.complete")}
+                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            )}
           </div>
 
           {/* ═══ RIGHT COLUMN: Sidebar (4 cols) ═══ */}
@@ -431,24 +462,24 @@ export default function LearnClient({
                             const isActive = st.subtopic_id === subtopic.subtopic_id;
                             const isComplete = st.status === "complete";
                             return (
-                              <div key={st.subtopic_id}
-                                className={`flex items-center gap-3 pl-10 pr-5 py-2 transition-colors ${isActive ? "bg-blue-500/[0.05]" : ""}`}>
+                              <Link key={st.subtopic_id} href={`/learn?exploreId=${st.subtopic_id}`}
+                                className={`flex items-center gap-3 pl-10 pr-5 py-2 transition-colors group ${isActive ? "bg-blue-500/[0.05]" : "hover:bg-white/[0.02]"}`}>
                                 <div className="flex-shrink-0">
                                   {isComplete ? (
                                     <CheckCircle2 className="w-4 h-4 text-emerald-500" />
                                   ) : isActive ? (
                                     <div className="w-4 h-4 rounded-full bg-blue-500/20 border-2 border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
                                   ) : (
-                                    <div className="w-4 h-4 rounded-full border border-slate-700" />
+                                    <div className="w-4 h-4 rounded-full border border-slate-700 group-hover:border-slate-500" />
                                   )}
                                 </div>
                                 <span className={`text-xs leading-snug truncate ${
-                                  isActive ? "text-white font-semibold" : isComplete ? "text-slate-500" : "text-slate-400"
+                                  isActive ? "text-white font-semibold" : isComplete ? "text-slate-500" : "text-slate-400 group-hover:text-slate-200"
                                 }`}>
                                   {st.title}
                                 </span>
                                 {isActive && <Zap className="w-3 h-3 text-blue-400 flex-shrink-0 ml-auto" />}
-                              </div>
+                              </Link>
                             );
                           })}
                         </div>
