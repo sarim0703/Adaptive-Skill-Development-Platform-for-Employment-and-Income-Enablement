@@ -72,7 +72,7 @@ function DockIcon({
         className={`
           aspect-square rounded-2xl flex items-center justify-center relative
           transition-colors duration-300
-          ${isActive ? "bg-white/15 text-white" : "bg-white/5 text-slate-500 hover:text-white"}
+          ${isActive ? "bg-foreground/15 text-foreground" : "bg-foreground/5 text-foreground/40 hover:text-foreground"}
         `}
       >
         <Icon className={`${isActive ? "w-1/2 h-1/2" : "w-5 h-5"}`} />
@@ -92,7 +92,7 @@ function DockIcon({
               initial={{ opacity: 0, y: 10, scale: 0.8 }}
               animate={{ opacity: 1, y: -45, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.8 }}
-              className="absolute px-3 py-1.5 rounded-lg bg-[#111] dark:bg-[#111] light:bg-white border border-white/10 text-white dark:text-white light:text-black text-[10px] font-bold uppercase tracking-widest pointer-events-none whitespace-nowrap shadow-2xl"
+              className="absolute px-3 py-1.5 rounded-lg bg-card border border-border text-foreground text-[10px] font-bold uppercase tracking-widest pointer-events-none whitespace-nowrap shadow-2xl"
             >
               {label}
             </motion.div>
@@ -137,9 +137,9 @@ export default function Navbar() {
           pointer-events-auto
           flex items-center gap-2 p-2 rounded-[28px] 
           w-max mx-auto
-          bg-white/10 dark:bg-[#0A0A0C]/70 light:bg-white/70 backdrop-blur-3xl border border-white/10 dark:border-white/10 light:border-black/5
-          shadow-[0_20px_50px_rgba(0,0,0,0.6),inset_0_1px_1px_rgba(255,255,255,0.05)]
-          transition-all duration-500 hover:shadow-[0_20px_80px_rgba(0,0,0,0.8),0_0_20px_rgba(59,130,246,0.1)]
+          bg-card/70 backdrop-blur-3xl border border-border
+          shadow-[0_20px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)]
+          transition-all duration-500 hover:shadow-[0_20px_80px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_20px_80px_rgba(0,0,0,0.8)]
         "
       >
         
@@ -147,15 +147,15 @@ export default function Navbar() {
         <Link href="/" className="px-2">
           <motion.div 
             whileHover={{ rotate: 5, scale: 1.1 }}
-            className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg relative group overflow-hidden bg-black dark:bg-[#0A0A0C] light:bg-slate-100"
+            className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg relative group overflow-hidden bg-background border border-border"
           >
             <Image src="/logo.png" alt="CareerOrbit Logo" fill className="object-cover" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-white dark:border-[#0A0A0C] animate-pulse" />
+            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background animate-pulse" />
           </motion.div>
         </Link>
 
         {/* Divider */}
-        <div className="w-px h-8 bg-white/10 dark:bg-white/10 light:bg-black/5 mx-1" />
+        <div className="w-px h-8 bg-border mx-1" />
 
         {/* ── Nav Links Cluster ── */}
         {!isLandingPage && (
@@ -178,12 +178,12 @@ export default function Navbar() {
                 whileTap={{ scale: 0.95 }}
                 className={`
                   w-[40px] h-[40px] rounded-2xl flex items-center justify-center group cursor-pointer relative transition-all duration-300
-                  ${pathname === "/profile" ? "bg-white/15 text-white" : "bg-white/5 text-slate-500 hover:text-white dark:text-slate-500 light:text-slate-400"}
+                  ${isActive ? "bg-foreground/10 text-foreground" : "bg-foreground/5 text-foreground/40 hover:text-foreground"}
                 `}
               >
                 <div className={`
                   w-7 h-7 rounded-lg flex items-center justify-center text-[10px] font-black 
-                  ${pathname === "/profile" ? "bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]" : "bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-400 group-hover:text-blue-300"}
+                  ${pathname === "/profile" ? "bg-blue-500 text-white shadow-[0_0_15px_rgba(59,130,246,0.5)]" : "bg-gradient-to-br from-blue-500/20 to-violet-500/20 text-blue-500 group-hover:text-blue-400"}
                 `}>
                   {userInitial}
                 </div>
@@ -192,7 +192,7 @@ export default function Navbar() {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     whileHover={{ opacity: 1, y: -45 }}
-                    className="absolute px-3 py-1.5 rounded-lg bg-[#111] dark:bg-[#111] light:bg-white border border-white/10 text-white dark:text-white light:text-black text-[10px] font-bold uppercase tracking-widest pointer-events-none whitespace-nowrap shadow-2xl opacity-0 group-hover:opacity-100"
+                    className="absolute px-3 py-1.5 rounded-lg bg-card border border-border text-foreground text-[10px] font-bold uppercase tracking-widest pointer-events-none whitespace-nowrap shadow-2xl opacity-0 group-hover:opacity-100"
                   >
                     Profile
                   </motion.div>
@@ -203,7 +203,7 @@ export default function Navbar() {
         )}
 
         {/* Divider */}
-        <div className="w-px h-8 bg-white/10 dark:bg-white/10 light:bg-black/5 mx-1" />
+        <div className="w-px h-8 bg-border mx-1" />
 
         {/* ── Controls Cluster ── */}
         <div className="flex items-center gap-2 px-1">
@@ -217,7 +217,7 @@ export default function Navbar() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={toggleTheme}
-            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-white/5 dark:bg-white/5 light:bg-black/5 text-slate-500 hover:text-blue-500 transition-colors border border-transparent"
+            className="w-10 h-10 flex items-center justify-center rounded-2xl bg-foreground/5 text-foreground/40 hover:text-blue-500 transition-colors border border-transparent"
             title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
           >
             {theme === "dark" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-500" />}
@@ -239,7 +239,7 @@ export default function Navbar() {
                 whileHover={{ scale: 1.1, rotate: -10 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => signOut({ callbackUrl: window.location.origin })}
-                className="w-10 h-10 flex items-center justify-center rounded-2xl text-slate-500 hover:bg-rose-500/10 hover:text-rose-500 transition-colors border border-transparent hover:border-rose-500/20"
+                className="w-10 h-10 flex items-center justify-center rounded-2xl text-foreground/40 hover:bg-rose-500/10 hover:text-rose-500 transition-colors border border-transparent hover:border-rose-500/20"
                 title="Sign out"
               >
                 <LogOut className="w-5 h-5" />
