@@ -61,24 +61,24 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <div className="h-full flex flex-col p-8 md:p-12">
+    <div className="h-full flex flex-col p-8 md:p-12 text-foreground">
       <div className="flex justify-between items-center mb-12">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-[#0A0A0C] border border-white/10 relative">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center overflow-hidden bg-background border border-border relative">
           <Image src="/logo.png" alt="CareerOrbit Logo" fill className="object-cover" />
         </div>
         <button 
           onClick={onClose}
-          className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all"
+          className="w-10 h-10 rounded-full hover:bg-card flex items-center justify-center text-foreground/40 hover:text-foreground transition-all"
         >
           <X className="w-5 h-5" />
         </button>
       </div>
 
       <div className="flex-1">
-        <h2 className="text-4xl font-black text-white mb-2 tracking-tight">
+        <h2 className="text-4xl font-black text-foreground mb-2 tracking-tight">
           {isLogin ? t("auth.welcome") : t("auth.join")}
         </h2>
-        <p className="text-slate-400 font-medium mb-10">
+        <p className="text-slate-500 dark:text-slate-400 font-medium mb-10">
           {isLogin ? t("auth.sub") : t("auth.joinsub")}
         </p>
 
@@ -92,7 +92,7 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
                   name="name"
                   type="text"
                   required
-                  className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
+                  className="w-full bg-card border border-border rounded-2xl py-4 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
                   placeholder="John Doe"
                 />
               </div>
@@ -107,7 +107,7 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
                 name="email"
                 type="email"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
+                className="w-full bg-card border border-border rounded-2xl py-4 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
                 placeholder="you@example.com"
               />
             </div>
@@ -121,7 +121,7 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
                 name="password"
                 type="password"
                 required
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
+                className="w-full bg-card border border-border rounded-2xl py-4 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
                 placeholder="••••••••"
               />
             </div>

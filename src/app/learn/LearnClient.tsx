@@ -152,7 +152,7 @@ export default function LearnClient({
   const ringOffset = ringCircumference - (overallProgress / 100) * ringCircumference;
 
   return (
-    <div className="relative min-h-screen bg-[#0A0A0C] text-white overflow-hidden">
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden transition-colors duration-500">
       {/* Background Effects */}
       <div className="fixed inset-0 bg-tech-grid opacity-5 pointer-events-none" />
       <div className="fixed w-[500px] h-[500px] bg-blue-600/5 -top-40 -right-40 rounded-full blur-[120px] pointer-events-none" />
@@ -169,13 +169,13 @@ export default function LearnClient({
               <ChevronRight className="w-3 h-3" />
               <span className="text-slate-400">Module {currentModuleNumber}</span>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-white">Lesson {currentSubtopicIndex + 1}</span>
+              <span className="text-foreground">Lesson {currentSubtopicIndex + 1}</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border">
               <Clock className="w-3.5 h-3.5 text-slate-500" />
-              <span className="text-xs font-mono font-bold text-white tabular-nums">{formatTime(timeSpent)}</span>
+              <span className="text-xs font-mono font-bold text-foreground tabular-nums">{formatTime(timeSpent)}</span>
             </div>
             {streak > 0 && (
               <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/5 border border-amber-500/10">
@@ -190,17 +190,17 @@ export default function LearnClient({
         {isExploring && (
           <div className="relative group mb-6">
             <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-500 to-violet-500 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-            <div className="relative flex items-center justify-between p-4 rounded-2xl bg-[#0F1115] border border-white/10">
+            <div className="relative flex items-center justify-between p-4 rounded-2xl bg-card border border-border">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
                   <Sparkles className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-white tracking-tight">Exploration Mode Active</h4>
+                  <h4 className="text-sm font-bold text-foreground tracking-tight">Exploration Mode Active</h4>
                   <p className="text-[11px] text-slate-400">You are viewing a future lesson. Mastery quizzes are locked until you reach this stage.</p>
                 </div>
               </div>
-              <Link href="/learn" className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
+              <Link href="/learn" className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-border rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
                 Return to Active Task
               </Link>
             </div>
@@ -226,7 +226,7 @@ export default function LearnClient({
                 <p className="text-xs text-rose-400/60 mt-0.5">{t("learn.pathSwitch.sub")}</p>
               </div>
             </div>
-            <Link href="/path-selection" className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest bg-white text-black rounded-xl hover:bg-rose-500 hover:text-white transition-all">
+            <Link href="/path-selection" className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest bg-foreground text-background rounded-xl hover:bg-rose-500 hover:text-white transition-all">
               {t("learn.pathSwitch.btn")}
             </Link>
           </div>
@@ -239,7 +239,7 @@ export default function LearnClient({
           <div className="lg:col-span-8 space-y-5">
 
             {/* Video Player Card */}
-            <div className="rounded-2xl overflow-hidden bg-white/[0.03] border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+            <div className="rounded-2xl overflow-hidden bg-card border border-border shadow-[0_8px_32px_rgba(0,0,0,0.1)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
               {videoData ? (
                 <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
                   <iframe
@@ -252,7 +252,7 @@ export default function LearnClient({
                 </div>
               ) : (
                 <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/[0.02]">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-card">
                     <Loader2 className="w-8 h-8 text-slate-600 animate-spin" />
                     <p className="text-slate-600 font-bold text-[9px] uppercase tracking-widest">{t("quiz.preparing")}</p>
                   </div>
@@ -260,13 +260,13 @@ export default function LearnClient({
               )}
               {/* Video Info Bar */}
               {videoData && (
-                <div className="flex items-center justify-between px-5 py-3 border-t border-white/5 bg-white/[0.02]">
+                <div className="flex items-center justify-between px-5 py-3 border-t border-border bg-card">
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <PlayCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
                     <p className="text-xs text-slate-400 font-medium truncate">{videoData.title}</p>
                   </div>
                   <a href={`https://www.youtube.com/watch?v=${videoData.videoId}`} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 text-[9px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest flex-shrink-0 ml-3">
+                    className="flex items-center gap-1 text-[9px] font-bold text-slate-500 hover:text-foreground transition-colors uppercase tracking-widest flex-shrink-0 ml-3">
                     YouTube <ExternalLink className="w-3 h-3" />
                   </a>
                 </div>
@@ -286,30 +286,30 @@ export default function LearnClient({
                       <span className="text-amber-400 ml-2">· Attempt {(subtopic.attempt_count ?? 0) + 1}</span>
                     )}
                   </div>
-                  <h2 className="text-xl font-bold text-white leading-tight">{subtopic.title}</h2>
+                  <h2 className="text-xl font-bold text-foreground leading-tight">{subtopic.title}</h2>
                 </div>
               </div>
             </div>
 
             {/* Tabbed Content */}
-            <div className="rounded-2xl bg-white/[0.03] border border-white/5 overflow-hidden">
+            <div className="rounded-2xl bg-card border border-border overflow-hidden">
               {/* Tab Bar */}
-              <div className="flex border-b border-white/5">
+              <div className="flex border-b border-border">
                 <button onClick={() => setActiveTab("task")}
                   className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
-                    activeTab === "task" ? "border-blue-500 text-white bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
+                    activeTab === "task" ? "border-blue-500 text-foreground bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
                   }`}>
                   <Target className="w-3.5 h-3.5" /> {t("learn.whatToDo")}
                 </button>
                 <button onClick={() => setActiveTab("notes")}
                   className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
-                    activeTab === "notes" ? "border-blue-500 text-white bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
+                    activeTab === "notes" ? "border-blue-500 text-foreground bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
                   }`}>
                   <BookOpen className="w-3.5 h-3.5" /> Notes
                 </button>
                 <button onClick={() => setActiveTab("resources")}
                   className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
-                    activeTab === "resources" ? "border-blue-500 text-white bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
+                    activeTab === "resources" ? "border-blue-500 text-foreground bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
                   }`}>
                   <Globe className="w-3.5 h-3.5" /> Resources
                 </button>
@@ -321,7 +321,7 @@ export default function LearnClient({
                   <div className="space-y-4">
                     <div className="rounded-xl bg-blue-500/[0.03] border border-blue-500/10 p-5 relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
-                      <p className="text-base text-slate-200 leading-relaxed font-medium pl-3">{subtopic.practical_task}</p>
+                      <p className="text-base text-slate-500 dark:text-slate-200 leading-relaxed font-medium pl-3">{subtopic.practical_task}</p>
                     </div>
                     <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/[0.03] border border-amber-500/10">
                       <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
@@ -342,7 +342,7 @@ export default function LearnClient({
                 )}
                 {activeTab === "notes" && (
                   subtopic.key_learning_notes ? (
-                    <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{subtopic.key_learning_notes}</div>
+                    <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{subtopic.key_learning_notes}</div>
                   ) : (
                     <div className="text-center py-8 text-slate-600">
                       <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
@@ -361,12 +361,12 @@ export default function LearnClient({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {resources.map((res, idx) => (
                           <a key={idx} href={res.url} target="_blank" rel="noopener noreferrer"
-                            className="group p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all flex flex-col h-full">
+                            className="group p-4 rounded-xl bg-card border border-border hover:bg-white/[0.04] hover:border-blue-500/30 transition-all flex flex-col h-full">
                             <div className="flex items-start justify-between mb-2">
-                              <h4 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">{res.title}</h4>
-                              <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 flex-shrink-0 ml-2" />
+                              <h4 className="text-sm font-bold text-foreground group-hover:text-blue-500 transition-colors line-clamp-1">{res.title}</h4>
+                              <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-500 flex-shrink-0 ml-2" />
                             </div>
-                            <span className="inline-block px-2 py-0.5 rounded border border-white/10 text-[9px] font-bold text-slate-400 uppercase tracking-widest w-max mb-2">
+                            <span className="inline-block px-2 py-0.5 rounded border border-border text-[9px] font-bold text-slate-400 uppercase tracking-widest w-max mb-2">
                               {res.type}
                             </span>
                             <p className="text-xs text-slate-400 leading-relaxed mt-auto line-clamp-2">{res.description}</p>
@@ -387,7 +387,7 @@ export default function LearnClient({
             {/* CTA */}
             {isExploring ? (
               <Link href="/learn"
-                className="w-full py-5 rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all group">
+                className="w-full py-5 rounded-2xl bg-card border border-border text-foreground font-bold text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all group">
                 <PlayCircle className="w-5 h-5 text-blue-400" />
                 Return to Active Lesson
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -406,7 +406,7 @@ export default function LearnClient({
           <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-28 lg:self-start">
 
             {/* Progress Card */}
-            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-5">
+            <div className="rounded-2xl bg-card border border-border p-5">
               <div className="flex items-center gap-4">
                 <div className="relative flex-shrink-0">
                   <svg width="96" height="96" className="-rotate-90">
@@ -418,20 +418,20 @@ export default function LearnClient({
                     </linearGradient></defs>
                   </svg>
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-xl font-black text-white tabular-nums">{overallProgress}%</span>
+                    <span className="text-xl font-black text-foreground tabular-nums">{overallProgress}%</span>
                   </div>
                 </div>
                 <div className="min-w-0">
                   <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Path Progress</h3>
-                  <p className="text-sm font-bold text-white">{completedSubtopics} <span className="text-slate-500 font-normal">of {totalSubtopics} lessons</span></p>
+                  <p className="text-sm font-bold text-foreground">{completedSubtopics} <span className="text-slate-500 font-normal">of {totalSubtopics} lessons</span></p>
                   <p className="text-[10px] text-slate-600 mt-0.5">Capability: {capScore}/100</p>
                 </div>
               </div>
             </div>
 
             {/* Course Curriculum */}
-            <div className="rounded-2xl bg-white/[0.03] border border-white/5 overflow-hidden">
-              <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+            <div className="rounded-2xl bg-card border border-border overflow-hidden">
+              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
                 <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Course Content</h3>
                 <span className="text-[10px] text-slate-600">{totalModules} modules</span>
               </div>
@@ -444,12 +444,12 @@ export default function LearnClient({
                   const isCurrent = mod.module_id === moduleId;
 
                   return (
-                    <div key={mod.module_id} className="border-b border-white/5 last:border-b-0">
+                    <div key={mod.module_id} className="border-b border-border last:border-b-0">
                       <button onClick={() => toggleModule(mod.module_id)}
                         className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-white/[0.02] transition-colors ${isCurrent ? "bg-white/[0.03]" : ""}`}>
                         <ChevronDown className={`w-3.5 h-3.5 text-slate-600 flex-shrink-0 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`} />
                         <div className="flex-1 min-w-0">
-                          <p className={`text-xs font-bold truncate ${isCurrent ? "text-white" : "text-slate-400"}`}>
+                          <p className={`text-xs font-bold truncate ${isCurrent ? "text-foreground" : "text-slate-400"}`}>
                             {mod.module_title}
                           </p>
                           <p className="text-[10px] text-slate-600 mt-0.5">{completedInMod}/{totalInMod} done</p>
@@ -474,7 +474,7 @@ export default function LearnClient({
                                   )}
                                 </div>
                                 <span className={`text-xs leading-snug truncate ${
-                                  isActive ? "text-white font-semibold" : isComplete ? "text-slate-500" : "text-slate-400 group-hover:text-slate-200"
+                                  isActive ? "text-foreground font-semibold" : isComplete ? "text-slate-500" : "text-slate-400 group-hover:text-slate-200"
                                 }`}>
                                   {st.title}
                                 </span>
