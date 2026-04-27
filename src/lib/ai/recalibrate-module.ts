@@ -1,4 +1,4 @@
-import { getGemma3Model, GEMMA3_RECALIBRATE_MODULE_PROMPT } from "./models";
+import { getGPT5ReasoningModel, GPT5_RECALIBRATE_MODULE_PROMPT } from "./models";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { db } from "@/db";
@@ -45,11 +45,11 @@ export async function recalibrateAndGenerateNextModule(userId: string, roadmapId
   const profileContext = JSON.stringify(profile);
 
   // 3. Generate the module
-  const gemma = getGemma3Model();
+  const gpt5 = getGPT5ReasoningModel();
   const { object } = await generateObject({
-    model: gemma,
+    model: gpt5,
     schema: moduleSchema,
-    system: GEMMA3_RECALIBRATE_MODULE_PROMPT,
+    system: GPT5_RECALIBRATE_MODULE_PROMPT,
     prompt: `
 Target Module ID to Generate: ${targetModuleId}
 User Capability Score: ${capabilityScore}/100

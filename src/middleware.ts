@@ -4,7 +4,7 @@ export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
 
-  const protectedRoutes = ["/learn", "/onboarding", "/path-selection", "/profile", "/pre-test", "/analytics"];
+  const protectedRoutes = ["/learn", "/onboarding", "/path-selection", "/profile", "/pre-test", "/analytics", "/badges"];
   const apiProtectedRoutes = ["/api/chat", "/api/quiz", "/api/pre-test"];
 
   const isProtectedRoute = protectedRoutes.some((route) => nextUrl.pathname.startsWith(route));

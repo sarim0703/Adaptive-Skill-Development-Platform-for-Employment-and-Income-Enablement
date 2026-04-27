@@ -19,11 +19,16 @@ export const profiles = pgTable('profile', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text('userId').notNull().references(() => users.id, { onDelete: 'cascade' }),
   location: text('location'),
+  ageGroup: text('age_group'),
+  gender: text('gender'),
   educationLevel: text('education_level'),
-  timeAvailability: text('time_availability'),
-  rawSkillsInput: text('raw_skills_input'),
-  workHistory: text('work_history'),
+  timeAvailability: text('time_availability'), // kept for backward compat
+  workInterest: text('work_interest'),
+  rawSkillsInput: text('raw_skills_input'), // legacy alias
+  experienceLevel: text('experience_level'),
+  workHistory: text('work_history'), // legacy alias
   targetIncomeExact: integer('target_income_exact'),
+  deviceType: text('device_type'),
   languagePreference: text('language_preference'),
   confidenceLevel: integer('confidence_level'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -133,3 +138,15 @@ export const learningEvents = pgTable('learning_event', {
   data: jsonb('data').notNull(),            // Flexible payload per event type
   occurredAt: timestamp('occurred_at').defaultNow(),
 });
+
+// Cache for YouTube videos and transcripts to ensure presentation stability and save quota
+export const videoCache = pgTable('video_cache', {
+  query: text('query').primaryKey(),
+  videoId: text('video_id').notNull(),
+  title: text('title').notNull(),
+  channelTitle: text('channel_title').notNull(),
+  thumbnail: text('thumbnail').notNull(),
+  transcript: text('transcript'),
+  lastFetched: timestamp('last_fetched').defaultNow(),
+});
+

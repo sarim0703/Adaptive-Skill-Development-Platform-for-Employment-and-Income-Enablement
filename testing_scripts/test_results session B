@@ -1,4 +1,4 @@
-# SkillSync V2 — Honest Test Results (Session A)
+# CareerOrbit — Honest Test Results (Session A)
 
 I have created an automated testing suite using **Vitest** and **React Testing Library** to validate the core pieces built during Session A. All test scripts are located in `testing_scripts/`. 
 

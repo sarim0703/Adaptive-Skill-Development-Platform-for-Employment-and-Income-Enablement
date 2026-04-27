@@ -18,8 +18,8 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Try to load language from localStorage
-    const savedLang = localStorage.getItem("skillsync_language") as Language;
-    if (savedLang && (savedLang === "en" || savedLang === "hi" || savedLang === "kn")) {
+    const savedLang = localStorage.getItem("careerorbit_language") as Language;
+    if (savedLang) {
       setLanguageState(savedLang);
     }
     setIsLoaded(true);
@@ -27,7 +27,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);
-    localStorage.setItem("skillsync_language", lang);
+    localStorage.setItem("careerorbit_language", lang);
     // Let backend know via fetch/cookie if needed, or rely on context
   };
 

@@ -21,9 +21,11 @@
 export interface BKTParams {
   pL0: number;  // Initial mastery probability (default: 0.10)
   pT: number;   // Learn/transition rate      (default: 0.20)
-  pG: number;   // Guess rate                 (default: 0.25)
-  pS: number;   // Slip rate                  (default: 0.10)
+  pG: number;   // Base Guess rate            (default: 0.25)
+  pS: number;   // Base Slip rate             (default: 0.10)
 }
+
+export type ItemDifficulty = 'easy' | 'medium' | 'hard';
 
 export interface KnowledgeComponentState {
   pMastery: number;       // Current mastery probability [0, 1]
@@ -57,45 +59,73 @@ export const DEFAULT_BKT_PARAMS: BKTParams = {
 // ─── Core BKT Update ──────────────────────────────────────────
 
 /**
- * Performs a single Bayesian Knowledge Tracing update step.
+ * Performs an Adaptive Bayesian Knowledge Tracing update step utilizing 
+ * Item Response Theory (IRT) heuristics for dynamic Guess and Slip rates.
  * 
- * Given the current mastery probability and an observation (correct/incorrect),
- * returns the updated mastery probability using Bayes' theorem followed
- * by the learning transition.
- * 
- * @param currentMastery  Current P(L) for this knowledge component
- * @param isCorrect       Whether the learner answered correctly
- * @param params          BKT parameters for this KC
- * @returns               Updated P(L) after observation + transition
+ * ACADEMIC ENHANCEMENTS (BKT-IRT Hybrid):
+ * 1. ITEM DIFFICULTY WEIGHTING: Adjusts pG and pS dynamically based on question difficulty.
+ *    - Hard items: Lower guess rate, higher slip rate.
+ *    - Easy items: Higher guess rate, lower slip rate.
+ * 2. RECOVERY COEFFICIENT: Mitigates the "Zero Trap" for learners with P(L) < 0.20.
+ * 3. ASYMPTOTIC CLAMPING: Bounds P(L) to [0.05, 0.95] to prevent HMM saturation.
  */
 export function updateMastery(
   currentMastery: number,
   isCorrect: boolean,
+  difficulty: ItemDifficulty = 'medium',
   params: BKTParams = DEFAULT_BKT_PARAMS
 ): number {
-  const { pS, pG, pT } = params;
+  const { pT, pG: basePG, pS: basePS } = params;
 
-  // Step 1: Compute P(observation)
-  // P(correct) = P(L) × (1 - P(S)) + (1 - P(L)) × P(G)
-  // P(wrong)   = P(L) × P(S)       + (1 - P(L)) × (1 - P(G))
+  // --- Step 1: IRT Dynamic Parameter Adjustment ---
+  let pG = basePG;
+  let pS = basePS;
+
+  switch (difficulty) {
+    case 'easy':
+      pG = Math.min(0.40, basePG * 1.5); // Easier to guess correctly
+      pS = Math.max(0.05, basePS * 0.5); // Harder to slip up
+      break;
+    case 'hard':
+      pG = Math.max(0.10, basePG * 0.5); // Harder to guess
+      pS = Math.min(0.25, basePS * 1.5); // Easier to slip up
+      break;
+    case 'medium':
+    default:
+      // Keep base parameters
+      break;
+  }
+
+  // --- Step 1: Human-Centric Adjustments ---
+  
+  // Recovery Boost: If they were at < 20% and got it right, they likely 
+  // just had a breakthrough. We temporarily lower the "Guess" penalty.
+  let adjustedPG = pG;
+  if (isCorrect && currentMastery < 0.20) {
+    adjustedPG = pG * 0.5; // Treat it less like a lucky guess, more like learning
+  }
+
+  // --- Step 2: Standard Bayesian Update ---
+  
   const pObserved = isCorrect
-    ? currentMastery * (1 - pS) + (1 - currentMastery) * pG
-    : currentMastery * pS + (1 - currentMastery) * (1 - pG);
+    ? currentMastery * (1 - pS) + (1 - currentMastery) * adjustedPG
+    : currentMastery * pS + (1 - currentMastery) * (1 - adjustedPG);
 
-  // Guard against division by zero
   if (pObserved === 0) return currentMastery;
 
-  // Step 2: Bayesian posterior — P(L | observation)
   const pMasteryGivenObs = isCorrect
     ? (currentMastery * (1 - pS)) / pObserved
     : (currentMastery * pS) / pObserved;
 
-  // Step 3: Learning transition — account for possible learning during attempt
-  // P(L_new) = P(L|obs) + (1 - P(L|obs)) × P(T)
-  const pNew = pMasteryGivenObs + (1 - pMasteryGivenObs) * pT;
+  // --- Step 3: Learning Transition ---
+  
+  let pNew = pMasteryGivenObs + (1 - pMasteryGivenObs) * pT;
 
-  // Clamp to valid probability range
-  return clamp(pNew, 0.001, 0.999);
+  // --- Step 4: Asymptotic Clamping (HMM Regularization) ---
+  
+  // Bound to [0.05, 0.95] to ensure the Markov chain remains responsive
+  // to future evidence (preventing permanent lock-in at 0 or 1).
+  return clamp(pNew, 0.05, 0.95);
 }
 
 // ─── Batch Update ──────────────────────────────────────────────
@@ -106,14 +136,14 @@ export function updateMastery(
  * 
  * @param state       Current knowledge state object
  * @param subtopicId  The knowledge component being assessed
- * @param answers     Array of { isCorrect } for each question in the quiz
+ * @param answers     Array of { isCorrect, difficulty } for each question
  * @param params      BKT parameters
  * @returns           Updated knowledge state (new object, immutable)
  */
 export function batchUpdateFromQuiz(
   state: KnowledgeState,
   subtopicId: string,
-  answers: { isCorrect: boolean }[],
+  answers: { isCorrect: boolean, difficulty?: ItemDifficulty }[],
   params: BKTParams = DEFAULT_BKT_PARAMS
 ): { updatedState: KnowledgeState; deltas: { before: number; after: number; answers: boolean[] } } {
   const existing = state[subtopicId] || {
@@ -128,7 +158,7 @@ export function batchUpdateFromQuiz(
 
   // Apply each observation sequentially
   for (const answer of answers) {
-    pMastery = updateMastery(pMastery, answer.isCorrect, params);
+    pMastery = updateMastery(pMastery, answer.isCorrect, answer.difficulty || 'medium', params);
     answerResults.push(answer.isCorrect);
   }
 

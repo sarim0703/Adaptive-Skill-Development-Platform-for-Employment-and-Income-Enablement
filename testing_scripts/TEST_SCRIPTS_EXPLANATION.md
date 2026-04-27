@@ -1,6 +1,6 @@
-# 🚀 SkillSync V2: Master Test Scripts Documentation
+# 🚀 CareerOrbit: Master Test Scripts Documentation
 
-This is the central reference for the automated testing architecture, mathematical models, and AI logic powering SkillSync V2.
+This is the central reference for the automated testing architecture, mathematical models, and AI logic powering CareerOrbit.
 
 ---
 
@@ -112,4 +112,4 @@ const capabilityScore = clamp((model.capabilityScore ?? 50) + scoreDelta - attem
 
 ---
 > [!IMPORTANT]
-> This suite guarantees that SkillSync V2 is not just a UI, but a stable, mathematically-driven adaptive platform that correctly tracks UN SDG 8 impact goals.
+> This suite guarantees that CareerOrbit is not just a UI, but a stable, mathematically-driven adaptive platform that correctly tracks UN SDG 8 impact goals.

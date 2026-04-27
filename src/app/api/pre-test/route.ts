@@ -1,4 +1,4 @@
-import { getPhi4Model } from "@/lib/ai/models";
+import { getGPT5InstantModel } from "@/lib/ai/models";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { NextResponse } from "next/server";
@@ -20,7 +20,7 @@ export async function POST(req: Request) {
     const { pathTitle, profileSummary, language } = await req.json();
     const lang = language || 'english';
 
-    const model = getPhi4Model();
+    const model = getGPT5InstantModel();
 
     const { object } = await generateObject({
       model,

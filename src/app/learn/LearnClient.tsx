@@ -1,25 +1,35 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { PlayCircle, Clock, CheckCircle2, AlertTriangle, BookOpen, Flame, LogOut, TrendingUp, Target, Circle, Sparkles, ChevronRight, LayoutDashboard } from "lucide-react";
+import {
+  PlayCircle, Clock, CheckCircle2, AlertTriangle, BookOpen,
+  Flame, Target, ChevronRight, ChevronDown, Loader2,
+  Zap, ExternalLink, FileText, Sparkles, ListChecks, Globe
+} from "lucide-react";
 import Link from "next/link";
 import QuizModal from "@/components/QuizModal";
 import MentorChat from "@/components/MentorChat";
 import { checkProactiveTriggers } from "@/app/actions";
-import { signOut } from "next-auth/react";
 import { useLanguage } from "@/context/LanguageContext";
+
+type ModuleData = {
+  module_id: number;
+  module_title: string;
+  subtopics: {
+    status: string; subtopic_id: string; title: string;
+    task_type: string; practical_task: string;
+    youtube_search_query: string; attempt_count?: number;
+    key_learning_notes?: string; [key: string]: unknown;
+  }[];
+};
 
 type LearnClientProps = {
   roadmapId: string;
   moduleId: number;
   subtopic: {
-    subtopic_id: string;
-    title: string;
-    practical_task: string;
-    task_type: string;
-    youtube_search_query: string;
-    status: string;
-    attempt_count?: number;
+    subtopic_id: string; title: string; practical_task: string;
+    task_type: string; youtube_search_query: string; status: string;
+    attempt_count?: number; key_learning_notes?: string;
     [key: string]: unknown;
   };
   userModel: { capabilityScore?: number; pathSwitchSuggested?: boolean; currentStreak?: number; quizAverage?: number } | null;
@@ -33,6 +43,7 @@ type LearnClientProps = {
   currentSubtopicIndex: number;
   totalModules: number;
   currentModuleNumber: number;
+  allModules: ModuleData[];
 };
 
 const TASK_ICONS: Record<string, string> = {
@@ -40,22 +51,75 @@ const TASK_ICONS: Record<string, string> = {
 };
 
 export default function LearnClient({
-  roadmapId, moduleId, subtopic, userModel, pathTitle, userName, userLocation,
-  totalSubtopics, completedSubtopics, currentModuleTitle, currentModuleSubtopics,
-  currentSubtopicIndex, totalModules, currentModuleNumber,
+  roadmapId, moduleId, subtopic, userModel, pathTitle, userName,
+  totalSubtopics, completedSubtopics, currentModuleTitle,
+  currentSubtopicIndex, totalModules, currentModuleNumber, allModules,
 }: LearnClientProps) {
   const { t } = useLanguage();
   const [timeSpent, setTimeSpent] = useState(0);
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeTrigger, setActiveTrigger] = useState<string | null>(null);
+  const [videoData, setVideoData] = useState<{ videoId: string; title: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<"task" | "notes" | "resources">("task");
+  const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set([moduleId]));
+  const [resources, setResources] = useState<any[]>([]);
+  const [loadingResources, setLoadingResources] = useState(false);
   const timeRef = useRef(0);
 
+  const capScore = userModel?.capabilityScore ?? 50;
+  const streak = userModel?.currentStreak ?? 0;
+  const overallProgress = totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0;
+
+  // Fetch video
+  useEffect(() => {
+    async function getGroundedVideo() {
+      if (!subtopic.youtube_search_query) return;
+      try {
+        const apiKey = "AIzaSyCVtyevZxmJ3UHMRkx1-KdGK5Rf67wiL9U";
+        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=${encodeURIComponent(subtopic.youtube_search_query)}&type=video&videoCaption=closedCaption&relevanceLanguage=en&videoDuration=medium&key=${apiKey}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.items?.[0]) {
+          setVideoData({ videoId: data.items[0].id.videoId, title: data.items[0].snippet.title });
+        }
+      } catch (err) { console.error("Video fetch error:", err); }
+    }
+    getGroundedVideo();
+  }, [subtopic.youtube_search_query]);
+
+  // Fetch resources
+  useEffect(() => {
+    async function fetchResources() {
+      setLoadingResources(true);
+      try {
+        const res = await fetch("/api/resources", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subtopicTitle: subtopic.title,
+            practicalTask: subtopic.practical_task,
+          }),
+        });
+        const data = await res.json();
+        if (data.resources) {
+          setResources(data.resources);
+        }
+      } catch (err) {
+        console.error("Failed to fetch resources:", err);
+      } finally {
+        setLoadingResources(false);
+      }
+    }
+    fetchResources();
+  }, [subtopic.subtopic_id, subtopic.title, subtopic.practical_task]);
+
+  // Timer + proactive triggers
   useEffect(() => {
     const timer = setInterval(() => {
       timeRef.current += 1;
       setTimeSpent(timeRef.current);
       if (timeRef.current % 30 === 0) {
-        checkProactiveTriggers(subtopic.subtopic_id as string, timeRef.current).then(trigger => {
+        checkProactiveTriggers(subtopic.subtopic_id, timeRef.current).then(trigger => {
           if (trigger) setActiveTrigger(trigger);
         });
       }
@@ -63,11 +127,8 @@ export default function LearnClient({
     return () => clearInterval(timer);
   }, [subtopic.subtopic_id]);
 
-  const formatTime = (seconds: number) => {
-    const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-    const s = (seconds % 60).toString().padStart(2, "0");
-    return `${m}:${s}`;
-  };
+  const formatTime = (s: number) =>
+    `${Math.floor(s / 60).toString().padStart(2, "0")}:${(s % 60).toString().padStart(2, "0")}`;
 
   const getGreetingText = () => {
     const hour = new Date().getHours();
@@ -76,251 +137,343 @@ export default function LearnClient({
     return t("learn.greeting.evening");
   };
 
-  const capScore = userModel?.capabilityScore ?? 50;
-  const streak = userModel?.currentStreak ?? 0;
-  const overallProgress = totalSubtopics > 0 ? Math.round((completedSubtopics / totalSubtopics) * 100) : 0;
+  const toggleModule = (id: number) => {
+    setExpandedModules(prev => {
+      const next = new Set(prev);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  };
+
+  // Progress ring
+  const ringRadius = 40;
+  const ringCircumference = 2 * Math.PI * ringRadius;
+  const ringOffset = ringCircumference - (overallProgress / 100) * ringCircumference;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6 animate-fadeInUp">
-      
-      {/* Dynamic Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 bg-[#007AFF]/10 text-[#007AFF] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3">
-            <LayoutDashboard className="w-3 h-3" />
-            {pathTitle}
+    <div className="relative min-h-screen bg-[#0A0A0C] text-white overflow-hidden">
+      {/* Background Effects */}
+      <div className="fixed inset-0 bg-tech-grid opacity-5 pointer-events-none" />
+      <div className="fixed w-[500px] h-[500px] bg-blue-600/5 -top-40 -right-40 rounded-full blur-[120px] pointer-events-none" />
+      <div className="fixed w-[400px] h-[400px] bg-violet-600/5 -bottom-40 -left-40 rounded-full blur-[120px] pointer-events-none" />
+
+      {/* ═══ MAIN LAYOUT ═══ */}
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 pb-24 relative z-10">
+
+        {/* ── Top Status Strip ── */}
+        <div className="flex items-center justify-between py-4 mb-2">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <span>{pathTitle}</span>
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-slate-400">Module {currentModuleNumber}</span>
+              <ChevronRight className="w-3 h-3" />
+              <span className="text-white">Lesson {currentSubtopicIndex + 1}</span>
+            </div>
           </div>
-          <h1 className="text-3xl font-bold text-slate-800 leading-tight">
-            {getGreetingText()}, {userName || 'Learner'} 👋
-          </h1>
-          <p className="text-slate-500 font-medium mt-1">
-            {t("learn.module")} {currentModuleNumber} / {totalModules}: {currentModuleTitle}
-          </p>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5">
+              <Clock className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-xs font-mono font-bold text-white tabular-nums">{formatTime(timeSpent)}</span>
+            </div>
+            {streak > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/5 border border-amber-500/10">
+                <Flame className="w-3.5 h-3.5 text-amber-500" />
+                <span className="text-xs font-bold text-amber-400">{streak}</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white border border-slate-200 rounded-2xl p-3 shadow-sm">
-          <div className="flex flex-col items-end">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none">Session Timer</span>
-            <span className="text-sm font-mono font-bold text-slate-700">{formatTime(timeSpent)}</span>
+        {/* Banners */}
+        {subtopic.status === "needs_review" && (
+          <div className="flex items-start gap-3 p-4 mb-4 rounded-2xl bg-amber-500/5 border border-amber-500/10">
+            <AlertTriangle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-sm font-bold text-amber-400">{t("learn.review.title")}</p>
+              <p className="text-xs text-amber-400/60 mt-0.5">{t("learn.review.sub")}</p>
+            </div>
           </div>
-          <div className="w-px h-8 bg-slate-100" />
-          <div className="flex items-center gap-2 px-1">
-            <Flame className="w-5 h-5 text-amber-500" />
-            <span className="text-sm font-bold text-slate-800">{streak}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Workspace Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left/Main Column: Focused Task */}
-        <div className="lg:col-span-8 space-y-6">
-          
-          {/* Status Banners */}
-          {subtopic.status === 'needs_review' && (
-            <div className="bg-amber-50 border border-amber-200 text-amber-800 p-5 rounded-2xl flex items-start gap-3 shadow-sm">
-              <AlertTriangle className="w-6 h-6 text-amber-500 flex-shrink-0" />
+        )}
+        {userModel?.pathSwitchSuggested && (
+          <div className="flex items-center justify-between p-4 mb-4 rounded-2xl bg-rose-500/5 border border-rose-500/10">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-rose-500 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-sm uppercase tracking-wide">{t("learn.review.title")}</p>
-                <p className="text-sm text-amber-700 mt-1">{t("learn.review.sub")}</p>
+                <p className="text-sm font-bold text-rose-400">{t("learn.pathSwitch.title")}</p>
+                <p className="text-xs text-rose-400/60 mt-0.5">{t("learn.pathSwitch.sub")}</p>
               </div>
             </div>
-          )}
+            <Link href="/path-selection" className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest bg-white text-black rounded-xl hover:bg-rose-500 hover:text-white transition-all">
+              {t("learn.pathSwitch.btn")}
+            </Link>
+          </div>
+        )}
 
-          {userModel?.pathSwitchSuggested && (
-            <div className="bg-rose-50 border border-rose-200 text-rose-800 p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-4 justify-between shadow-sm">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-6 h-6 text-rose-500 flex-shrink-0" />
+        {/* ── Two-Column Grid ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+          {/* ═══ LEFT COLUMN: Video + Content (8 cols) ═══ */}
+          <div className="lg:col-span-8 space-y-5">
+
+            {/* Video Player Card */}
+            <div className="rounded-2xl overflow-hidden bg-white/[0.03] border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+              {videoData ? (
+                <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${videoData.videoId}?modestbranding=1&rel=0`}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    title={videoData.title}
+                  />
+                </div>
+              ) : (
+                <div className="relative w-full" style={{ paddingBottom: "56.25%" }}>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-white/[0.02]">
+                    <Loader2 className="w-8 h-8 text-slate-600 animate-spin" />
+                    <p className="text-slate-600 font-bold text-[9px] uppercase tracking-widest">{t("quiz.preparing")}</p>
+                  </div>
+                </div>
+              )}
+              {/* Video Info Bar */}
+              {videoData && (
+                <div className="flex items-center justify-between px-5 py-3 border-t border-white/5 bg-white/[0.02]">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <PlayCircle className="w-4 h-4 text-red-500 flex-shrink-0" />
+                    <p className="text-xs text-slate-400 font-medium truncate">{videoData.title}</p>
+                  </div>
+                  <a href={`https://www.youtube.com/watch?v=${videoData.videoId}`} target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 text-[9px] font-bold text-slate-500 hover:text-white transition-colors uppercase tracking-widest flex-shrink-0 ml-3">
+                    YouTube <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+              )}
+            </div>
+
+            {/* Lesson Header */}
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-lg">
+                  {TASK_ICONS[subtopic.task_type] || "📝"}
+                </div>
                 <div>
-                  <p className="font-bold text-sm uppercase tracking-wide">{t("learn.pathSwitch.title")}</p>
-                  <p className="text-sm text-rose-700 mt-1">{t("learn.pathSwitch.sub")}</p>
-                </div>
-              </div>
-              <Link href="/path-selection" className="btn-primary py-2 px-5 text-xs rounded-full">
-                {t("learn.pathSwitch.btn")}
-              </Link>
-            </div>
-          )}
-
-          {/* Core Task Card */}
-          <div className="card p-8 md:p-10 relative overflow-hidden group">
-            {/* Type Accent */}
-            <div className="absolute top-0 left-0 w-1.5 h-full bg-[#007AFF]" />
-            
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center text-2xl shadow-inner border border-slate-100">
-                  {TASK_ICONS[subtopic.task_type] || '📝'}
-                </div>
-                <div>
-                  <span className="text-[10px] font-black text-[#007AFF] uppercase tracking-[0.2em]">Step {currentSubtopicIndex + 1} of {currentModuleSubtopics.length}</span>
-                  <h2 className="text-2xl font-bold text-slate-800 mt-0.5">{subtopic.title}</h2>
+                  <div className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em]">
+                    Step {currentSubtopicIndex + 1} · {subtopic.task_type}
+                    {subtopic.attempt_count !== undefined && subtopic.attempt_count > 0 && (
+                      <span className="text-amber-400 ml-2">· Attempt {(subtopic.attempt_count ?? 0) + 1}</span>
+                    )}
+                  </div>
+                  <h2 className="text-xl font-bold text-white leading-tight">{subtopic.title}</h2>
                 </div>
               </div>
             </div>
 
-            {/* Practical Task Instructions */}
-            <div className="bg-slate-50/80 rounded-3xl p-8 mb-8 border border-slate-100">
-              <div className="flex items-center gap-2 mb-4">
-                <Target className="w-5 h-5 text-[#007AFF]" />
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">{t("learn.whatToDo")}</h3>
+            {/* Tabbed Content */}
+            <div className="rounded-2xl bg-white/[0.03] border border-white/5 overflow-hidden">
+              {/* Tab Bar */}
+              <div className="flex border-b border-white/5">
+                <button onClick={() => setActiveTab("task")}
+                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
+                    activeTab === "task" ? "border-blue-500 text-white bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
+                  }`}>
+                  <Target className="w-3.5 h-3.5" /> {t("learn.whatToDo")}
+                </button>
+                <button onClick={() => setActiveTab("notes")}
+                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
+                    activeTab === "notes" ? "border-blue-500 text-white bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
+                  }`}>
+                  <BookOpen className="w-3.5 h-3.5" /> Notes
+                </button>
+                <button onClick={() => setActiveTab("resources")}
+                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
+                    activeTab === "resources" ? "border-blue-500 text-white bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
+                  }`}>
+                  <Globe className="w-3.5 h-3.5" /> Resources
+                </button>
               </div>
-              <p className="text-xl font-medium text-slate-700 leading-relaxed italic">
-                &quot;{subtopic.practical_task}&quot;
-              </p>
+
+              {/* Tab Content */}
+              <div className="p-5">
+                {activeTab === "task" && (
+                  <div className="space-y-4">
+                    <div className="rounded-xl bg-blue-500/[0.03] border border-blue-500/10 p-5 relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+                      <p className="text-base text-slate-200 leading-relaxed font-medium pl-3">{subtopic.practical_task}</p>
+                    </div>
+                    <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/[0.03] border border-amber-500/10">
+                      <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="text-[9px] font-black text-amber-400/60 uppercase tracking-[0.2em] mb-1">{t("learn.quickTip")}</h4>
+                        <p className="text-xs text-slate-400 leading-relaxed">
+                          {subtopic.task_type === "install" && t("learn.tip.install")}
+                          {subtopic.task_type === "create" && t("learn.tip.create")}
+                          {subtopic.task_type === "apply" && t("learn.tip.apply")}
+                          {subtopic.task_type === "practice" && t("learn.tip.practice")}
+                          {subtopic.task_type === "submit" && t("learn.tip.submit")}
+                          {subtopic.task_type === "call" && t("learn.tip.call")}
+                          {!["install","create","apply","practice","submit","call"].includes(subtopic.task_type) && t("learn.tip.default")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {activeTab === "notes" && (
+                  subtopic.key_learning_notes ? (
+                    <div className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">{subtopic.key_learning_notes}</div>
+                  ) : (
+                    <div className="text-center py-8 text-slate-600">
+                      <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                      <p className="text-xs font-medium">No notes available for this lesson.</p>
+                    </div>
+                  )
+                )}
+                {activeTab === "resources" && (
+                  <div className="space-y-4">
+                    {loadingResources ? (
+                      <div className="flex flex-col items-center justify-center py-10 gap-3">
+                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Curating Free Resources...</p>
+                      </div>
+                    ) : resources.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {resources.map((res, idx) => (
+                          <a key={idx} href={res.url} target="_blank" rel="noopener noreferrer"
+                            className="group p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-white/10 transition-all flex flex-col h-full">
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="text-sm font-bold text-white group-hover:text-blue-400 transition-colors line-clamp-1">{res.title}</h4>
+                              <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-400 flex-shrink-0 ml-2" />
+                            </div>
+                            <span className="inline-block px-2 py-0.5 rounded border border-white/10 text-[9px] font-bold text-slate-400 uppercase tracking-widest w-max mb-2">
+                              {res.type}
+                            </span>
+                            <p className="text-xs text-slate-400 leading-relaxed mt-auto line-clamp-2">{res.description}</p>
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-slate-600">
+                        <Globe className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                        <p className="text-xs font-medium">No resources found for this lesson.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* Resource Buttons */}
-            <div className="flex flex-wrap items-center gap-4 mb-10">
-              <a
-                href={`https://www.youtube.com/results?search_query=${encodeURIComponent(subtopic.youtube_search_query)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 bg-[#FF0000]/5 text-[#FF0000] px-5 py-3 rounded-2xl text-sm font-bold border border-[#FF0000]/10 hover:bg-[#FF0000]/10 transition-all"
-              >
-                <PlayCircle className="w-5 h-5" />
-                {t("learn.watchTutorial")}
-              </a>
-              
-              <div className="flex items-center gap-2 bg-slate-100 text-slate-500 px-4 py-3 rounded-2xl text-sm font-bold border border-slate-200">
-                <BookOpen className="w-5 h-5" />
-                Documentation
-              </div>
-            </div>
-
-            {/* Primary Action */}
-            <button
-              onClick={() => setShowQuiz(true)}
-              className="btn-primary w-full py-5 text-xl font-bold shadow-2xl shadow-blue-500/20 group rounded-2xl"
-            >
-              <CheckCircle2 className="w-6 h-6" />
+            {/* CTA */}
+            <button onClick={() => setShowQuiz(true)}
+              className="w-full py-5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm uppercase tracking-[0.2em] shadow-[0_15px_40px_rgba(59,130,246,0.25)] flex items-center justify-center gap-3 hover:scale-[1.01] active:scale-[0.99] transition-all group">
+              <CheckCircle2 className="w-5 h-5" />
               {t("learn.complete")}
-              <ChevronRight className="w-5 h-5 ml-auto group-hover:translate-x-1 transition-transform" />
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
 
-          {/* Quick Tip Widget */}
-          <div className="glass-card p-6 flex items-start gap-4">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="w-5 h-5 text-amber-600" />
-            </div>
-            <div>
-              <h4 className="text-xs font-bold text-amber-800 uppercase tracking-widest mb-1">{t("learn.quickTip")}</h4>
-              <p className="text-sm text-slate-600 font-medium leading-relaxed">
-                {subtopic.task_type === 'install' && t("learn.tip.install")}
-                {subtopic.task_type === 'create' && t("learn.tip.create")}
-                {subtopic.task_type === 'apply' && t("learn.tip.apply")}
-                {subtopic.task_type === 'practice' && t("learn.tip.practice")}
-                {subtopic.task_type === 'submit' && t("learn.tip.submit")}
-                {subtopic.task_type === 'call' && t("learn.tip.call")}
-                {!TASK_ICONS[subtopic.task_type] && t("learn.tip.default")}
-              </p>
-            </div>
-          </div>
-        </div>
+          {/* ═══ RIGHT COLUMN: Sidebar (4 cols) ═══ */}
+          <div className="lg:col-span-4 space-y-5 lg:sticky lg:top-28 lg:self-start">
 
-        {/* Right Column: Information & Overview */}
-        <div className="lg:col-span-4 space-y-8">
-          
-          {/* Progress Summary Widget */}
-          <div className="card p-6 border-b-4 border-b-[#34C759]">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Learning Analytics</h3>
-            <div className="space-y-6">
-              {/* Radial or Visual Progress */}
-              <div>
-                <div className="flex justify-between items-end mb-2">
-                  <span className="text-sm font-bold text-slate-700">Path Completion</span>
-                  <span className="text-2xl font-black text-[#007AFF]">{overallProgress}%</span>
-                </div>
-                <div className="h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200">
-                  <div className="h-full bg-gradient-to-r from-[#007AFF] to-[#5856D6] rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(0,122,255,0.4)]" style={{ width: `${overallProgress}%` }} />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50">
-                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Capability</div>
-                  <div className="flex items-center gap-1.5">
-                    <TrendingUp className="w-4 h-4 text-[#007AFF]" />
-                    <span className="text-lg font-black text-slate-800">{capScore}</span>
+            {/* Progress Card */}
+            <div className="rounded-2xl bg-white/[0.03] border border-white/5 p-5">
+              <div className="flex items-center gap-4">
+                <div className="relative flex-shrink-0">
+                  <svg width="96" height="96" className="-rotate-90">
+                    <circle cx="48" cy="48" r={ringRadius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="6" />
+                    <circle cx="48" cy="48" r={ringRadius} fill="none" stroke="url(#pgGrad)" strokeWidth="6" strokeLinecap="round"
+                      strokeDasharray={ringCircumference} strokeDashoffset={ringOffset} className="transition-all duration-1000" />
+                    <defs><linearGradient id="pgGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#3B82F6" /><stop offset="100%" stopColor="#8B5CF6" />
+                    </linearGradient></defs>
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-xl font-black text-white tabular-nums">{overallProgress}%</span>
                   </div>
                 </div>
-                <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Milestones</div>
-                  <div className="flex items-center gap-1.5">
-                    <Target className="w-4 h-4 text-[#34C759]" />
-                    <span className="text-lg font-black text-slate-800">{completedSubtopics}/{totalSubtopics}</span>
-                  </div>
+                <div className="min-w-0">
+                  <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Path Progress</h3>
+                  <p className="text-sm font-bold text-white">{completedSubtopics} <span className="text-slate-500 font-normal">of {totalSubtopics} lessons</span></p>
+                  <p className="text-[10px] text-slate-600 mt-0.5">Capability: {capScore}/100</p>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Module Roadmap Widget */}
-          <div className="card p-6">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Module Roadmap</h3>
-              <Link href="/learn/outline" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center hover:bg-blue-50 hover:text-blue-500 transition-colors border border-slate-100">
-                <BookOpen className="w-4 h-4" />
-              </Link>
-            </div>
-            
-            <div className="space-y-4 relative">
-              {/* Vertical Line */}
-              <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-slate-100" />
-              
-              {currentModuleSubtopics.map((sub, idx) => (
-                <div key={idx} className={`flex items-start gap-4 relative group ${
-                  idx === currentSubtopicIndex ? '' : 'opacity-60'
-                }`}>
-                  <div className={`mt-1.5 w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black z-10 border-2 transition-all ${
-                    sub.status === 'complete' ? 'bg-[#34C759] border-[#34C759] text-white' :
-                    idx === currentSubtopicIndex ? 'bg-white border-[#007AFF] text-[#007AFF] shadow-lg shadow-blue-500/20' :
-                    'bg-white border-slate-200 text-slate-300'
-                  }`}>
-                    {sub.status === 'complete' ? <CheckCircle2 className="w-3.5 h-3.5" /> : idx + 1}
-                  </div>
-                  <div className="flex-1">
-                    <span className={`text-sm font-bold block leading-tight ${
-                      idx === currentSubtopicIndex ? 'text-slate-800' : 'text-slate-500'
-                    }`}>
-                      {sub.title}
-                    </span>
-                    {idx === currentSubtopicIndex && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-[#007AFF] uppercase mt-1">
-                        Current Focus
-                      </span>
-                    )}
-                  </div>
-                </div>
-              ))}
+            {/* Course Curriculum */}
+            <div className="rounded-2xl bg-white/[0.03] border border-white/5 overflow-hidden">
+              <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+                <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Course Content</h3>
+                <span className="text-[10px] text-slate-600">{totalModules} modules</span>
+              </div>
+
+              <div className="max-h-[50vh] overflow-y-auto">
+                {allModules.map((mod) => {
+                  const isExpanded = expandedModules.has(mod.module_id);
+                  const completedInMod = mod.subtopics?.filter(s => s.status === "complete").length ?? 0;
+                  const totalInMod = mod.subtopics?.length ?? 0;
+                  const isCurrent = mod.module_id === moduleId;
+
+                  return (
+                    <div key={mod.module_id} className="border-b border-white/5 last:border-b-0">
+                      <button onClick={() => toggleModule(mod.module_id)}
+                        className={`w-full flex items-center gap-3 px-5 py-3 text-left hover:bg-white/[0.02] transition-colors ${isCurrent ? "bg-white/[0.03]" : ""}`}>
+                        <ChevronDown className={`w-3.5 h-3.5 text-slate-600 flex-shrink-0 transition-transform duration-200 ${isExpanded ? "" : "-rotate-90"}`} />
+                        <div className="flex-1 min-w-0">
+                          <p className={`text-xs font-bold truncate ${isCurrent ? "text-white" : "text-slate-400"}`}>
+                            {mod.module_title}
+                          </p>
+                          <p className="text-[10px] text-slate-600 mt-0.5">{completedInMod}/{totalInMod} done</p>
+                        </div>
+                      </button>
+
+                      {isExpanded && mod.subtopics && (
+                        <div className="pb-2">
+                          {mod.subtopics.map((st, idx) => {
+                            const isActive = st.subtopic_id === subtopic.subtopic_id;
+                            const isComplete = st.status === "complete";
+                            return (
+                              <div key={st.subtopic_id}
+                                className={`flex items-center gap-3 pl-10 pr-5 py-2 transition-colors ${isActive ? "bg-blue-500/[0.05]" : ""}`}>
+                                <div className="flex-shrink-0">
+                                  {isComplete ? (
+                                    <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                  ) : isActive ? (
+                                    <div className="w-4 h-4 rounded-full bg-blue-500/20 border-2 border-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
+                                  ) : (
+                                    <div className="w-4 h-4 rounded-full border border-slate-700" />
+                                  )}
+                                </div>
+                                <span className={`text-xs leading-snug truncate ${
+                                  isActive ? "text-white font-semibold" : isComplete ? "text-slate-500" : "text-slate-400"
+                                }`}>
+                                  {st.title}
+                                </span>
+                                {isActive && <Zap className="w-3 h-3 text-blue-400 flex-shrink-0 ml-auto" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Quiz Modal */}
       {showQuiz && (
-        <QuizModal
-          roadmapId={roadmapId}
-          moduleId={moduleId}
-          subtopicId={subtopic.subtopic_id}
-          subtopicTitle={subtopic.title}
-          practicalTask={subtopic.practical_task}
-          capabilityScore={capScore}
-          timeSpent={timeSpent}
-          attemptNumber={(subtopic.attempt_count ?? 0) + 1}
-          onClose={() => setShowQuiz(false)}
-        />
+        <QuizModal roadmapId={roadmapId} moduleId={moduleId}
+          subtopicId={subtopic.subtopic_id} subtopicTitle={subtopic.title}
+          practicalTask={subtopic.practical_task} youtubeSearchQuery={subtopic.youtube_search_query}
+          capabilityScore={capScore} timeSpent={timeSpent}
+          attemptNumber={(subtopic.attempt_count ?? 0) + 1} onClose={() => setShowQuiz(false)} />
       )}
 
-      {/* AI Assistant */}
-      <MentorChat
-        subtopicId={subtopic.subtopic_id}
-        triggerType={activeTrigger}
-        timeSpentSeconds={timeSpent}
-        isPulsing={activeTrigger !== null}
-      />
+      {/* AI Mentor */}
+      <MentorChat subtopicId={subtopic.subtopic_id} triggerType={activeTrigger}
+        timeSpentSeconds={timeSpent} isPulsing={activeTrigger !== null} />
     </div>
   );
 }

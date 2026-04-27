@@ -1,7 +1,40 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Briefcase, MapPin, ExternalLink, Clock, Building2, Search, Sparkles, ArrowRight, IndianRupee } from "lucide-react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import dynamic from "next/dynamic";
+import { 
+  Briefcase, 
+  MapPin, 
+  ExternalLink, 
+  Clock, 
+  Building2, 
+  Search, 
+  Sparkles, 
+  IndianRupee, 
+  Zap, 
+  ShieldCheck, 
+  Target,
+  ChevronRight,
+  Map as MapIcon,
+  List,
+  Navigation,
+  Globe
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { getAnalyticsData } from "@/app/actions";
+
+// ── Dynamic import for Leaflet (SSR-incompatible) ──
+const JobMap = dynamic(() => import("@/components/JobMap"), { 
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[500px] rounded-[32px] bg-white/[0.02] border border-white/5 flex items-center justify-center">
+      <div className="text-center">
+        <Globe className="w-10 h-10 text-blue-500/30 mx-auto mb-4 animate-pulse" />
+        <p className="text-slate-600 text-sm font-bold">Loading Map Engine...</p>
+      </div>
+    </div>
+  )
+});
 
 interface Job {
   id: string;
@@ -25,219 +58,407 @@ interface JobData {
   jobs: Job[];
 }
 
+// ── Enhanced Geocoding Utilities (Restored from stable version) ──
+const CITY_COORDS: Record<string, [number, number]> = {
+  "mumbai": [19.076, 72.8777],
+  "delhi": [28.6139, 77.209],
+  "bangalore": [12.9716, 77.5946],
+  "bengaluru": [12.9716, 77.5946],
+  "hyderabad": [17.385, 78.4867],
+  "chennai": [13.0827, 80.2707],
+  "kolkata": [22.5726, 88.3639],
+  "pune": [18.5204, 73.8567],
+  "ahmedabad": [23.0225, 72.5714],
+  "jaipur": [26.9124, 75.7873],
+  "lucknow": [26.8467, 80.9462],
+  "chandigarh": [30.7333, 76.7794],
+  "indore": [22.7196, 75.8577],
+  "bhopal": [23.2599, 77.4126],
+  "kochi": [9.9312, 76.2673],
+  "nagpur": [21.1458, 79.0882],
+  "surat": [21.1702, 72.8311],
+  "coimbatore": [11.0168, 76.9558],
+  "vadodara": [22.3072, 73.1812],
+  "gurgaon": [28.4595, 77.0266],
+  "gurugram": [28.4595, 77.0266],
+  "noida": [28.5355, 77.391],
+  "thiruvananthapuram": [8.5241, 76.9366],
+  "visakhapatnam": [17.6868, 83.2185],
+  "patna": [25.6093, 85.1376],
+  "ranchi": [23.3441, 85.3096],
+  "guwahati": [26.1445, 91.7362],
+  "bhubaneswar": [20.2961, 85.8245],
+  "dehradun": [30.3165, 78.0322],
+  "mysore": [12.2958, 76.6394],
+  "mangalore": [12.9141, 74.856],
+  "remote": [20.5937, 78.9629],
+  "india": [20.5937, 78.9629],
+};
+
+function getCityCenter(location: string): [number, number] {
+  if (!location) return CITY_COORDS["india"];
+  const loc = location.toLowerCase();
+  
+  // 1. Direct city check
+  for (const city in CITY_COORDS) {
+    if (loc.includes(city)) return CITY_COORDS[city];
+  }
+  
+  // 2. State-code fallbacks (Ensures accurate state-level placement)
+  if (loc.includes("mh") || loc.includes("maharashtra")) return CITY_COORDS["mumbai"];
+  if (loc.includes("ka") || loc.includes("karnataka")) return CITY_COORDS["bangalore"];
+  if (loc.includes("tn") || loc.includes("tamil")) return CITY_COORDS["chennai"];
+  if (loc.includes("dl")) return CITY_COORDS["delhi"];
+  if (loc.includes("gj") || loc.includes("gujarat")) return CITY_COORDS["ahmedabad"];
+  if (loc.includes("up") || loc.includes("uttar")) return CITY_COORDS["lucknow"];
+  if (loc.includes("wb") || loc.includes("west bengal")) return CITY_COORDS["kolkata"];
+  if (loc.includes("ts") || loc.includes("telangana") || loc.includes("ap")) return CITY_COORDS["hyderabad"];
+  
+  return CITY_COORDS["india"];
+}
+
+// ── Scatter Cloud Logic (Visual Jitter) ──
+function getScatteredCoords(center: [number, number], index: number): [number, number] {
+  // Use a predictable pattern based on index
+  const angle = (index * 137.5) * (Math.PI / 180); // Golden angle for even distribution
+  const radius = 0.01 + (Math.sqrt(index) * 0.015); // Spiral outward
+  
+  return [
+    center[0] + Math.cos(angle) * radius,
+    center[1] + Math.sin(angle) * radius
+  ];
+}
+
 export default function OpportunitiesPage() {
   const [data, setData] = useState<JobData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [cityTerm, setCityTerm] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [userContext, setUserContext] = useState<{ pathTitle: string; capabilityScore: number } | null>(null);
+  const [hoveredJobId, setHoveredJobId] = useState<string | null>(null);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [selectedCoords, setSelectedCoords] = useState<[number, number] | null>(null);
+  
+  // Jobs currently being displayed on the map/list
+  const [activeJobs, setActiveJobs] = useState<any[]>([]);
+  const jobRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    fetch("/jobs-data.json")
-      .then((res) => res.json())
-      .then((json) => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    const fetchContext = async () => {
+      try {
+        const analytics = await getAnalyticsData();
+        if (analytics) {
+          setUserContext({ pathTitle: analytics.pathTitle, capabilityScore: analytics.capabilityScore });
+          setSearchTerm(analytics.pathTitle);
+        }
+      } catch (err) { console.error(err); }
+    };
+    fetchContext();
   }, []);
 
-  const filteredJobs = data?.jobs?.filter(
-    (job) =>
-      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchTerm.toLowerCase())
-  ) ?? [];
+  const handleSearch = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const query = searchTerm.trim() || userContext?.pathTitle || "";
+    if (!query) return;
 
-  const getSourceColor = (source: string) => {
-    switch (source.toUpperCase()) {
-      case "INDEED": return "from-[#2557a7] to-[#1a3d7c]";
-      case "NAUKRI": return "from-[#4a90d9] to-[#2d6cb5]";
-      case "LINKEDIN": return "from-[#0a66c2] to-[#004182]";
-      default: return "from-[#007AFF] to-[#5856D6]";
+    setLoading(true);
+    setError(null);
+    setHasSearched(true);
+    setSelectedCoords(null);
+
+    try {
+      const params = new URLSearchParams({ search: query });
+      if (cityTerm.trim()) params.set("city", cityTerm.trim());
+      
+      const res = await fetch(`/api/jobs?${params.toString()}`);
+      if (!res.ok) throw new Error("Failed to fetch jobs");
+      const jobs = await res.json();
+      
+      if (jobs.error) throw new Error(jobs.error);
+      
+      const newData = {
+        fetched_at: new Date().toISOString(),
+        skills_searched: [query],
+        location: cityTerm.trim() || "India",
+        total_results: Array.isArray(jobs) ? jobs.length : 0,
+        jobs: Array.isArray(jobs) ? jobs : [],
+      };
+      
+      setData(newData);
+      
+      // Step 1: Get stable city center
+      const center = getCityCenter(cityTerm.trim() || "India");
+      
+      // Step 2: Scatter all jobs instantly around the center
+      const scatteredJobs = newData.jobs.map((j: any, i: number) => ({
+        ...j,
+        coords: getScatteredCoords(center, i)
+      }));
+      
+      setActiveJobs(scatteredJobs);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || "Failed to fetch live opportunities.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getSourceBadge = (source: string) => {
-    switch (source.toUpperCase()) {
-      case "INDEED": return "bg-[#2557a7]/10 text-[#2557a7] border-[#2557a7]/20";
-      case "NAUKRI": return "bg-[#4a90d9]/10 text-[#4a90d9] border-[#4a90d9]/20";
-      case "LINKEDIN": return "bg-[#0a66c2]/10 text-[#0a66c2] border-[#0a66c2]/20";
-      default: return "bg-[#007AFF]/10 text-[#007AFF] border-[#007AFF]/20";
+  // ── STABILIZED CAMERA LOGIC ──
+  const mapCenter = useMemo<[number, number]>(() => {
+    // 1. Priority: User selected a job
+    if (selectedCoords) return selectedCoords;
+    
+    // 2. Priority: User is typing a city (Snap to city center)
+    if (cityTerm.trim()) {
+      const coords = getCityCenter(cityTerm);
+      if (coords !== CITY_COORDS["india"]) return coords;
+    }
+    
+    // 3. Priority: First job result (Static center only, don't follow background updates)
+    if (data?.jobs && data.jobs.length > 0) {
+      return getCityCenter(data.jobs[0].location || cityTerm);
+    }
+    
+    return [20.5937, 78.9629]; // India Default
+  }, [selectedCoords, cityTerm, data]);
+
+  const handleSelectJobFromMap = (id: string) => {
+    const job = activeJobs.find(j => j.id === id);
+    if (job?.coords) {
+      setSelectedCoords(job.coords as [number, number]);
+    }
+    setSelectedJobId(id);
+    const element = jobRefs.current[id];
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#007AFF] to-[#5856D6] flex items-center justify-center mx-auto mb-6 animate-pulse">
-            <Briefcase className="w-8 h-8 text-white" />
-          </div>
-          <p className="text-slate-400 font-medium text-lg">Loading real job opportunities...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleSelectJobFromList = (job: any) => {
+    setSelectedJobId(job.id);
+    if (job.coords) {
+      setSelectedCoords(job.coords as [number, number]);
+    }
+  };
+
+  const getMatchScore = useCallback((index: number) => {
+    if (!userContext) return 0;
+    const base = userContext.capabilityScore;
+    const variance = (index % 5) - 2;
+    return Math.min(100, Math.max(0, base + variance));
+  }, [userContext]);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-12 animate-fadeInUp">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <div className="inline-flex items-center gap-2 bg-[#34C759]/10 text-[#34C759] px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-[#34C759]/20">
-          <Sparkles className="w-4 h-4" />
-          BKT-Verified Skill Matching
-        </div>
-        <h1 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight leading-tight mb-4">
-          Real Job Opportunities
-        </h1>
-        <p className="text-lg text-slate-500 max-w-2xl mx-auto font-medium leading-relaxed">
-          Live listings from <strong>Indeed</strong> and <strong>Naukri</strong>, filtered by your BKT-verified mastered skills.
-          Click any job to view and apply on the original platform.
-        </p>
-      </div>
+    <div className="flex h-screen w-full bg-[#0A0A0C] text-white overflow-hidden font-sans">
+      
+      {/* ── Left Side: Discovery Feed ── */}
+      <aside className="w-[480px] h-full flex flex-col border-r border-white/5 bg-[#0A0A0C] relative z-20 shadow-2xl">
+        
+        {/* Header Console */}
+        <div className="p-6 pt-12 border-b border-white/5 bg-[#0A0A0C]/80 backdrop-blur-xl">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center border border-blue-500/20">
+                <Sparkles className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <h1 className="text-xl font-black text-white tracking-tight">CareerOrbit</h1>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Market Command Center</p>
+              </div>
+            </div>
+            {/* Total Results Badge */}
+            {data?.total_results && (
+              <div className="px-3 py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/20">
+                <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{data.total_results} Found</p>
+              </div>
+            )}
+          </div>
 
-      {/* Stats Bar */}
-      {data && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="card p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#007AFF] to-[#5856D6] flex items-center justify-center">
-              <Briefcase className="w-6 h-6 text-white" />
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl">
+              <Search className="w-4 h-4 text-slate-600" />
+              <input 
+                value={searchTerm}
+                onChange={e => setSearchTerm(e.target.value)}
+                placeholder="Role or skill..."
+                className="bg-transparent text-sm font-bold focus:outline-none w-full"
+              />
             </div>
-            <div>
-              <p className="text-2xl font-black text-slate-800">{data.total_results}</p>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Live Listings</p>
-            </div>
-          </div>
-          <div className="card p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#34C759] to-[#30B0C7] flex items-center justify-center">
-              <Search className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-slate-800 leading-tight">{data.skills_searched.join(", ")}</p>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Mastered Skills</p>
-            </div>
-          </div>
-          <div className="card p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#FF9500] to-[#FF3B30] flex items-center justify-center">
-              <Clock className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-slate-800 leading-tight">{new Date(data.fetched_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
-              <p className="text-xs text-slate-400 font-bold uppercase tracking-wider">Last Updated</p>
+            <div className="flex items-center gap-3">
+              <div className="flex-1 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl flex items-center gap-3">
+                <Navigation className="w-4 h-4 text-emerald-500/60" />
+                <input 
+                  value={cityTerm}
+                  onChange={e => setCityTerm(e.target.value)}
+                  placeholder="Target City..."
+                  className="bg-transparent text-sm font-bold focus:outline-none w-full"
+                />
+              </div>
+              <button 
+                onClick={() => handleSearch()}
+                disabled={loading}
+                className="bg-blue-600 h-[46px] px-6 rounded-2xl hover:bg-blue-500 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Zap className="w-4 h-4 text-white" />}
+                <span className="text-[10px] font-black uppercase tracking-widest">Scan</span>
+              </button>
             </div>
           </div>
         </div>
-      )}
 
-      {/* Search */}
-      <div className="card p-4 mb-8">
-        <div className="flex items-center gap-3">
-          <Search className="w-5 h-5 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Filter by job title or company..."
-            className="flex-1 bg-transparent text-slate-700 placeholder:text-slate-300 focus:outline-none font-medium"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+        {/* Scrollable List / Standby View */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar bg-gradient-to-b from-transparent to-blue-900/5">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center opacity-40">
+              <div className="w-16 h-16 bg-blue-500/10 rounded-full flex items-center justify-center mb-6 relative">
+                <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
+                <Globe className="w-6 h-6 text-blue-500" />
+              </div>
+              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Intercepting Live Signals</p>
+            </div>
+          ) : activeJobs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="relative mb-8">
+                <div className="w-24 h-24 rounded-full bg-blue-600/5 border border-blue-500/10 flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin opacity-40" />
+                </div>
+                <Target className="absolute inset-0 m-auto w-8 h-8 text-blue-500/40" />
+              </div>
+              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-2">Command Center Standby</h3>
+              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.15em] max-w-[200px] leading-relaxed">
+                Enter parameters and initiate <span className="text-blue-500/60">Scan</span> to track local opportunities.
+              </p>
+            </div>
+          ) : (
+            activeJobs.map((job, i) => {
+              const score = getMatchScore(i);
+              const isActive = selectedJobId === job.id || hoveredJobId === job.id;
+              
+              return (
+                <motion.div
+                  key={job.id}
+                  ref={el => jobRefs.current[job.id] = el}
+                  onMouseEnter={() => setHoveredJobId(job.id)}
+                  onMouseLeave={() => setHoveredJobId(null)}
+                  onClick={() => handleSelectJobFromList(job)}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className={`group relative p-5 rounded-2xl border transition-all duration-500 cursor-pointer ${
+                    isActive 
+                    ? "bg-blue-600/10 border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.1)]" 
+                    : "bg-white/[0.02] border-white/5 hover:border-white/20"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-4 mb-3">
+                    <div className="min-w-0">
+                      <h3 className={`text-sm font-black tracking-tight mb-1 truncate ${isActive ? "text-blue-400" : "text-white"}`}>
+                        {job.title}
+                      </h3>
+                      <p className="text-[11px] font-bold text-slate-500 truncate">{job.company}</p>
+                    </div>
+                    <div className="relative w-10 h-10 flex-shrink-0">
+                      <svg className="w-full h-full -rotate-90">
+                        <circle cx="20" cy="20" r="18" fill="none" stroke="currentColor" strokeWidth="2" className="text-white/5" />
+                        <circle 
+                          cx="20" cy="20" r="18" fill="none" stroke="currentColor" strokeWidth="2" 
+                          strokeDasharray="113"
+                          strokeDashoffset={113 * (1 - score/100)}
+                          className="text-blue-500"
+                          style={{ strokeLinecap: "round" }}
+                        />
+                      </svg>
+                      <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black">{score}%</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4 text-[10px] text-slate-600 font-bold mb-4">
+                    <div className="flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {job.location || "India"}
+                    </div>
+                    {job.salary && job.salary !== "Not Disclosed" && (
+                      <div className="flex items-center gap-1 text-emerald-400/70">
+                        <IndianRupee className="w-3 h-3" />
+                        {job.salary.split('(')[0]}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex gap-2">
+                      <span className="text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 rounded bg-white/5 border border-white/5">{job.source}</span>
+                      {job.is_remote && <span className="text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Remote</span>}
+                    </div>
+                    <a 
+                      href={job.job_url} 
+                      target="_blank" 
+                      onClick={(e) => e.stopPropagation()}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-lg bg-blue-600 text-white"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
+                </motion.div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 bg-[#0A0A0C] border-t border-white/5 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active Link</span>
+          </div>
+          <p className="text-[9px] font-black text-slate-700 uppercase tracking-widest">Ver. 2.4.0</p>
+        </div>
+      </aside>
+
+      {/* ── Right Side: Situation Map ── */}
+      <main className="flex-1 relative h-full">
+        <div className="w-full h-full">
+          <JobMap 
+            jobs={activeJobs} 
+            center={mapCenter}
+            selectedJobId={selectedJobId}
+            onSelectJob={handleSelectJobFromMap}
+            hoveredJobId={hoveredJobId}
           />
         </div>
-      </div>
 
-      {/* Job Cards */}
-      <div className="space-y-4">
-        {filteredJobs.length === 0 ? (
-          <div className="card p-16 text-center">
-            <Briefcase className="w-12 h-12 text-slate-200 mx-auto mb-4" />
-            <p className="text-slate-400 font-medium">No jobs match your search.</p>
-          </div>
-        ) : (
-          filteredJobs.map((job) => (
-            <a
-              key={job.id}
-              href={job.job_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="card p-6 md:p-8 block group hover:border-[#007AFF]/40 transition-all hover:shadow-lg hover:shadow-blue-500/5 relative overflow-hidden"
-            >
-              {/* Source gradient accent */}
-              <div className={`absolute top-0 right-0 w-40 h-40 bg-gradient-to-br ${getSourceColor(job.source)} opacity-[0.03] rounded-bl-[100px] -z-10`} />
-
-              <div className="flex flex-col md:flex-row gap-6">
-                {/* Left: Icon */}
-                <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${getSourceColor(job.source)} flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform`}>
-                  <Building2 className="w-7 h-7 text-white" />
-                </div>
-
-                {/* Center: Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-2">
-                    <h3 className="text-lg font-black text-slate-800 tracking-tight group-hover:text-[#007AFF] transition-colors">
-                      {job.title}
-                    </h3>
-                    {job.is_remote && (
-                      <span className="text-[10px] font-bold uppercase tracking-widest bg-[#34C759]/10 text-[#34C759] px-2 py-0.5 rounded-full border border-[#34C759]/20">
-                        Remote
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-sm font-bold text-slate-500 mb-3">{job.company}</p>
-
-                  <div className="flex flex-wrap items-center gap-4 mb-3">
-                    {job.location && (
-                      <span className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                        <MapPin className="w-3.5 h-3.5" />
-                        {job.location}
-                      </span>
-                    )}
-                    {job.salary && job.salary !== "Not Disclosed" && (
-                      <span className="flex items-center gap-1.5 text-xs text-[#34C759] font-bold">
-                        <IndianRupee className="w-3.5 h-3.5" />
-                        {job.salary}
-                      </span>
-                    )}
-                    {job.date_posted && (
-                      <span className="flex items-center gap-1.5 text-xs text-slate-400 font-medium">
-                        <Clock className="w-3.5 h-3.5" />
-                        {job.date_posted}
-                      </span>
-                    )}
-                  </div>
-
-                  {job.description && (
-                    <p className="text-sm text-slate-400 leading-relaxed line-clamp-2">
-                      {job.description}
-                    </p>
-                  )}
-                </div>
-
-                {/* Right: Source Badge + Arrow */}
-                <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-center gap-4 flex-shrink-0">
-                  <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full border ${getSourceBadge(job.source)}`}>
-                    {job.source}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-[#007AFF] opacity-0 group-hover:opacity-100 transition-opacity">
-                    View Job <ExternalLink className="w-3.5 h-3.5" />
-                  </div>
-                </div>
-              </div>
-            </a>
-          ))
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="mt-12 card p-8 text-center border-[#007AFF]/20 bg-[#007AFF]/5">
-        <div className="flex items-center justify-center gap-3 mb-3">
-          <Sparkles className="w-5 h-5 text-[#007AFF]" />
-          <h4 className="text-sm font-black text-[#007AFF] uppercase tracking-[0.3em]">Powered by JobSpy</h4>
+        {/* Legend */}
+        <div className="absolute bottom-8 right-8 z-[1000] flex flex-col gap-2">
+          {[
+            { label: "Indeed", color: "bg-blue-600" },
+            { label: "LinkedIn", color: "bg-sky-500" },
+            { label: "Glassdoor", color: "bg-emerald-500" },
+          ].map((s) => (
+            <div key={s.label} className="bg-[#111]/80 backdrop-blur-xl border border-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${s.color} shadow-[0_0_8px_currentColor]`} />
+              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.label}</span>
+            </div>
+          ))}
         </div>
-        <p className="text-slate-500 font-medium max-w-2xl mx-auto leading-relaxed text-sm">
-          These are live job listings aggregated from Indeed and Naukri using the open-source{" "}
-          <a href="https://github.com/speedyapply/JobSpy" target="_blank" rel="noopener noreferrer" className="text-[#007AFF] font-bold underline underline-offset-2">
-            JobSpy
-          </a>{" "}
-          library. Jobs are filtered using BKT-verified skills where mastery probability exceeds 80%.
-        </p>
-      </div>
+
+        {/* Map Pulse Loader */}
+        {loading && (
+          <div className="absolute inset-0 z-[1000] flex items-center justify-center pointer-events-none bg-blue-500/5">
+            <div className="w-[400px] h-[400px] border border-blue-500/10 rounded-full animate-ping opacity-20" />
+            <div className="absolute w-[200px] h-[200px] border border-blue-500/20 rounded-full animate-ping delay-75 opacity-10" />
+          </div>
+        )}
+      </main>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+      `}</style>
     </div>
   );
 }

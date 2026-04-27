@@ -75,7 +75,7 @@ export default function ArchitecturePage() {
           Technical Blueprint
         </div>
         <h1 className="text-4xl md:text-6xl font-black text-slate-800 tracking-tight leading-tight mb-6">
-          SkillSync Architecture
+          CareerOrbit Architecture
         </h1>
         <p className="text-xl text-slate-500 max-w-3xl mx-auto font-medium leading-relaxed">
           A high-fidelity 8-layer adaptive feedback loop designed for scientific precision in upskilling.
@@ -151,7 +151,7 @@ export default function ArchitecturePage() {
         <div className="card p-10 border-[#007AFF]/20 bg-[#007AFF]/5">
           <h4 className="text-sm font-black text-[#007AFF] uppercase tracking-[0.3em] mb-4">Architecture Compliance</h4>
           <p className="text-slate-600 font-medium leading-relaxed">
-            The SkillSync architecture implements Vygotsky&apos;s Zone of Proximal Development (ZPD) 
+            The CareerOrbit architecture implements Vygotsky&apos;s Zone of Proximal Development (ZPD) 
             through a Bayesian Knowledge Tracing (BKT) engine, ensuring that all AI interventions 
             are pedagogically grounded and measurable.
           </p>

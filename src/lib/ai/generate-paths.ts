@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { generateObject } from "ai";
-import { getGemma3Model, GEMMA3_PATH_OPTIONS_PROMPT } from "./models";
+import { getGPT5ReasoningModel, GPT5_PATH_OPTIONS_PROMPT } from "./models";
 
 export const pathOptionSchema = z.object({
   paths: z.array(
@@ -22,12 +22,12 @@ export const pathOptionSchema = z.object({
 });
 
 export async function generatePathOptionsAI(profileString: string) {
-  const model = getGemma3Model();
+  const model = getGPT5ReasoningModel();
 
   const { object } = await generateObject({
     model,
     schema: pathOptionSchema,
-    system: GEMMA3_PATH_OPTIONS_PROMPT,
+    system: GPT5_PATH_OPTIONS_PROMPT,
     prompt: `Generate paths for the following user profile:\n${profileString}`,
   });
 

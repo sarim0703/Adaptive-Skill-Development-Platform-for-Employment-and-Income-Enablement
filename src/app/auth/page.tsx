@@ -32,7 +32,7 @@ export default function AuthPage() {
         });
 
         if (res?.error) {
-          setError(res.error);
+          setError("Invalid email or password. Please try again.");
         } else {
           // Route returning users to the correct page
           const destination = await checkUserState();
@@ -40,14 +40,32 @@ export default function AuthPage() {
         }
       } else {
         await registerUser(formData);
-        setIsLogin(true);
-        setError("Account created successfully! Please sign in. ✅");
+        // Automatically sign in the user right after registration
+        const res = await signIn("credentials", {
+          redirect: false,
+          email,
+          password,
+        });
+
+        if (res?.error) {
+          setError("Account created, but auto-login failed. Please sign in manually.");
+          setIsLogin(true);
+        } else {
+          const destination = await checkUserState();
+          router.push(destination);
+        }
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message || "An error occurred");
+        // NextAuth v5 often throws confusing internal errors (like "An unexpected response was received from the server") when credentials fail.
+        if (err.message.includes("Unexpected") || err.message.includes("Credentials") || err.message.includes("Configuration")) {
+          setError("Invalid email or password. Please try again.");
+        } else {
+          // Fallback for network issues or actual crashes
+          setError("Invalid email or password. Please try again."); 
+        }
       } else {
-        setError("An error occurred");
+        setError("Invalid email or password. Please try again.");
       }
     } finally {
       setLoading(false);

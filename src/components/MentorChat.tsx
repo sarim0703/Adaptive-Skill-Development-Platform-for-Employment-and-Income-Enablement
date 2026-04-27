@@ -2,8 +2,6 @@
 
 import { useState, useRef, useEffect } from "react";
 import { X, Send, Loader2, Sparkles } from "lucide-react";
-import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
 import { useLanguage } from "@/context/LanguageContext";
 import SpeechInput from "./SpeechInput";
 
@@ -24,8 +22,6 @@ export default function MentorChat({ subtopicId, triggerType, timeSpentSeconds, 
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
   const getGreetingText = (type: string): string => {
     switch (type) {
       case 'stuck':
@@ -39,24 +35,14 @@ export default function MentorChat({ subtopicId, triggerType, timeSpentSeconds, 
     }
   };
 
-  const { messages, sendMessage, status } = useChat({
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      body: {
-        subtopicId,
-        triggerType,
-        timeSpentSeconds,
-      },
-    }),
-    messages: triggerType ? [{
-      id: 'system-greeting',
-      role: 'assistant' as const,
-      content: getGreetingText(triggerType),
-      parts: [{ type: 'text' as const, text: getGreetingText(triggerType) }],
-    }] : [],
-  });
-
-  const isLoading = status === 'streaming' || status === 'submitted';
+  const [messages, setMessages] = useState<any[]>(triggerType ? [{
+    id: 'system-greeting',
+    role: 'assistant',
+    content: getGreetingText(triggerType),
+  }] : []);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const shouldAutoOpen = triggerType === 'stuck' || triggerType === 'repeated_failure';
   useEffect(() => {
@@ -72,9 +58,52 @@ export default function MentorChat({ subtopicId, triggerType, timeSpentSeconds, 
   const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!input.trim() || isLoading) return;
-    const msg = input;
+
+    const userMsg = { id: Date.now().toString(), role: 'user', content: input };
+    setMessages(prev => [...prev, userMsg]);
+    const currentInput = input;
     setInput('');
-    await sendMessage({ text: msg });
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...messages, userMsg].map(m => ({ role: m.role, content: m.content })),
+          subtopicId,
+          triggerType,
+          timeSpentSeconds,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to send message');
+
+      const reader = response.body?.getReader();
+      if (!reader) return;
+
+      const assistantId = (Date.now() + 1).toString();
+      setMessages(prev => [...prev, { id: assistantId, role: 'assistant', content: '' }]);
+
+      const decoder = new TextDecoder();
+      let fullContent = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        fullContent += chunk;
+
+        setMessages(prev => prev.map(m => 
+          m.id === assistantId ? { ...m, content: fullContent } : m
+        ));
+      }
+    } catch (error) {
+      console.error("[MentorChat] Error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -119,6 +148,10 @@ export default function MentorChat({ subtopicId, triggerType, timeSpentSeconds, 
             )}
             {messages.map((msg) => {
               const role = msg.role as string;
+              const content = msg.content || (msg as any).parts?.map((p: any) => p.text || '').join('') || '';
+              
+              if (!content && role === 'user') return null;
+
               return (
               <div key={msg.id} className={`flex ${role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed ${
@@ -126,7 +159,7 @@ export default function MentorChat({ subtopicId, triggerType, timeSpentSeconds, 
                     ? 'bg-indigo-500 text-white rounded-br-md'
                     : 'bg-white text-slate-700 border border-slate-200 rounded-bl-md shadow-sm'
                 }`}>
-                  {msg.content}
+                  {content}
                 </div>
               </div>
               );

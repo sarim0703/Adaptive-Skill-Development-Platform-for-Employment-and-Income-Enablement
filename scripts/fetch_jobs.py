@@ -1,5 +1,5 @@
 """
-SkillSync Job Fetcher — Powered by JobSpy (speedyapply/JobSpy)
+CareerOrbit Job Fetcher — Powered by JobSpy (speedyapply/JobSpy)
 Fetches real job listings from Naukri & Indeed India based on BKT-mastered skills.
 Saves results to public/jobs-data.json for the Next.js frontend.
 """
@@ -111,7 +111,7 @@ def main():
         location = sys.argv[2]
 
     print(f"\n{'='*50}")
-    print(f"  SkillSync Job Fetcher")
+    print(f"  CareerOrbit Job Fetcher")
     print(f"  Skills: {skills}")
     print(f"  Location: {location}")
     print(f"{'='*50}\n")

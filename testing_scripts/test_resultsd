@@ -30,4 +30,4 @@ Test scripts for Session D (`07_session_d.test.ts`) covering the AI recalibratio
 ---
 
 > [!TIP]
-> The recalibration engine correctly performs a surgical replacement of a single module inside the JSONB array while leaving all other modules untouched. This is the core mechanism that makes SkillSync truly adaptive — the platform refuses to generate content until it has measured the user's real capability.
+> The recalibration engine correctly performs a surgical replacement of a single module inside the JSONB array while leaving all other modules untouched. This is the core mechanism that makes CareerOrbit truly adaptive — the platform refuses to generate content until it has measured the user's real capability.

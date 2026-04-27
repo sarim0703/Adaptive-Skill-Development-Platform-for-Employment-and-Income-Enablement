@@ -100,6 +100,7 @@ export default async function LearnPage() {
       currentSubtopicIndex={currentSubtopicIndex}
       totalModules={modules.length}
       currentModuleNumber={activeModuleId!}
+      allModules={modules}
     />
   );
 }

@@ -68,7 +68,7 @@ T42,F,Outcome Card,Submit feedback,"1. Select an outcome option
 T43,F,Visual Polish,Needs review badge,"1. Fail a quiz on a subtopic
 2. Check /learn dashboard","Yellow ⚠️ banner: 'Let's review this again' with explanation",,
 T44,F,Visual Polish,Smooth transitions,"1. Navigate between /learn, /learn/outline, /path-selection","Page transitions are smooth, no layout jumps or flash of unstyled content",,
-T45,General,SEO,Page titles,"1. Check browser tab title on each page","Landing: 'SkillSync V2 — Adaptive Learning...', Auth: same, Learn: same",,
+T45,General,SEO,Page titles,"1. Check browser tab title on each page","Landing: 'CareerOrbit - Adaptive Career...', Auth: same, Learn: same",,
 T46,General,Error Handling,No console errors,"1. Open browser DevTools Console
 2. Navigate through all pages","No red errors in console (warnings are acceptable)",,
 T47,General,Database,Data persistence,"1. Complete a few tasks and quizzes

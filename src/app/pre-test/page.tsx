@@ -30,7 +30,7 @@ export default async function PreTestPage() {
   });
 
   const profileSummary = profile
-    ? `Location: ${profile.location}, Education: ${profile.educationLevel}, Skills: ${profile.rawSkillsInput}`
+    ? `Location: ${profile.location}, Education: ${profile.educationLevel}, Interest: ${profile.workInterest}`
     : 'No profile data';
 
   return (

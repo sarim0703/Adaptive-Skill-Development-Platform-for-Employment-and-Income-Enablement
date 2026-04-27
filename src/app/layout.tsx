@@ -9,9 +9,11 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
+import { Providers } from "@/components/Providers";
+
 export const metadata: Metadata = {
-  title: "SkillSync — Learn Skills That Actually Pay",
-  description: "AI-powered adaptive learning platform that builds personalized, practical career paths for India's workforce.",
+  title: "CareerOrbit - Adaptive Career Navigation",
+  description: "AI-powered vocational training and career orbit synchronization",
 };
 
 export default function RootLayout({
@@ -22,12 +24,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable}`} suppressHydrationWarning>
       <body className="min-h-screen font-sans bg-[#F2F2F7] text-[#1D1D1F] antialiased" suppressHydrationWarning>
-        <LanguageProvider>
-          <Navbar />
-          <main className="pt-24 min-h-screen">
-            {children}
-          </main>
-        </LanguageProvider>
+        <Providers>
+          <LanguageProvider>
+            <Navbar />
+            <main className="pt-24 min-h-screen">
+              {children}
+            </main>
+          </LanguageProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -1,6 +1,6 @@
 # Walkthrough: Session B (Path Selection) Completed
 
-I have successfully completed **Session B — Path Selection System** of the SkillSync V2 build plan. We have now fully integrated the AI capabilities to dynamically generate career paths and curricula based on user profiles.
+I have successfully completed **Session B — Path Selection System** of the CareerOrbit build plan. We have now fully integrated the AI capabilities to dynamically generate career paths and curricula based on user profiles.
 
 Here is what was accomplished:
 
@@ -9,17 +9,17 @@ Set up the AI registry using the Vercel AI SDK. We established `gpt-4o-mini` as 
 
 ## 2. Dynamic Path Generation
 Built the AI logic to process a user's onboarding profile into distinct, realistic gig economy paths:
-- **[generate-paths.ts](file:///c:/My%20projects/adaptive%20learning%20project/skillsync-v2/src/lib/ai/generate-paths.ts)**: Enforces a strict Zod schema ensuring each generated path includes a practical summary, an estimated income range, and a 3-week preview.
+- **[generate-paths.ts](file:///c:/My%20projects/adaptive%20learning%20project/career-orbit/src/lib/ai/generate-paths.ts)**: Enforces a strict Zod schema ensuring each generated path includes a practical summary, an estimated income range, and a 3-week preview.
 - **Server Actions**: `generateAndSavePathOptions()` fetches the user's profile, triggers the AI, and securely saves the options to the `path_option` table in the database.
 
 ## 3. Path Selection Page (UI)
 Created a premium, responsive interface for users to review their AI-generated options:
-- **[PathSelectionClient.tsx](file:///c:/My%20projects/adaptive%20learning%20project/skillsync-v2/src/app/path-selection/PathSelectionClient.tsx)**: Displays the paths as interactive cards. If a user lands here and hasn't generated paths yet, it displays a dynamic "Analyzing Your Profile" loading state while the server action runs.
+- **[PathSelectionClient.tsx](file:///c:/My%20projects/adaptive%20learning%20project/career-orbit/src/app/path-selection/PathSelectionClient.tsx)**: Displays the paths as interactive cards. If a user lands here and hasn't generated paths yet, it displays a dynamic "Analyzing Your Profile" loading state while the server action runs.
 - The cards include detailed metrics (Est. Income, Ready In X Weeks, Curriculum Preview) using polished Lucide icons and Tailwind styles.
 
 ## 4. Initial Roadmap Generation
 When a user selects a path, the true adaptive engine kicks in:
-- **[generate-roadmap.ts](file:///c:/My%20projects/adaptive%20learning%20project/skillsync-v2/src/lib/ai/generate-roadmap.ts)**: Generates the strict curriculum for **Module 1** and **Module 2** only, ensuring every single subtopic has a `practical_task` and a `youtube_search_query`.
+- **[generate-roadmap.ts](file:///c:/My%20projects/adaptive%20learning%20project/career-orbit/src/lib/ai/generate-roadmap.ts)**: Generates the strict curriculum for **Module 1** and **Module 2** only, ensuring every single subtopic has a `practical_task` and a `youtube_search_query`.
 - **Server Action**: `createInitialRoadmap()` takes the generated modules, attaches database state flags (like `status: 'locked'`), appends 3 `PENDING_CALIBRATION` placeholder modules (for dynamic future generation), and saves the active roadmap to the database. It also initializes the `user_model` row for tracking their progress.
 
 ## Verification Results

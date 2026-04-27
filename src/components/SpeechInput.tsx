@@ -70,17 +70,17 @@ export default function SpeechInput({ onResult, language = "en-IN", className = 
     <button
       type="button"
       onClick={toggleListening}
-      className={`p-2 rounded-full transition-all flex items-center justify-center ${
+      className={`transition-all flex items-center justify-center ${
         isListening 
-          ? "bg-red-100 text-red-600 animate-pulse ring-4 ring-red-50" 
-          : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+          ? "bg-red-500 text-white animate-pulse ring-4 ring-red-500/20" 
+          : "bg-blue-600 text-white hover:bg-blue-500 shadow-lg"
       } ${className}`}
       title={isListening ? "Stop Recording" : "Start Voice Input"}
     >
       {isListening ? (
-        <MicOff className="w-4 h-4" />
+        <MicOff className="w-1/2 h-1/2" />
       ) : (
-        <Mic className="w-4 h-4" />
+        <Mic className="w-1/2 h-1/2" />
       )}
     </button>
   );

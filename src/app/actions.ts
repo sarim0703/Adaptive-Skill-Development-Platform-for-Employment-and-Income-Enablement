@@ -11,6 +11,7 @@ import { checkProactiveTriggers as checkTriggers } from "@/lib/adaptive/triggers
 import { batchUpdateFromQuiz, computeCapabilityFromBKT, initializeKC, getKnowledgeStateSummary, computeNormalizedLearningGain, getZPDStatus, type KnowledgeState } from "@/lib/adaptive/bkt-engine";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 
 export async function registerUser(formData: FormData) {
@@ -100,13 +101,17 @@ export async function saveOnboardingProfile(answers: Record<number, string>) {
   const userId = session.user.id;
   const profileData = {
     location: answers[1] || "",
-    educationLevel: answers[2] || "",
-    timeAvailability: answers[3] || "",
-    rawSkillsInput: answers[4] || "",
-    workHistory: answers[5] || "",
-    targetIncomeExact: answers[6] ? parseInt(answers[6]) : null,
-    languagePreference: answers[7] || "",
-    confidenceLevel: answers[8] ? parseInt(answers[8]) : null,
+    ageGroup: answers[2] || "",
+    gender: answers[3] || "",
+    educationLevel: answers[4] || "",
+    workInterest: answers[5] || "",
+    rawSkillsInput: answers[5] || "", // legacy alias
+    experienceLevel: answers[6] || "",
+    workHistory: answers[6] || "", // legacy alias
+    targetIncomeExact: answers[7] ? parseInt(answers[7]) : null,
+    deviceType: answers[8] || "",
+    languagePreference: answers[9] || "",
+    confidenceLevel: answers[10] ? parseInt(answers[10]) : null,
   };
 
   // Check if profile already exists for this user
@@ -122,7 +127,11 @@ export async function saveOnboardingProfile(answers: Record<number, string>) {
     await db.insert(profiles).values({ userId, ...profileData });
   }
 
-  redirect("/path-selection");
+  revalidatePath('/path-selection');
+  revalidatePath('/onboarding');
+  revalidatePath('/');
+
+  return { success: true };
 }
 
 export async function getPathOptions() {
@@ -149,7 +158,9 @@ export async function generateAndSavePathOptions() {
 
   if (!profile) throw new Error("Profile not found");
 
-  const profileString = JSON.stringify(profile, null, 2);
+  // Sanitize the profile context to remove DB metadata and legacy aliases
+  const { id, userId: _, createdAt, rawSkillsInput, workHistory, timeAvailability, ...cleanProfile } = profile;
+  const profileString = JSON.stringify(cleanProfile, null, 2);
   const paths = await generatePathOptionsAI(profileString);
 
   // Clear existing options first to allow regeneration
@@ -184,7 +195,10 @@ export async function selectPath(pathId: string) {
     where: (p, { eq, and }) => and(eq(p.id, pathId), eq(p.userId, userId)),
   });
 
-  if (!path) throw new Error("Path not found");
+  if (!path) {
+    console.error(`[selectPath Error] Could not find path. Received pathId: '${pathId}', Session userId: '${userId}'`);
+    throw new Error("Path not found");
+  }
 
   const profile = await db.query.profiles.findFirst({
     where: (p, { eq }) => eq(p.userId, userId),
@@ -202,6 +216,7 @@ export async function selectPath(pathId: string) {
 type GeneratedSubtopic = {
   subtopic_id: string;
   title: string;
+  key_learning_notes: string;
   practical_task: string;
   task_type: string;
   youtube_search_query: string;
@@ -216,8 +231,12 @@ type GeneratedModule = {
 
 export async function createInitialRoadmap(selectedPath: { id: string; userId: string; pathTitle: string; estimatedWeeks: number | null; estimatedIncomeMin: number | null; estimatedIncomeMax: number | null }, profile: Record<string, unknown>) {
   const userId = selectedPath.userId;
-  const pathContext = JSON.stringify(selectedPath);
-  const profileContext = JSON.stringify(profile);
+  const { id, userId: _, createdAt, ...cleanPathContext } = selectedPath as any;
+  const pathContext = JSON.stringify(cleanPathContext);
+
+  // Sanitize profile context
+  const { id: profileId, userId: profileUserId, createdAt: profileCreatedAt, rawSkillsInput, workHistory, timeAvailability, ...cleanProfile } = profile as any;
+  const profileContext = JSON.stringify(cleanProfile);
 
   const generatedModules = await generateInitialRoadmapAI(pathContext, profileContext);
 
@@ -237,17 +256,7 @@ export async function createInitialRoadmap(selectedPath: { id: string; userId: s
     })),
   }));
 
-  // Add 3 placeholder modules
-  const placeholderModules = [3, 4, 5].map((id) => ({
-    module_id: id,
-    module_title: null,
-    status: 'PENDING_CALIBRATION',
-    generated_at: null,
-    unlocks_after_module_id: id - 1,
-    subtopics: [],
-  }));
-
-  const allModules = [...formattedModules, ...placeholderModules];
+  const allModules = [...formattedModules];
 
   // Archive any existing active roadmaps
   await db.update(roadmaps)
@@ -302,13 +311,14 @@ export async function getUserProfile() {
   const userId = session?.user?.id;
   if (!userId) return null;
 
-  const profile = await db.query.profiles.findFirst({
-    where: (p, { eq }) => eq(p.userId, userId as string),
-  });
-
-  const user = await db.query.users.findFirst({
-    where: (u, { eq }) => eq(u.id, userId as string),
-  });
+  const [profile, user] = await Promise.all([
+    db.query.profiles.findFirst({
+      where: (p, { eq }) => eq(p.userId, userId as string),
+    }),
+    db.query.users.findFirst({
+      where: (u, { eq }) => eq(u.id, userId as string),
+    })
+  ]);
 
   return { name: user?.name ?? null, location: profile?.location ?? null };
 }
@@ -617,9 +627,27 @@ export async function getAnalyticsData() {
     };
   });
 
+  // Module progress from roadmap
+  const modules = roadmap.modules as { module_id: number; module_title: string; subtopics: { status: string; subtopic_id: string; title: string }[] }[];
+  
+  const subtopicTitles: Record<string, string> = {};
+  modules.forEach(mod => {
+    mod.subtopics?.forEach(st => {
+      if (st.subtopic_id && st.title) {
+        subtopicTitles[st.subtopic_id] = st.title;
+      }
+    });
+  });
+
+  const prettifySlug = (slug: string) => {
+    return slug
+      .replace(/[_-]/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase());
+  };
+
   // BKT mastery per subtopic
   const masteryGrid = Object.entries(knowledgeState).map(([subtopicId, kc]) => ({
-    subtopicId,
+    subtopicId: subtopicTitles[subtopicId] || prettifySlug(subtopicId),
     mastery: Math.round(kc.pMastery * 100),
     attempts: kc.attempts,
     correct: kc.correctCount,
@@ -641,8 +669,6 @@ export async function getAnalyticsData() {
     return acc;
   }, {} as Record<string, number>);
 
-  // Module progress from roadmap
-  const modules = roadmap.modules as { module_id: number; module_title: string; subtopics: { status: string; subtopic_id: string; title: string }[] }[];
   const moduleProgress = modules.map(mod => {
     const total = mod.subtopics?.length || 0;
     const completed = mod.subtopics?.filter(s => s.status === 'complete').length || 0;

@@ -2,17 +2,17 @@ import { db } from "@/db";
 import { getZPDStatus, getZPDLabel, getScaffoldingInstruction, type KnowledgeState } from "@/lib/adaptive/bkt-engine";
 
 export async function buildMentorContext(userId: string, subtopicId: string, triggerType: string | null, timeSpentSeconds: number) {
-  const model = await db.query.userModel.findFirst({
-    where: (um, { eq }) => eq(um.userId, userId),
-  });
-
-  const profile = await db.query.profiles.findFirst({
-    where: (p, { eq }) => eq(p.userId, userId),
-  });
-
-  const roadmap = await db.query.roadmaps.findFirst({
-    where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')),
-  });
+  const [model, profile, roadmap] = await Promise.all([
+    db.query.userModel.findFirst({
+      where: (um, { eq }) => eq(um.userId, userId),
+    }),
+    db.query.profiles.findFirst({
+      where: (p, { eq }) => eq(p.userId, userId),
+    }),
+    db.query.roadmaps.findFirst({
+      where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')),
+    })
+  ]);
 
   if (!model || !profile || !roadmap) return '';
 
@@ -37,11 +37,21 @@ export async function buildMentorContext(userId: string, subtopicId: string, tri
   const zpdLabel = getZPDLabel(zpdStatus);
   const scaffoldingInstruction = getScaffoldingInstruction(currentMastery);
 
+  // Build a mapping of subtopic IDs to titles for the AI to understand
+  const subtopicTitles: Record<string, string> = {};
+  for (const mod of (roadmap.modules as any[])) {
+    mod.subtopics?.forEach((st: any) => {
+      subtopicTitles[st.subtopic_id] = st.title;
+    });
+  }
+
+  const prettifySlug = (slug: string) => slug.replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
   // Build per-subtopic mastery summary (top 5 most recent)
   const masteryEntries = Object.entries(knowledgeState)
     .sort((a, b) => new Date(b[1].lastUpdated).getTime() - new Date(a[1].lastUpdated).getTime())
     .slice(0, 5)
-    .map(([id, kc]) => `  ${id}: ${Math.round(kc.pMastery * 100)}% (${getZPDLabel(getZPDStatus(kc.pMastery))})`)
+    .map(([id, kc]) => `  - ${subtopicTitles[id] || prettifySlug(id)}: ${Math.round(kc.pMastery * 100)}% (${getZPDLabel(getZPDStatus(kc.pMastery))})`)
     .join('\n');
 
   // ─── Trigger Instruction ────────────────────────────────────

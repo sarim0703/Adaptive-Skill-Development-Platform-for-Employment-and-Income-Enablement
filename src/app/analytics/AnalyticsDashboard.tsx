@@ -4,8 +4,13 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import {
   Brain, TrendingUp, Target, Flame, BarChart3,
-  CheckCircle2, Clock, ArrowLeft, Award, Zap, Download, Sparkles, PieChart
+  CheckCircle2, Clock, ArrowLeft, Award, Zap, Download, Sparkles, PieChart, Info, ExternalLink, Briefcase
 } from "lucide-react";
+import { motion } from "framer-motion";
+import ReactMarkdown from 'react-markdown';
+import { useCompletion } from '@ai-sdk/react';
+import { Loader2, ChevronRight, AlertCircle } from "lucide-react";
+import { useEffect } from "react";
 
 type ZPDStatus = 'below_zpd' | 'in_zpd' | 'mastered';
 
@@ -53,17 +58,17 @@ type AnalyticsData = {
 
 function zpdColor(zpd: ZPDStatus) {
   switch (zpd) {
-    case 'mastered': return 'bg-[#34C759]';
-    case 'in_zpd': return 'bg-[#007AFF]';
-    case 'below_zpd': return 'bg-[#FF9500]';
+    case 'mastered': return 'from-emerald-500 to-teal-400';
+    case 'in_zpd': return 'from-blue-500 to-cyan-400';
+    case 'below_zpd': return 'from-amber-500 to-orange-400';
   }
 }
 
-function zpdBadge(zpd: ZPDStatus) {
+function zpdText(zpd: ZPDStatus) {
   switch (zpd) {
-    case 'mastered': return 'badge-green';
-    case 'in_zpd': return 'badge-indigo';
-    case 'below_zpd': return 'badge-amber';
+    case 'mastered': return 'text-emerald-400';
+    case 'in_zpd': return 'text-blue-400';
+    case 'below_zpd': return 'text-amber-400';
   }
 }
 
@@ -79,242 +84,379 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
   const { t } = useLanguage();
   const router = useRouter();
 
+  const { completion, complete, isLoading: isLoadingAnalysis, error: analysisError } = useCompletion({
+    api: '/api/analytics/analyze',
+    streamProtocol: 'text',
+  });
+
+  useEffect(() => {
+    if (completion) {
+      console.log("[Analytics] AI Analysis chunk received:", completion.length);
+    }
+  }, [completion]);
+
   const nlgColor = data.normalizedLearningGain !== null
-    ? data.normalizedLearningGain >= 70 ? 'text-[#34C759]' :
-      data.normalizedLearningGain >= 30 ? 'text-[#007AFF]' : 'text-[#FF9500]'
-    : 'text-slate-400';
+    ? data.normalizedLearningGain >= 70 ? 'text-emerald-400' :
+      data.normalizedLearningGain >= 30 ? 'text-blue-400' : 'text-amber-400'
+    : 'text-slate-500';
 
   return (
-    <div className="max-w-7xl mx-auto px-6 py-6 animate-fadeInUp">
-      
-      {/* Header with Research Focus */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
-        <div>
-          <div className="inline-flex items-center gap-2 bg-[#007AFF]/10 text-[#007AFF] px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest mb-3">
-            <BarChart3 className="w-3 h-3" />
-            Research Metrics
-          </div>
-          <h1 className="text-3xl font-bold text-slate-800 leading-tight">
-            Learning Analytics Dashboard
-          </h1>
-          <p className="text-slate-500 font-medium mt-1">
-            Analyzing {data.userName}&apos;s progress in <span className="text-slate-800 font-bold">{data.pathTitle}</span>
-          </p>
-        </div>
+    <div className="relative min-h-screen bg-[#0A0A0C] text-white overflow-hidden pb-20">
+      {/* Background Decor */}
+      <div className="aurora-blob w-[800px] h-[800px] bg-blue-600/5 -top-1/4 -right-1/4 rounded-full pointer-events-none blur-[120px]"></div>
+      <div className="aurora-blob w-[600px] h-[600px] bg-violet-600/5 bottom-0 -left-1/4 rounded-full pointer-events-none blur-[100px]"></div>
+      <div className="absolute inset-0 bg-tech-grid opacity-5 pointer-events-none"></div>
 
-        <div className="flex items-center gap-3">
-          <button 
-            onClick={() => window.open('/api/export', '_blank')}
-            className="flex items-center gap-2 bg-white border border-slate-200 rounded-2xl px-5 py-2.5 text-sm font-bold text-slate-700 hover:border-[#007AFF] hover:bg-[#007AFF]/5 transition-all shadow-sm"
+      <div className="max-w-7xl mx-auto px-6 pt-24 relative z-10">
+        
+        {/* ── Header ── */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-8">
+          <motion.div 
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
           >
-            <Download className="w-4 h-4" />
-            Export Research Data (CSV)
-          </button>
-        </div>
-      </div>
-
-      {/* Primary KPI Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        
-        {/* Capability Widget */}
-        <div className="card p-6 border-l-4 border-l-[#007AFF]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#007AFF]/10 flex items-center justify-center">
-              <Brain className="w-5 h-5 text-[#007AFF]" />
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest text-blue-400 mb-4">
+              <BarChart3 className="w-3.5 h-3.5" />
+              Intelligence Dashboard
             </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Mastery</span>
-          </div>
-          <div className="text-4xl font-black text-slate-800 mb-1">{data.capabilityScore}</div>
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("analytics.capability")}</div>
+            <h1 className="text-4xl font-black text-white leading-tight tracking-tight">
+              Learning Analytics
+            </h1>
+            <p className="text-slate-500 font-medium mt-2">
+              Analyzing <span className="text-white">{data.userName}</span>&apos;s cognitive trajectory in <span className="text-blue-400">{data.pathTitle}</span>
+            </p>
+          </motion.div>
+
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex items-center gap-4"
+          >
+            <button 
+              onClick={() => window.open('/api/export', '_blank')}
+              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/[0.03] border border-white/5 text-xs font-bold text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all group"
+            >
+              <Download className="w-4 h-4 transition-transform group-hover:translate-y-0.5" />
+              Export CSV
+            </button>
+          </motion.div>
         </div>
 
-        {/* Learning Gain Widget */}
-        <div className="card p-6 border-l-4 border-l-[#34C759]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#34C759]/10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-[#34C759]" />
-            </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Hake Gain</span>
-          </div>
-          <div className={`text-4xl font-black mb-1 ${nlgColor}`}>
-            {data.normalizedLearningGain !== null ? `${data.normalizedLearningGain}%` : '—'}
-          </div>
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("analytics.nlg")}</div>
-        </div>
-
-        {/* Streak Widget */}
-        <div className="card p-6 border-l-4 border-l-[#FF9500]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#FF9500]/10 flex items-center justify-center">
-              <Flame className="w-5 h-5 text-[#FF9500]" />
-            </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Momentum</span>
-          </div>
-          <div className="text-4xl font-black text-slate-800 mb-1">{data.currentStreak} <span className="text-xl">Days</span></div>
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("analytics.streak")}</div>
-        </div>
-
-        {/* Quizzes Widget */}
-        <div className="card p-6 border-l-4 border-l-[#5856D6]">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-xl bg-[#5856D6]/10 flex items-center justify-center">
-              <Zap className="w-5 h-5 text-[#5856D6]" />
-            </div>
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Volume</span>
-          </div>
-          <div className="text-4xl font-black text-slate-800 mb-1">{data.totalQuizzes}</div>
-          <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">{t("analytics.quizzes")}</div>
-        </div>
-      </div>
-
-      {/* Detailed Analysis Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-10">
-        
-        {/* Left: Mastery Visuals */}
-        <div className="lg:col-span-8 space-y-8">
+        {/* ── Core KPI Grid ── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           
-          {/* Learning Curve Chart */}
-          <div className="card p-8">
-            <div className="flex items-center justify-between mb-10">
-              <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">BKT Learning Curve</h3>
-              <div className="flex items-center gap-4 text-[10px] font-bold">
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#007AFF]" /> Mastery Probability</span>
-                <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-slate-200" /> Quiz Scores</span>
+          {[
+            { label: t("analytics.capability"), val: data.capabilityScore, icon: Brain, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20", sub: "Cognitive Level" },
+            { label: t("analytics.nlg"), val: data.normalizedLearningGain !== null ? `${data.normalizedLearningGain}%` : '—', icon: TrendingUp, color: nlgColor, bg: "bg-emerald-400/10", border: "border-emerald-400/20", sub: "Skill Delta" },
+            { label: t("analytics.streak"), val: `${data.currentStreak} Days`, icon: Flame, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20", sub: "Continuity" },
+            { label: t("analytics.quizzes"), val: data.totalQuizzes, icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20", sub: "Session Count" }
+          ].map((kpi, i) => (
+            <motion.div 
+              key={i}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.1 }}
+              className={`rounded-3xl bg-white/[0.03] border ${kpi.border} p-6 relative overflow-hidden group hover:scale-[1.02] transition-all`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-10 h-10 rounded-xl ${kpi.bg} flex items-center justify-center`}>
+                  <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
+                </div>
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{kpi.sub}</span>
               </div>
+              <div className={`text-4xl font-black mb-1 ${kpi.color}`}>{kpi.val}</div>
+              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{kpi.label}</div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* ── Secondary Charts Section ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+          
+          {/* Left: Mastery Visuals (8 cols) */}
+          <div className="lg:col-span-8 space-y-8">
+            
+            {/* Learning Curve Chart */}
+            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-8 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-12">
+                <div>
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Cognitive Trajectory</h3>
+                  <h2 className="text-xl font-bold text-white">BKT Learning Curve</h2>
+                </div>
+                <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-slate-500">
+                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" /> Mastery</span>
+                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-white/10" /> Quiz Scores</span>
+                </div>
+              </div>
+
+              {data.learningCurve.length > 0 ? (
+                <div className="h-72 flex items-end gap-3 md:gap-5 px-2 relative">
+                  {/* Grid Lines */}
+                  <div className="absolute inset-x-0 top-0 h-px bg-white/[0.03]" />
+                  <div className="absolute inset-x-0 top-1/4 h-px bg-white/[0.03]" />
+                  <div className="absolute inset-x-0 top-2/4 h-px bg-white/[0.03]" />
+                  <div className="absolute inset-x-0 top-3/4 h-px bg-white/[0.03]" />
+
+                  {data.learningCurve.map((point, i) => (
+                    <div key={point.attempt} className="flex-1 flex flex-col items-center group relative h-full justify-end">
+                      {/* Tooltip */}
+                      <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-all bg-[#111] border border-white/10 text-white text-[10px] font-bold px-3 py-2 rounded-xl pointer-events-none whitespace-nowrap z-20 shadow-2xl">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Zap className="w-3 h-3 text-violet-400" />
+                          <span>Capability: {point.capability}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Target className="w-3 h-3 text-emerald-400" />
+                          <span>Score: {point.quizScore}%</span>
+                        </div>
+                      </div>
+                      
+                      {/* Mastery Bar */}
+                      <motion.div 
+                        initial={{ height: 0 }}
+                        animate={{ height: `${point.mastery}%` }}
+                        transition={{ delay: i * 0.05, duration: 1, ease: "easeOut" }}
+                        className="w-full bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-xl relative group-hover:from-blue-500 group-hover:to-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.15)]"
+                      >
+                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">{point.mastery}%</div>
+                      </motion.div>
+                      
+                      <div className="mt-4 text-[9px] font-black text-slate-600 uppercase tracking-tighter">Attempt {point.attempt}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="h-72 flex flex-col items-center justify-center text-slate-600 gap-4">
+                  <Info className="w-8 h-8 text-slate-800" />
+                  <p className="italic text-sm">Calibration required: Complete your first module to see your curve.</p>
+                </div>
+              )}
             </div>
 
-            {data.learningCurve.length > 0 ? (
-              <div className="h-64 flex items-end gap-2 md:gap-4 px-2">
-                {data.learningCurve.map((point) => (
-                  <div key={point.attempt} className="flex-1 flex flex-col items-center group relative h-full justify-end">
-                    {/* Tooltip */}
-                    <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-[10px] font-bold px-2 py-1 rounded pointer-events-none whitespace-nowrap z-10">
-                      Cap: {point.capability} | Score: {point.quizScore}%
+            {/* BKT Mastery Grid */}
+            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-8">
+              <div className="flex items-center justify-between mb-10">
+                <div>
+                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Detailed Breakdown</h3>
+                  <h2 className="text-xl font-bold text-white">Knowledge Components</h2>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {data.masteryGrid.map((kc, i) => (
+                  <motion.div 
+                    key={kc.subtopicId}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 hover:bg-white/[0.04] transition-all group"
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-sm font-bold text-white truncate max-w-[180px] group-hover:text-blue-400 transition-colors">{kc.subtopicId}</span>
+                      <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 ${zpdText(kc.zpd)}`}>
+                        {zpdLabel(kc.zpd)}
+                      </span>
                     </div>
-                    
-                    <div className="w-full bg-[#007AFF] rounded-t-xl transition-all duration-700 shadow-sm relative group-hover:bg-[#007AFF]/80"
-                         style={{ height: `${point.mastery}%` }}>
-                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#007AFF]">{point.mastery}%</div>
+                    <div className="flex items-center gap-4">
+                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden p-0.5">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${kc.mastery}%` }}
+                          transition={{ duration: 1.5, ease: "easeOut" }}
+                          className={`h-full rounded-full bg-gradient-to-r ${zpdColor(kc.zpd)} shadow-[0_0_10px_rgba(255,255,255,0.1)]`}
+                        />
+                      </div>
+                      <span className="text-base font-black text-white w-10 text-right tabular-nums">{kc.mastery}%</span>
                     </div>
-                    
-                    <div className="mt-3 text-[10px] font-black text-slate-300 uppercase tracking-tighter">Q{point.attempt}</div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
-            ) : (
-              <div className="h-64 flex items-center justify-center text-slate-300 italic text-sm">No quiz data available yet.</div>
+            </div>
+          </div>
+
+          {/* Right: Summary Widgets (4 cols) */}
+          <div className="lg:col-span-4 space-y-8">
+            
+            {/* Mastery Distribution Card */}
+            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-6">
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-8">Mastery Distribution</h3>
+              
+              <div className="space-y-8">
+                {/* Visual Stacked Bar */}
+                <div className="relative h-20 rounded-2xl overflow-hidden p-1 bg-white/[0.03] border border-white/5 flex gap-1">
+                  <div className="h-full bg-emerald-500/80 rounded-lg relative group transition-all" style={{ width: `${(data.knowledgeSummary.masteredCount / data.knowledgeSummary.totalKCs) * 100}%` }}>
+                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">Mastered</div>
+                  </div>
+                  <div className="h-full bg-blue-500/80 rounded-lg relative group transition-all" style={{ width: `${(data.knowledgeSummary.inZPDCount / data.knowledgeSummary.totalKCs) * 100}%` }}>
+                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">ZPD</div>
+                  </div>
+                  <div className="h-full bg-amber-500/80 rounded-lg relative group transition-all" style={{ width: `${(data.knowledgeSummary.belowZPDCount / data.knowledgeSummary.totalKCs) * 100}%` }}>
+                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">Active</div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { label: "Mastered", count: data.knowledgeSummary.masteredCount, color: "bg-emerald-500" },
+                    { label: "Active ZPD", count: data.knowledgeSummary.inZPDCount, color: "bg-blue-500" },
+                    { label: "Needs Review", count: data.knowledgeSummary.belowZPDCount, color: "bg-amber-500" }
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-center justify-between px-2">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-2.5 h-2.5 rounded-full ${item.color} shadow-[0_0_8px_rgba(255,255,255,0.2)]`} />
+                        <span className="text-sm font-bold text-slate-300">{item.label}</span>
+                      </div>
+                      <span className="text-sm font-black text-white">{item.count} <span className="text-[9px] text-slate-600">KCs</span></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* SDG 8 Impact Card */}
+            <div className="rounded-3xl bg-white/[0.03] border-b-4 border-b-violet-500/30 border border-white/5 p-6 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <Briefcase className="w-20 h-20 text-white" />
+              </div>
+              
+              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-8">SDG 8 Outcome Impact</h3>
+              
+              <div className="space-y-3">
+                {Object.entries(data.outcomeDistribution).map(([type, count]) => {
+                  const labels: Record<string, string> = {
+                    gig_found: 'Job/Gig Secured',
+                    interview: 'Interview Invitation',
+                    confidence: 'Skill Confidence',
+                    still_learning: 'Training Active',
+                  };
+                  return (
+                    <div key={type} className="flex items-center justify-between bg-white/[0.03] p-4 rounded-2xl border border-white/5 group/row hover:bg-white/5 transition-all">
+                      <span className="text-xs font-bold text-slate-400 group-hover/row:text-white transition-colors">{labels[type] || type}</span>
+                      <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center text-xs font-black text-violet-400 border border-violet-500/20">
+                        {count}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Methodology Footer ── */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-3xl bg-white/[0.03] border border-white/5 p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden mb-12"
+        >
+          <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/30" />
+          
+          <div className="flex items-start gap-5">
+            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center flex-shrink-0">
+              <Sparkles className="w-6 h-6 text-blue-400" />
+            </div>
+            <div>
+              <h4 className="text-xs font-black text-white uppercase tracking-widest mb-2 flex items-center gap-2">
+                BKT Analytics Methodology
+                <Info className="w-3.5 h-3.5 text-slate-600" />
+              </h4>
+              <p className="text-[11px] text-slate-500 font-medium max-w-2xl leading-relaxed">
+                CareerOrbit utilizes <span className="text-slate-300">Bayesian Knowledge Tracing (BKT)</span> to model your mastery as a latent variable. 
+                Our algorithms process response patterns to distinguish between luck and true cognitive mastery. 
+                Capability levels are normalized against research-grade datasets to ensure high-fidelity career readiness metrics.
+              </p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-4 border-l border-white/5 pl-8 md:pl-12">
+            <div className="text-right hidden md:block">
+              <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Platform Integrity</p>
+              <p className="text-[10px] font-bold text-emerald-400">Research Verified</p>
+            </div>
+            <PieChart className="w-8 h-8 text-slate-700" />
+          </div>
+        </motion.div>
+
+        {/* ── Deep Cognitive Analysis Section ── */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="rounded-[40px] bg-gradient-to-br from-indigo-600/10 via-transparent to-blue-600/10 border border-white/10 p-1 md:p-8"
+        >
+          <div className="rounded-[32px] bg-[#0D0D0F]/80 backdrop-blur-3xl p-8 md:p-12 border border-white/5 shadow-2xl">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
+              <div className="max-w-2xl text-center md:text-left">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] font-black uppercase tracking-widest text-violet-400 mb-4">
+                  <Sparkles className="w-3 h-3" />
+                  AI Reasoning Engine
+                </div>
+                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">
+                  Deep Cognitive Analysis
+                </h2>
+                <p className="text-slate-400 font-medium leading-relaxed">
+                  Let our AI Mentor analyze your diagnostic patterns, BKT mastery deltas, and behavioral data to provide a research-grade breakdown of your unique learning persona.
+                </p>
+              </div>
+
+              <button
+                onClick={() => complete("")}
+                disabled={isLoadingAnalysis}
+                className="group relative px-10 py-5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_15px_40px_rgba(59,130,246,0.3)] hover:shadow-[0_20px_50px_rgba(59,130,246,0.5)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
+              >
+                {isLoadingAnalysis ? (
+                  <div className="flex items-center gap-3">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Analyzing Patterns...
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    Analyze My Performance
+                    <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                  </div>
+                )}
+              </button>
+            </div>
+
+            {/* Analysis Result Display */}
+            {analysisError && (
+              <div className="mt-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3">
+                <AlertCircle className="w-5 h-5" />
+                Failed to generate analysis. Please try again.
+              </div>
+            )}
+
+            {(completion || isLoadingAnalysis) && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative mt-8"
+              >
+                <div className="absolute inset-0 bg-blue-500/5 rounded-3xl blur-2xl" />
+                <div className="relative bg-white/[0.02] border border-white/10 rounded-3xl p-8 md:p-10 font-medium text-slate-300 leading-loose prose prose-invert prose-blue max-w-none prose-sm md:prose-base min-h-[100px]">
+                   {completion ? (
+                     <ReactMarkdown>{completion}</ReactMarkdown>
+                   ) : (
+                     <div className="flex flex-col gap-4 animate-pulse">
+                        <div className="h-4 bg-white/5 rounded w-3/4" />
+                        <div className="h-4 bg-white/5 rounded w-1/2" />
+                        <div className="h-4 bg-white/5 rounded w-5/6" />
+                     </div>
+                   )}
+                   {isLoadingAnalysis && completion && (
+                     <div className="flex gap-1 mt-6">
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+                        <div className="w-1.5 h-1.5 bg-blue-500 rounded-full animate-bounce" />
+                     </div>
+                   )}
+                </div>
+              </motion.div>
             )}
           </div>
-
-          {/* BKT Mastery Grid */}
-          <div className="card p-8">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-8">Knowledge Component Mastery</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {data.masteryGrid.map((kc) => (
-                <div key={kc.subtopicId} className="bg-slate-50/50 border border-slate-100 rounded-2xl p-5 hover:bg-white hover:shadow-md transition-all">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="text-sm font-bold text-slate-800 truncate max-w-[180px]">{kc.subtopicId}</span>
-                    <span className={`badge ${zpdBadge(kc.zpd)} text-[9px] py-0.5 px-2 font-black uppercase tracking-widest`}>
-                      {zpdLabel(kc.zpd)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden p-0.5">
-                      <div className={`h-full rounded-full transition-all duration-1000 ${zpdColor(kc.zpd)} shadow-sm`}
-                           style={{ width: `${kc.mastery}%` }} />
-                    </div>
-                    <span className="text-lg font-black text-slate-800 w-12 text-right">{kc.mastery}%</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Right: Summary Widgets */}
-        <div className="lg:col-span-4 space-y-8">
-          
-          {/* ZPD Summary Card */}
-          <div className="card p-6">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Mastery Distribution</h3>
-            <div className="space-y-6">
-              {/* Progress Pie-style Bar */}
-              <div className="flex h-12 rounded-2xl overflow-hidden p-1 bg-slate-50 border border-slate-100">
-                <div className="bg-[#34C759] transition-all" style={{ width: `${(data.knowledgeSummary.masteredCount / data.knowledgeSummary.totalKCs) * 100}%` }} />
-                <div className="bg-[#007AFF] transition-all" style={{ width: `${(data.knowledgeSummary.inZPDCount / data.knowledgeSummary.totalKCs) * 100}%` }} />
-                <div className="bg-[#FF9500] transition-all" style={{ width: `${(data.knowledgeSummary.belowZPDCount / data.knowledgeSummary.totalKCs) * 100}%` }} />
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-[#34C759]" />
-                    <span className="text-sm font-bold text-slate-700">Mastered</span>
-                  </div>
-                  <span className="text-sm font-black text-slate-400">{data.knowledgeSummary.masteredCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-[#007AFF]" />
-                    <span className="text-sm font-bold text-slate-700">Active ZPD</span>
-                  </div>
-                  <span className="text-sm font-black text-slate-400">{data.knowledgeSummary.inZPDCount}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 rounded-full bg-[#FF9500]" />
-                    <span className="text-sm font-bold text-slate-700">Needs Work</span>
-                  </div>
-                  <span className="text-sm font-black text-slate-400">{data.knowledgeSummary.belowZPDCount}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* SDG 8 Outcomes Widget */}
-          <div className="card p-6 border-b-4 border-b-[#5856D6]">
-            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Outcome Impact (SDG 8)</h3>
-            <div className="space-y-3">
-              {Object.entries(data.outcomeDistribution).map(([type, count]) => {
-                const labels: Record<string, string> = {
-                  gig_found: '💼 Job/Gig Secured',
-                  interview: '🤝 Interview Invitation',
-                  confidence: '💪 Skill Confidence',
-                  still_learning: '📚 Training Active',
-                };
-                return (
-                  <div key={type} className="flex items-center justify-between bg-slate-50/50 p-4 rounded-2xl border border-slate-50">
-                    <span className="text-sm font-bold text-slate-600">{labels[type] || type}</span>
-                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-xs font-black text-[#5856D6] shadow-sm border border-slate-100">
-                      {count}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Methodology Footer */}
-      <div className="glass-card p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-slate-500" />
-          </div>
-          <div>
-            <h4 className="text-xs font-black text-slate-800 uppercase tracking-widest">BKT Analytics Methodology</h4>
-            <p className="text-[10px] text-slate-500 font-medium max-w-lg leading-relaxed">
-              Capability scores are derived from real-time Bayesian Knowledge Tracing with a mastery threshold of 0.85. 
-              Learning Gain is computed using Hake&apos;s formula: (Post - Pre) / (1 - Pre).
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <PieChart className="w-4 h-4 text-slate-300" />
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Research-Grade Fidelity</span>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
 }
+
+

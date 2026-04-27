@@ -1,4 +1,4 @@
-# SkillSync V2 - Implementation Plan (Session C)
+# CareerOrbit - Implementation Plan (Session C)
 
 This plan outlines the execution of **Session C (Execution View - Core Loop)**. This is the heart of the adaptive engine, where the user actually engages with tasks, takes AI-generated quizzes, and triggers dynamic capability recalculations.
 
