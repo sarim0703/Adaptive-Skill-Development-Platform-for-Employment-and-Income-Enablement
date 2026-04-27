@@ -178,7 +178,7 @@ export default function Navbar() {
                 whileTap={{ scale: 0.95 }}
                 className={`
                   w-[40px] h-[40px] rounded-2xl flex items-center justify-center group cursor-pointer relative transition-all duration-300
-                  ${isActive ? "bg-foreground/10 text-foreground" : "bg-foreground/5 text-foreground/40 hover:text-foreground"}
+                  ${pathname === "/profile" ? "bg-foreground/10 text-foreground" : "bg-foreground/5 text-foreground/40 hover:text-foreground"}
                 `}
               >
                 <div className={`
