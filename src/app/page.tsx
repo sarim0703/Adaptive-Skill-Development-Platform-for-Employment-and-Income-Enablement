@@ -5,8 +5,9 @@ import { Sparkles, Target, Brain, TrendingUp, ArrowRight, CheckCircle2, Users, B
 import { useLanguage } from "@/context/LanguageContext";
 import { useSearchParams, useRouter } from "next/navigation";
 import AuthSidePanel from "@/components/AuthSidePanel";
+import { Suspense } from "react";
 
-export default function Home() {
+function HomeContent() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -191,5 +192,13 @@ export default function Home() {
         />
       )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0A0A0C] flex items-center justify-center"><Sparkles className="w-8 h-8 text-blue-500 animate-pulse" /></div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
