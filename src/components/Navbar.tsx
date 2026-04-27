@@ -13,7 +13,6 @@ import {
   X, 
   ChevronRight, 
   Zap, 
-  Zap, 
   Globe,
   User,
   Award
@@ -224,7 +223,7 @@ export default function Navbar() {
               <motion.button
                 whileHover={{ scale: 1.1, rotate: -10 }}
                 whileTap={{ scale: 0.9 }}
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() => signOut({ callbackUrl: window.location.origin })}
                 className="w-10 h-10 flex items-center justify-center rounded-2xl text-slate-500 hover:bg-rose-500/10 hover:text-rose-500 transition-colors border border-transparent hover:border-rose-500/20"
                 title="Sign out"
               >
