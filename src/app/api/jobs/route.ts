@@ -1,9 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { exec } from "child_process";
-import { promisify } from "util";
-import path from "path";
-
-const execAsync = promisify(exec);
 
 // ── In-Memory Cache (1 hour TTL) ──
 const cache = new Map<string, { data: unknown; timestamp: number }>();
@@ -32,37 +27,21 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const scriptPath = path.join(process.cwd(), "scripts", "fetch_jobs_api.py");
+    const origin = req.nextUrl.origin;
+    const pythonUrl = `${origin}/api/fetch_jobs?q=${encodeURIComponent(search)}&l=${encodeURIComponent(location)}&c=${encodeURIComponent(city)}`;
     
-    // Pass city as 3rd argument to the Python scraper
-    const command = `python "${scriptPath}" "${search}" "${location}" "${city}"`;
+    console.log(`[Jobs API] Cache MISS. Calling internal Python function: ${pythonUrl}`);
     
-    console.log(`[Jobs API] Cache MISS. Executing: ${command}`);
-    
-    const { stdout, stderr } = await execAsync(command, { 
-      maxBuffer: 1024 * 1024 * 10,
-      timeout: 60000 // 60s timeout for scraping
+    const response = await fetch(pythonUrl, {
+      signal: AbortSignal.timeout(60000) // 60s timeout
     });
     
-    if (stderr && !stderr.includes("FutureWarning") && !stderr.includes("UserWarning") && !stderr.includes("DeprecationWarning")) {
-      console.warn("[Jobs API] Python warning:", stderr.slice(0, 200));
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Python function failed (${response.status}): ${errorText.slice(0, 100)}`);
     }
     
-    // Extract JSON from output (skip any stray log lines)
-    let jsonOutput = stdout.trim();
-    
-    if (jsonOutput.includes("[")) {
-      jsonOutput = jsonOutput.substring(jsonOutput.indexOf("["));
-    } else if (jsonOutput.includes("{")) {
-      jsonOutput = jsonOutput.substring(jsonOutput.indexOf("{"));
-    }
-    
-    const parsedData = JSON.parse(jsonOutput);
-    
-    if (parsedData && parsedData.error) {
-      console.error("[Jobs API] Scraper error:", parsedData.error);
-      return NextResponse.json({ error: parsedData.error }, { status: 500 });
-    }
+    const parsedData = await response.json();
     
     // ── Store in Cache ──
     cache.set(cacheKey, { data: parsedData, timestamp: Date.now() });
@@ -80,7 +59,7 @@ export async function GET(req: NextRequest) {
   } catch (error: any) {
     console.error("[Jobs API] Fatal error:", error.message?.slice(0, 300));
     return NextResponse.json(
-      { error: "Failed to fetch live jobs. The scraper timed out or encountered an error." }, 
+      { error: "Failed to fetch live jobs. The Python bridge encountered an error or timed out." }, 
       { status: 500 }
     );
   }
