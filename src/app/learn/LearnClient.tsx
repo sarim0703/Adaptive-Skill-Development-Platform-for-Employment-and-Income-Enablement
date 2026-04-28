@@ -431,12 +431,12 @@ export default function LearnClient({
 
             {/* Course Curriculum */}
             <div className="rounded-2xl bg-card border border-border overflow-hidden">
-              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
+              <div className="px-5 py-5 border-b border-border flex items-center justify-between">
                 <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Course Content</h3>
                 <span className="text-[10px] text-slate-600">{totalModules} modules</span>
               </div>
 
-              <div className="max-h-[50vh] overflow-y-auto">
+              <div className="max-h-[72vh] overflow-y-auto custom-scrollbar">
                 {allModules.map((mod) => {
                   const isExpanded = expandedModules.has(mod.module_id);
                   const completedInMod = mod.subtopics?.filter(s => s.status === "complete").length ?? 0;

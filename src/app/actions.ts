@@ -541,28 +541,34 @@ export async function submitPreTestResults(params: {
 
   // Initialize BKT knowledge state from pre-test answers
   // Correct answers get higher initial mastery (informed prior)
-  const knowledgeState: KnowledgeState = {};
+  const topicMasteries: Record<string, number[]> = {};
+  
   for (const result of params.questionResults) {
     const topicId = result.topic_area;
-    if (!knowledgeState[topicId]) {
-      // Set initial mastery based on whether they answered correctly
-      // and the difficulty of the question
-      let initialMastery = 0.05; // default very low
-      if (result.isCorrect) {
-        switch (result.difficulty) {
-          case 'easy': initialMastery = 0.20; break;
-          case 'medium': initialMastery = 0.35; break;
-          case 'hard': initialMastery = 0.50; break;
-        }
-      } else {
-        switch (result.difficulty) {
-          case 'easy': initialMastery = 0.03; break;
-          case 'medium': initialMastery = 0.05; break;
-          case 'hard': initialMastery = 0.08; break;
-        }
+    let initialMastery = 0.05; // default very low
+    
+    if (result.isCorrect) {
+      switch (result.difficulty) {
+        case 'easy': initialMastery = 0.20; break;
+        case 'medium': initialMastery = 0.35; break;
+        case 'hard': initialMastery = 0.50; break;
       }
-      knowledgeState[topicId] = initializeKC(topicId, initialMastery);
+    } else {
+      switch (result.difficulty) {
+        case 'easy': initialMastery = 0.03; break;
+        case 'medium': initialMastery = 0.05; break;
+        case 'hard': initialMastery = 0.08; break;
+      }
     }
+    
+    if (!topicMasteries[topicId]) topicMasteries[topicId] = [];
+    topicMasteries[topicId].push(initialMastery);
+  }
+
+  const knowledgeState: KnowledgeState = {};
+  for (const [topicId, masteries] of Object.entries(topicMasteries)) {
+    const avgMastery = masteries.reduce((a, b) => a + b, 0) / masteries.length;
+    knowledgeState[topicId] = initializeKC(topicId, avgMastery);
   }
 
   // Save pre-test score and initialized knowledge state
@@ -571,7 +577,7 @@ export async function submitPreTestResults(params: {
       preTestScore: params.score,
       preTestCompletedAt: new Date(),
       knowledgeState,
-      capabilityScore: params.score, // Initial capability = pre-test score
+      capabilityScore: computeCapabilityFromBKT(knowledgeState), // Initial capability derived from BKT
     })
     .where(eq(userModel.userId, userId));
 
@@ -687,7 +693,7 @@ export async function getAnalyticsData() {
     pathTitle: roadmap.pathTitle,
 
     // BKT Summary
-    capabilityScore: model.capabilityScore ?? 50,
+    capabilityScore: computeCapabilityFromBKT(knowledgeState),
     knowledgeSummary: ksSummary,
     masteryGrid,
 

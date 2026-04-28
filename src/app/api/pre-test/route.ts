@@ -36,8 +36,9 @@ IMPORTANT RULES:
 5. Use topic_area slugs like: "basic-tools", "customer-service", "route-planning", "safety", "digital-skills", "pricing", "quality-check", "communication" etc.
 6. Never use jargon. Questions should be accessible to someone with minimal formal education.
 7. CRITICAL: Generate ALL questions and options in ${lang}.
-8. The pre-test is NOT pass/fail — it's purely diagnostic. Frame questions neutrally.`,
-      prompt: `Career Path: ${pathTitle}\nLearner Background: ${profileSummary}`,
+8. The pre-test is NOT pass/fail — it's purely diagnostic. Frame questions neutrally.
+9. Ensure variety: Do not always place the correct answer at the same index across questions.`,
+      prompt: `Career Path: ${pathTitle}\nLearner Background: ${profileSummary}\nGeneration Seed: ${Date.now()}`,
     });
 
     return NextResponse.json({ questions: object.questions });

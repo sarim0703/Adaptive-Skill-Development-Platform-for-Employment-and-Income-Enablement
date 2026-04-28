@@ -64,17 +64,25 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
       setCurrentIndex(currentIndex + 1);
     } else {
       setSubmitting(true);
-      let correct = 0;
+      let totalWeight = 0;
+      let earnedWeight = 0;
+      
       const questionResults = questions.map((q, i) => {
-        const isCorrect = answers[i] === q.correct_index;
-        if (isCorrect) correct++;
+        const isCorrect = Number(answers[i]) === Number(q.correct_index);
+        
+        // Weighting: Easy=1, Medium=2, Hard=3
+        const weight = q.difficulty === 'hard' ? 3 : q.difficulty === 'medium' ? 2 : 1;
+        totalWeight += weight;
+        if (isCorrect) earnedWeight += weight;
+
         return {
           topic_area: q.topic_area,
           isCorrect,
           difficulty: q.difficulty,
         };
       });
-      const finalScore = Math.round((correct / questions.length) * 100);
+
+      const finalScore = totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0;
       setScore(finalScore);
 
       try {
