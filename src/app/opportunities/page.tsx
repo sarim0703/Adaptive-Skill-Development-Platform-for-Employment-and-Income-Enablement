@@ -27,10 +27,10 @@ import { getAnalyticsData } from "@/app/actions";
 const JobMap = dynamic(() => import("@/components/JobMap"), { 
   ssr: false,
   loading: () => (
-    <div className="w-full h-[500px] rounded-[32px] bg-white/[0.02] border border-white/5 flex items-center justify-center">
+    <div className="w-full h-[500px] rounded-xl bg-card border border-border flex items-center justify-center">
       <div className="text-center">
         <Globe className="w-10 h-10 text-blue-500/30 mx-auto mb-4 animate-pulse" />
-        <p className="text-slate-600 text-sm font-bold">Loading Map Engine...</p>
+        <p className="text-text-tertiary text-sm">Loading Map...</p>
       </div>
     </div>
   )
@@ -252,58 +252,58 @@ export default function OpportunitiesPage() {
   }, [userContext]);
 
   return (
-    <div className="flex h-screen w-full bg-[#0A0A0C] text-white overflow-hidden font-sans">
+    <div className="flex h-[calc(100vh-4rem)] w-full bg-background text-foreground overflow-hidden font-sans">
       
-      {/* ── Left Side: Discovery Feed ── */}
-      <aside className="w-[480px] h-full flex flex-col border-r border-white/5 bg-[#0A0A0C] relative z-20 shadow-2xl">
+      {/* ── Left Side: Job Feed ── */}
+      <aside className="w-[480px] h-full flex flex-col border-r border-border bg-background relative z-20">
         
-        {/* Header Console */}
-        <div className="p-6 pt-12 border-b border-white/5 bg-[#0A0A0C]/80 backdrop-blur-xl">
+        {/* Header */}
+        <div className="p-6 pt-8 border-b border-border bg-card/80 backdrop-blur-xl">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-blue-600/10 flex items-center justify-center border border-blue-500/20">
                 <Sparkles className="w-5 h-5 text-blue-500" />
               </div>
               <div>
-                <h1 className="text-xl font-black text-white tracking-tight">CareerOrbit</h1>
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Market Command Center</p>
+                <h1 className="text-lg font-semibold text-foreground tracking-tight">Job Explorer</h1>
+                <p className="text-xs text-text-tertiary">Find opportunities</p>
               </div>
             </div>
             {/* Total Results Badge */}
             {data?.total_results && (
               <div className="px-3 py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/20">
-                <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{data.total_results} Found</p>
+                <p className="text-xs font-medium text-blue-500">{data.total_results} Found</p>
               </div>
             )}
           </div>
 
           <div className="space-y-3">
-            <div className="flex items-center gap-3 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl">
-              <Search className="w-4 h-4 text-slate-600" />
+            <div className="flex items-center gap-3 px-4 py-2.5 bg-input border border-border rounded-xl">
+              <Search className="w-4 h-4 text-text-muted" />
               <input 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
                 placeholder="Role or skill..."
-                className="bg-transparent text-sm font-bold focus:outline-none w-full"
+                className="bg-transparent text-sm focus:outline-none w-full text-foreground"
               />
             </div>
             <div className="flex items-center gap-3">
-              <div className="flex-1 px-4 py-3 bg-white/[0.03] border border-white/10 rounded-2xl flex items-center gap-3">
+              <div className="flex-1 px-4 py-2.5 bg-input border border-border rounded-xl flex items-center gap-3">
                 <Navigation className="w-4 h-4 text-emerald-500/60" />
                 <input 
                   value={cityTerm}
                   onChange={e => setCityTerm(e.target.value)}
-                  placeholder="Target City..."
-                  className="bg-transparent text-sm font-bold focus:outline-none w-full"
+                  placeholder="City..."
+                  className="bg-transparent text-sm focus:outline-none w-full text-foreground"
                 />
               </div>
               <button 
                 onClick={() => handleSearch()}
                 disabled={loading}
-                className="bg-blue-600 h-[46px] px-6 rounded-2xl hover:bg-blue-500 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
+                className="bg-blue-600 h-[42px] px-5 rounded-xl hover:bg-blue-500 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Zap className="w-4 h-4 text-white" />}
-                <span className="text-[10px] font-black uppercase tracking-widest">Scan</span>
+                {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Search className="w-4 h-4 text-white" />}
+                <span className="text-xs font-medium text-white">Search</span>
               </button>
             </div>
           </div>
@@ -317,7 +317,7 @@ export default function OpportunitiesPage() {
                 <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
                 <Globe className="w-6 h-6 text-blue-500" />
               </div>
-              <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Intercepting Live Signals</p>
+              <p className="text-xs text-text-tertiary">Searching...</p>
             </div>
           ) : activeJobs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
@@ -327,9 +327,9 @@ export default function OpportunitiesPage() {
                 </div>
                 <Target className="absolute inset-0 m-auto w-8 h-8 text-blue-500/40" />
               </div>
-              <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-2">Command Center Standby</h3>
-              <p className="text-[10px] font-bold text-slate-600 uppercase tracking-[0.15em] max-w-[200px] leading-relaxed">
-                Enter parameters and initiate <span className="text-blue-500/60">Scan</span> to track local opportunities.
+              <h3 className="text-sm font-medium text-text-secondary mb-2">Search for jobs</h3>
+              <p className="text-xs text-text-tertiary max-w-[220px] leading-relaxed">
+                Enter a role and city to find opportunities.
               </p>
             </div>
           ) : (
@@ -347,18 +347,18 @@ export default function OpportunitiesPage() {
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
-                  className={`group relative p-5 rounded-2xl border transition-all duration-500 cursor-pointer ${
+                  className={`group relative p-5 rounded-xl border transition-all duration-300 cursor-pointer ${
                     isActive 
-                    ? "bg-blue-600/10 border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.1)]" 
-                    : "bg-white/[0.02] border-white/5 hover:border-white/20"
+                    ? "bg-blue-600/10 border-blue-500/40" 
+                    : "bg-card border-border hover:border-border-hover"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-4 mb-3">
                     <div className="min-w-0">
-                      <h3 className={`text-sm font-black tracking-tight mb-1 truncate ${isActive ? "text-blue-400" : "text-white"}`}>
+                      <h3 className={`text-sm font-semibold tracking-tight mb-1 truncate ${isActive ? "text-blue-500" : "text-foreground"}`}>
                         {job.title}
                       </h3>
-                      <p className="text-[11px] font-bold text-slate-500 truncate">{job.company}</p>
+                      <p className="text-xs text-text-tertiary truncate">{job.company}</p>
                     </div>
                     <div className="relative w-10 h-10 flex-shrink-0">
                       <svg className="w-full h-full -rotate-90">
@@ -375,7 +375,7 @@ export default function OpportunitiesPage() {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 text-[10px] text-slate-600 font-bold mb-4">
+                  <div className="flex items-center gap-4 text-xs text-text-tertiary mb-4">
                     <div className="flex items-center gap-1">
                       <MapPin className="w-3 h-3" />
                       {job.location || "India"}
@@ -390,8 +390,8 @@ export default function OpportunitiesPage() {
 
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2">
-                      <span className="text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 rounded bg-white/5 border border-white/5">{job.source}</span>
-                      {job.is_remote && <span className="text-[8px] font-black uppercase tracking-tighter px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Remote</span>}
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-input border border-border text-text-tertiary">{job.source}</span>
+                      {job.is_remote && <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Remote</span>}
                     </div>
                     <a 
                       href={job.job_url} 
@@ -409,12 +409,8 @@ export default function OpportunitiesPage() {
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-[#0A0A0C] border-t border-white/5 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Active Link</span>
-          </div>
-          <p className="text-[9px] font-black text-slate-700 uppercase tracking-widest">Ver. 2.4.0</p>
+        <div className="p-3 bg-card border-t border-border flex items-center justify-center">
+          <span className="text-xs text-text-tertiary">{data?.total_results ?? 0} results</span>
         </div>
       </aside>
 
@@ -437,9 +433,9 @@ export default function OpportunitiesPage() {
             { label: "LinkedIn", color: "bg-sky-500" },
             { label: "Glassdoor", color: "bg-emerald-500" },
           ].map((s) => (
-            <div key={s.label} className="bg-[#111]/80 backdrop-blur-xl border border-white/5 rounded-lg px-3 py-1.5 flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${s.color} shadow-[0_0_8px_currentColor]`} />
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">{s.label}</span>
+            <div key={s.label} className="bg-card/90 backdrop-blur-xl border border-border rounded-lg px-3 py-1.5 flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${s.color}`} />
+              <span className="text-xs font-medium text-text-secondary">{s.label}</span>
             </div>
           ))}
         </div>
@@ -456,8 +452,8 @@ export default function OpportunitiesPage() {
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.1); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--border-primary, rgba(255,255,255,0.05)); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: var(--border-primary, rgba(255,255,255,0.1)); }
       `}</style>
     </div>
   );

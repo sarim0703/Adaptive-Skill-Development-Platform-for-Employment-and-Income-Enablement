@@ -1,99 +1,140 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN SYSTEM — Surface Elevation + Semantic Tokens
+   Inspired by Linear/Vercel: 3 surface tiers, 4 text levels
+   ═══════════════════════════════════════════════════════════════ */
+
 @theme inline {
   --font-sans: "Inter", system-ui, sans-serif;
-  --color-background: var(--bg-primary);
+
+  /* Surface Tiers */
+  --color-background: var(--surface-base);
   --color-foreground: var(--text-primary);
+  --color-bg-secondary: var(--surface-raised);
+  --color-card: var(--surface-raised);
+  --color-card-hover: var(--surface-overlay);
+  --color-elevated: var(--surface-overlay);
+  --color-input: var(--input-bg);
+
+  /* Border Tiers */
+  --color-border: var(--border-subtle);
+  --color-border-hover: var(--border-default);
+  --color-border-strong: var(--border-strong);
+
+  /* Text Tiers */
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-text-muted: var(--text-disabled);
+
+  /* Accent (fixed across themes) */
   --color-accent: #3B82F6;
   --color-success: #10B981;
 }
 
+/* ─── Dark Theme (Default) ───────────────────────────────── */
 :root {
-  /* Dark Theme (Default) */
-  --bg-primary: #0A0A0C;
-  --text-primary: #FFFFFF;
-  --text-secondary: #94A3B8;
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.05);
+  /* Surface Elevation */
+  --surface-base: #0C0D12;
+  --surface-raised: #14161E;
+  --surface-overlay: #1C1E28;
+  --input-bg: rgba(255, 255, 255, 0.05);
+
+  /* Borders */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.20);
+
+  /* Text */
+  --text-primary: #ECECEF;
+  --text-secondary: #8B8D98;
+  --text-tertiary: #62636C;
+  --text-disabled: #3F4046;
+
+  /* Utility */
   --grid-line: rgba(255, 255, 255, 0.03);
   --aurora-opacity: 0.4;
   --selection-bg: rgba(59, 130, 246, 0.2);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+  --shadow-elevated: 0 20px 50px rgba(0, 0, 0, 0.6);
 }
 
+/* ─── Light Theme ────────────────────────────────────────── */
 .light {
-  /* Light Theme Overrides */
-  --bg-primary: #F8FAFC;
-  --text-primary: #0F172A;
-  --text-secondary: #475569;
-  --card-bg: rgba(255, 255, 255, 0.7);
-  --card-border: rgba(0, 0, 0, 0.05);
-  --glass-bg: rgba(255, 255, 255, 0.6);
+  --surface-base: #FAFBFC;
+  --surface-raised: #FFFFFF;
+  --surface-overlay: #FFFFFF;
+  --input-bg: rgba(0, 0, 0, 0.03);
+
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.10);
+  --border-strong: rgba(0, 0, 0, 0.20);
+
+  --text-primary: #111318;
+  --text-secondary: #60646C;
+  --text-tertiary: #8B8D98;
+  --text-disabled: #B5B7C0;
+
   --grid-line: rgba(0, 0, 0, 0.02);
   --aurora-opacity: 0.15;
   --selection-bg: rgba(59, 130, 246, 0.1);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --shadow-elevated: 0 20px 50px rgba(0, 0, 0, 0.08);
 }
 
-/* ─── Premium Base ────────────────────────────────────────── */
+/* ─── Base ────────────────────────────────────────────────── */
 body {
-  background: var(--bg-primary);
+  background: var(--surface-base);
   color: var(--text-primary);
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  transition: background 0.5s ease, color 0.5s ease;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* ─── Premium Design Tokens ──────────────────────────────── */
+/* ─── Card (Primary Surface) ─────────────────────────────── */
 .card {
-  background: var(--card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 1.5rem;
-  border: 1px solid var(--card-border);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dark .card {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:hover {
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 0 30px rgba(59, 130, 246, 0.15);
-  transform: translateY(-4px);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-card), 0 0 0 1px var(--border-subtle);
 }
 
+/* ─── Glass Card (Blur Surface) ──────────────────────────── */
 .glass-card {
-  background: var(--glass-bg);
+  background: var(--surface-raised);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--card-border);
-  border-radius: 2rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.75rem;
 }
 
-/* ─── Modern Buttons ─────────────────────────────────────── */
+/* ─── Buttons ────────────────────────────────────────────── */
 .btn-primary {
-  background: linear-gradient(135deg, #3B82F6, #8B5CF6);
+  background: linear-gradient(135deg, #3B82F6, #6366F1);
   color: white;
-  font-weight: 800;
+  font-weight: 600;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
   filter: brightness(1.1);
-  box-shadow: 0 0 40px rgba(59, 130, 246, 0.4);
-  transform: scale(1.02);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
 }
 
-/* ─── Background ──────────────────────────── */
+/* ─── Background Effects ─────────────────────────────────── */
 .bg-tech-grid {
   background-size: 60px 60px;
   background-image: 
@@ -121,9 +162,9 @@ body {
 }
 
 @keyframes float-ui {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-12px) rotate(0.5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
 }
 
 .animate-float {
@@ -134,18 +175,19 @@ body {
   animation: float-ui 7s ease-in-out infinite 1s;
 }
 
-/* ─── Leaflet Overrides ───────────────────────────────────── */
-.light .leaflet-popup-content-wrapper {
-  background: white !important;
-  color: #0F172A !important;
-}
-
-.dark .leaflet-popup-content-wrapper {
-  background: #111 !important;
-  color: white !important;
-}
-
+/* ─── Leaflet Map Overrides ──────────────────────────────── */
 .leaflet-container {
-  background: var(--bg-primary) !important;
+  background: var(--surface-base) !important;
 }
 
+.leaflet-popup-content-wrapper {
+  background: var(--surface-raised) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--border-subtle) !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow-elevated) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--surface-raised) !important;
+}

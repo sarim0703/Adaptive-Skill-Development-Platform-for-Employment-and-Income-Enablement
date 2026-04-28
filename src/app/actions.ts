@@ -108,10 +108,10 @@ export async function saveOnboardingProfile(answers: Record<number, string>) {
     rawSkillsInput: answers[5] || "", // legacy alias
     experienceLevel: answers[6] || "",
     workHistory: answers[6] || "", // legacy alias
-    targetIncomeExact: answers[7] ? parseInt(answers[7]) : null,
+    targetIncomeExact: answers[7] && !isNaN(parseInt(answers[7])) ? parseInt(answers[7]) : null,
     deviceType: answers[8] || "",
     languagePreference: answers[9] || "",
-    confidenceLevel: answers[10] ? parseInt(answers[10]) : null,
+    confidenceLevel: answers[10] && !isNaN(parseInt(answers[10])) ? parseInt(answers[10]) : null,
   };
 
   // Check if profile already exists for this user

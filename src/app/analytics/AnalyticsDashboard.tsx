@@ -98,15 +98,10 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
   const nlgColor = data.normalizedLearningGain !== null
     ? data.normalizedLearningGain >= 70 ? 'text-emerald-400' :
       data.normalizedLearningGain >= 30 ? 'text-blue-400' : 'text-amber-400'
-    : 'text-slate-500';
+    : 'text-text-tertiary';
 
   return (
-    <div className="relative min-h-screen bg-[#0A0A0C] text-white overflow-hidden pb-20">
-      {/* Background Decor */}
-      <div className="aurora-blob w-[800px] h-[800px] bg-blue-600/5 -top-1/4 -right-1/4 rounded-full pointer-events-none blur-[120px]"></div>
-      <div className="aurora-blob w-[600px] h-[600px] bg-violet-600/5 bottom-0 -left-1/4 rounded-full pointer-events-none blur-[100px]"></div>
-      <div className="absolute inset-0 bg-tech-grid opacity-5 pointer-events-none"></div>
-
+    <div className="relative min-h-screen bg-background text-foreground overflow-hidden pb-20 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-6 pt-24 relative z-10">
         
         {/* ── Header ── */}
@@ -115,15 +110,15 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest text-blue-400 mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-medium text-blue-500 mb-4">
               <BarChart3 className="w-3.5 h-3.5" />
-              Intelligence Dashboard
+              Research Analytics
             </div>
-            <h1 className="text-4xl font-black text-white leading-tight tracking-tight">
+            <h1 className="text-3xl font-bold text-foreground leading-tight tracking-tight">
               Learning Analytics
             </h1>
-            <p className="text-slate-500 font-medium mt-2">
-              Analyzing <span className="text-white">{data.userName}</span>&apos;s cognitive trajectory in <span className="text-blue-400">{data.pathTitle}</span>
+            <p className="text-text-secondary font-medium mt-2">
+              Analyzing <span className="text-foreground">{data.userName}</span>&apos;s progress in <span className="text-blue-500">{data.pathTitle}</span>
             </p>
           </motion.div>
 
@@ -134,7 +129,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
           >
             <button 
               onClick={() => window.open('/api/export', '_blank')}
-              className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-white/[0.03] border border-white/5 text-xs font-bold text-slate-300 hover:bg-white/[0.06] hover:text-white transition-all group"
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-sm font-medium text-text-secondary hover:text-foreground hover:border-border-hover transition-all group"
             >
               <Download className="w-4 h-4 transition-transform group-hover:translate-y-0.5" />
               Export CSV
@@ -146,26 +141,26 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           
           {[
-            { label: t("analytics.capability"), val: data.capabilityScore, icon: Brain, color: "text-blue-400", bg: "bg-blue-400/10", border: "border-blue-400/20", sub: "Cognitive Level" },
-            { label: t("analytics.nlg"), val: data.normalizedLearningGain !== null ? `${data.normalizedLearningGain}%` : '—', icon: TrendingUp, color: nlgColor, bg: "bg-emerald-400/10", border: "border-emerald-400/20", sub: "Skill Delta" },
-            { label: t("analytics.streak"), val: `${data.currentStreak} Days`, icon: Flame, color: "text-amber-400", bg: "bg-amber-400/10", border: "border-amber-400/20", sub: "Continuity" },
-            { label: t("analytics.quizzes"), val: data.totalQuizzes, icon: Zap, color: "text-violet-400", bg: "bg-violet-400/10", border: "border-violet-400/20", sub: "Session Count" }
+            { label: t("analytics.capability"), val: data.capabilityScore, icon: Brain, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", sub: "Cognitive Level" },
+            { label: t("analytics.nlg"), val: data.normalizedLearningGain !== null ? `${data.normalizedLearningGain}%` : '—', icon: TrendingUp, color: nlgColor, bg: "bg-emerald-500/10", border: "border-emerald-500/20", sub: "Learning Gain" },
+            { label: t("analytics.streak"), val: `${data.currentStreak} Days`, icon: Flame, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20", sub: "Consistency" },
+            { label: t("analytics.quizzes"), val: data.totalQuizzes, icon: Zap, color: "text-violet-500", bg: "bg-violet-500/10", border: "border-violet-500/20", sub: "Assessments" }
           ].map((kpi, i) => (
             <motion.div 
               key={i}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.1 }}
-              className={`rounded-3xl bg-white/[0.03] border ${kpi.border} p-6 relative overflow-hidden group hover:scale-[1.02] transition-all`}
+              className={`rounded-xl bg-card border ${kpi.border} p-6 relative overflow-hidden group hover:border-border-hover transition-all`}
             >
               <div className="flex items-center justify-between mb-4">
                 <div className={`w-10 h-10 rounded-xl ${kpi.bg} flex items-center justify-center`}>
                   <kpi.icon className={`w-5 h-5 ${kpi.color}`} />
                 </div>
-                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">{kpi.sub}</span>
+                <span className="text-xs font-medium text-text-tertiary">{kpi.sub}</span>
               </div>
-              <div className={`text-4xl font-black mb-1 ${kpi.color}`}>{kpi.val}</div>
-              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">{kpi.label}</div>
+              <div className={`text-4xl font-bold mb-1 tabular-nums ${kpi.color}`}>{kpi.val}</div>
+              <div className="text-xs font-medium text-text-tertiary">{kpi.label}</div>
             </motion.div>
           ))}
         </div>
@@ -177,25 +172,25 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
           <div className="lg:col-span-8 space-y-8">
             
             {/* Learning Curve Chart */}
-            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-8 relative overflow-hidden">
-              <div className="flex items-center justify-between mb-12">
+            <div className="rounded-xl bg-card border border-border p-8 relative overflow-hidden">
+              <div className="flex items-center justify-between mb-10">
                 <div>
-                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Cognitive Trajectory</h3>
-                  <h2 className="text-xl font-bold text-white">BKT Learning Curve</h2>
+                  <h3 className="text-xs font-medium text-text-tertiary mb-1">Learning Curve</h3>
+                  <h2 className="text-lg font-semibold text-foreground">BKT Mastery Over Time</h2>
                 </div>
-                <div className="flex items-center gap-4 text-[9px] font-black uppercase tracking-widest text-slate-500">
-                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" /> Mastery</span>
-                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-white/10" /> Quiz Scores</span>
+                <div className="flex items-center gap-4 text-xs font-medium text-text-tertiary">
+                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500" /> Mastery</span>
+                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-foreground/10" /> Quiz Scores</span>
                 </div>
               </div>
 
               {data.learningCurve.length > 0 ? (
                 <div className="h-72 flex items-end gap-3 md:gap-5 px-2 relative">
                   {/* Grid Lines */}
-                  <div className="absolute inset-x-0 top-0 h-px bg-white/[0.03]" />
-                  <div className="absolute inset-x-0 top-1/4 h-px bg-white/[0.03]" />
-                  <div className="absolute inset-x-0 top-2/4 h-px bg-white/[0.03]" />
-                  <div className="absolute inset-x-0 top-3/4 h-px bg-white/[0.03]" />
+                  <div className="absolute inset-x-0 top-0 h-px bg-border" />
+                  <div className="absolute inset-x-0 top-1/4 h-px bg-border" />
+                  <div className="absolute inset-x-0 top-2/4 h-px bg-border" />
+                  <div className="absolute inset-x-0 top-3/4 h-px bg-border" />
 
                   {data.learningCurve.map((point, i) => (
                     <div key={point.attempt} className="flex-1 flex flex-col items-center group relative h-full justify-end">
@@ -221,24 +216,24 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                         <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">{point.mastery}%</div>
                       </motion.div>
                       
-                      <div className="mt-4 text-[9px] font-black text-slate-600 uppercase tracking-tighter">Attempt {point.attempt}</div>
+                      <div className="mt-4 text-xs font-medium text-text-tertiary">Attempt {point.attempt}</div>
                     </div>
                   ))}
                 </div>
               ) : (
-                <div className="h-72 flex flex-col items-center justify-center text-slate-600 gap-4">
-                  <Info className="w-8 h-8 text-slate-800" />
+                <div className="h-72 flex flex-col items-center justify-center text-text-tertiary gap-4">
+                  <Info className="w-8 h-8 text-text-muted" />
                   <p className="italic text-sm">Calibration required: Complete your first module to see your curve.</p>
                 </div>
               )}
             </div>
 
             {/* BKT Mastery Grid */}
-            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-8">
-              <div className="flex items-center justify-between mb-10">
+            <div className="rounded-xl bg-card border border-border p-8">
+              <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Detailed Breakdown</h3>
-                  <h2 className="text-xl font-bold text-white">Knowledge Components</h2>
+                  <h3 className="text-xs font-medium text-text-tertiary mb-1">Detailed Breakdown</h3>
+                  <h2 className="text-lg font-semibold text-foreground">Knowledge Components</h2>
                 </div>
               </div>
 
@@ -249,16 +244,16 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                     initial={{ opacity: 0, scale: 0.98 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.05 }}
-                    className="bg-white/[0.02] border border-white/5 rounded-2xl p-5 hover:bg-white/[0.04] transition-all group"
+                    className="bg-input border border-border rounded-xl p-5 hover:bg-card-hover transition-all group"
                   >
                     <div className="flex items-center justify-between mb-4">
-                      <span className="text-sm font-bold text-white truncate max-w-[180px] group-hover:text-blue-400 transition-colors">{kc.subtopicId}</span>
-                      <span className={`text-[8px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded-lg bg-white/5 border border-white/10 ${zpdText(kc.zpd)}`}>
+                      <span className="text-sm font-medium text-foreground truncate max-w-[180px] group-hover:text-blue-500 transition-colors">{kc.subtopicId}</span>
+                      <span className={`text-[10px] font-medium px-2 py-0.5 rounded-lg bg-foreground/5 border border-border ${zpdText(kc.zpd)}`}>
                         {zpdLabel(kc.zpd)}
                       </span>
                     </div>
                     <div className="flex items-center gap-4">
-                      <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden p-0.5">
+                      <div className="flex-1 h-2 bg-foreground/5 rounded-full overflow-hidden p-0.5">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${kc.mastery}%` }}
@@ -266,7 +261,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                           className={`h-full rounded-full bg-gradient-to-r ${zpdColor(kc.zpd)} shadow-[0_0_10px_rgba(255,255,255,0.1)]`}
                         />
                       </div>
-                      <span className="text-base font-black text-white w-10 text-right tabular-nums">{kc.mastery}%</span>
+                      <span className="text-base font-semibold text-foreground w-10 text-right tabular-nums">{kc.mastery}%</span>
                     </div>
                   </motion.div>
                 ))}
@@ -278,12 +273,12 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
           <div className="lg:col-span-4 space-y-8">
             
             {/* Mastery Distribution Card */}
-            <div className="rounded-3xl bg-white/[0.03] border border-white/5 p-6">
-              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-8">Mastery Distribution</h3>
+            <div className="rounded-xl bg-card border border-border p-6">
+              <h3 className="text-xs font-medium text-text-tertiary mb-6">Mastery Distribution</h3>
               
               <div className="space-y-8">
                 {/* Visual Stacked Bar */}
-                <div className="relative h-20 rounded-2xl overflow-hidden p-1 bg-white/[0.03] border border-white/5 flex gap-1">
+                <div className="relative h-16 rounded-xl overflow-hidden p-1 bg-input border border-border flex gap-1">
                   <div className="h-full bg-emerald-500/80 rounded-lg relative group transition-all" style={{ width: `${(data.knowledgeSummary.masteredCount / data.knowledgeSummary.totalKCs) * 100}%` }}>
                      <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">Mastered</div>
                   </div>
@@ -303,10 +298,10 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between px-2">
                       <div className="flex items-center gap-3">
-                        <div className={`w-2.5 h-2.5 rounded-full ${item.color} shadow-[0_0_8px_rgba(255,255,255,0.2)]`} />
-                        <span className="text-sm font-bold text-slate-300">{item.label}</span>
+                        <div className={`w-2.5 h-2.5 rounded-full ${item.color}`} />
+                        <span className="text-sm font-medium text-text-secondary">{item.label}</span>
                       </div>
-                      <span className="text-sm font-black text-white">{item.count} <span className="text-[9px] text-slate-600">KCs</span></span>
+                      <span className="text-sm font-semibold text-foreground">{item.count} <span className="text-xs text-text-tertiary">KCs</span></span>
                     </div>
                   ))}
                 </div>
@@ -314,12 +309,12 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             </div>
 
             {/* SDG 8 Impact Card */}
-            <div className="rounded-3xl bg-white/[0.03] border-b-4 border-b-violet-500/30 border border-white/5 p-6 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Briefcase className="w-20 h-20 text-white" />
+            <div className="rounded-xl bg-card border-b-4 border-b-violet-500/30 border border-border p-6 relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Briefcase className="w-20 h-20 text-foreground" />
               </div>
               
-              <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-8">SDG 8 Outcome Impact</h3>
+              <h3 className="text-xs font-medium text-text-tertiary mb-6">SDG 8 Outcomes</h3>
               
               <div className="space-y-3">
                 {Object.entries(data.outcomeDistribution).map(([type, count]) => {
@@ -330,9 +325,9 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                     still_learning: 'Training Active',
                   };
                   return (
-                    <div key={type} className="flex items-center justify-between bg-white/[0.03] p-4 rounded-2xl border border-white/5 group/row hover:bg-white/5 transition-all">
-                      <span className="text-xs font-bold text-slate-400 group-hover/row:text-white transition-colors">{labels[type] || type}</span>
-                      <div className="w-8 h-8 rounded-xl bg-violet-500/10 flex items-center justify-center text-xs font-black text-violet-400 border border-violet-500/20">
+                    <div key={type} className="flex items-center justify-between bg-input p-4 rounded-xl border border-border group/row hover:bg-card-hover transition-all">
+                      <span className="text-xs font-medium text-text-secondary group-hover/row:text-foreground transition-colors">{labels[type] || type}</span>
+                      <div className="w-7 h-7 rounded-lg bg-violet-500/10 flex items-center justify-center text-xs font-semibold text-violet-500 border border-violet-500/20">
                         {count}
                       </div>
                     </div>
@@ -347,7 +342,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="rounded-3xl bg-white/[0.03] border border-white/5 p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden mb-12"
+          className="rounded-xl bg-card border border-border p-8 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden mb-12"
         >
           <div className="absolute top-0 left-0 w-1 h-full bg-blue-500/30" />
           
@@ -356,24 +351,24 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
               <Sparkles className="w-6 h-6 text-blue-400" />
             </div>
             <div>
-              <h4 className="text-xs font-black text-white uppercase tracking-widest mb-2 flex items-center gap-2">
+              <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-2">
                 BKT Analytics Methodology
-                <Info className="w-3.5 h-3.5 text-slate-600" />
+                <Info className="w-3.5 h-3.5 text-text-muted" />
               </h4>
-              <p className="text-[11px] text-slate-500 font-medium max-w-2xl leading-relaxed">
-                CareerOrbit utilizes <span className="text-slate-300">Bayesian Knowledge Tracing (BKT)</span> to model your mastery as a latent variable. 
+              <p className="text-xs text-text-secondary max-w-2xl leading-relaxed">
+                CareerOrbit utilizes <span className="text-foreground">Bayesian Knowledge Tracing (BKT)</span> to model your mastery as a latent variable. 
                 Our algorithms process response patterns to distinguish between luck and true cognitive mastery. 
                 Capability levels are normalized against research-grade datasets to ensure high-fidelity career readiness metrics.
               </p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4 border-l border-white/5 pl-8 md:pl-12">
+          <div className="flex items-center gap-4 border-l border-border pl-8 md:pl-12">
             <div className="text-right hidden md:block">
-              <p className="text-[8px] font-black text-slate-600 uppercase tracking-widest">Platform Integrity</p>
-              <p className="text-[10px] font-bold text-emerald-400">Research Verified</p>
+              <p className="text-xs font-medium text-text-tertiary">Integrity</p>
+              <p className="text-xs font-medium text-emerald-500">Research Verified</p>
             </div>
-            <PieChart className="w-8 h-8 text-slate-700" />
+            <PieChart className="w-8 h-8 text-text-muted" />
           </div>
         </motion.div>
 
@@ -381,27 +376,27 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="rounded-[40px] bg-gradient-to-br from-indigo-600/10 via-transparent to-blue-600/10 border border-white/10 p-1 md:p-8"
+          className="rounded-xl bg-gradient-to-br from-indigo-600/5 via-transparent to-blue-600/5 border border-border p-1 md:p-6"
         >
-          <div className="rounded-[32px] bg-[#0D0D0F]/80 backdrop-blur-3xl p-8 md:p-12 border border-white/5 shadow-2xl">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-12">
+          <div className="rounded-xl bg-card backdrop-blur-3xl p-8 md:p-10 border border-border">
+            <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-10">
               <div className="max-w-2xl text-center md:text-left">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] font-black uppercase tracking-widest text-violet-400 mb-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-500 mb-4">
                   <Sparkles className="w-3 h-3" />
-                  AI Reasoning Engine
+                  AI Analysis
                 </div>
-                <h2 className="text-3xl md:text-4xl font-black text-white tracking-tight mb-4">
-                  Deep Cognitive Analysis
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight mb-3">
+                  Performance Analysis
                 </h2>
-                <p className="text-slate-400 font-medium leading-relaxed">
-                  Let our AI Mentor analyze your diagnostic patterns, BKT mastery deltas, and behavioral data to provide a research-grade breakdown of your unique learning persona.
+                <p className="text-text-secondary text-sm leading-relaxed">
+                  AI analyzes your diagnostic patterns, BKT mastery data, and learning behavior to generate a personalized breakdown.
                 </p>
               </div>
 
               <button
                 onClick={() => complete("")}
                 disabled={isLoadingAnalysis}
-                className="group relative px-10 py-5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-2xl font-black text-sm uppercase tracking-widest shadow-[0_15px_40px_rgba(59,130,246,0.3)] hover:shadow-[0_20px_50px_rgba(59,130,246,0.5)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale"
+                className="group relative px-8 py-3.5 bg-gradient-to-r from-blue-600 to-violet-600 rounded-xl font-semibold text-sm text-white hover:brightness-110 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {isLoadingAnalysis ? (
                   <div className="flex items-center gap-3">
@@ -432,7 +427,7 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                 className="relative mt-8"
               >
                 <div className="absolute inset-0 bg-blue-500/5 rounded-3xl blur-2xl" />
-                <div className="relative bg-white/[0.02] border border-white/10 rounded-3xl p-8 md:p-10 font-medium text-slate-300 leading-loose prose prose-invert prose-blue max-w-none prose-sm md:prose-base min-h-[100px]">
+                <div className="relative bg-card border border-border rounded-xl p-8 md:p-10 text-text-secondary leading-loose prose prose-invert prose-blue max-w-none prose-sm md:prose-base min-h-[100px]">
                    {completion ? (
                      <ReactMarkdown>{completion}</ReactMarkdown>
                    ) : (

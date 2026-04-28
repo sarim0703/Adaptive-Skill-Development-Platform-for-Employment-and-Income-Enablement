@@ -113,6 +113,7 @@ export default function Navbar() {
   if (pathname === '/auth') return null;
 
   const isLandingPage = pathname === '/';
+  const isLoggedIn = !!session?.user;
   const userName = session?.user?.name?.split(' ')[0];
   const userInitial = userName?.charAt(0)?.toUpperCase() || '?';
 
@@ -146,11 +147,10 @@ export default function Navbar() {
         {/* ── Brand Icon ── */}
         <Link href="/" className="px-2">
           <motion.div 
-            whileHover={{ rotate: 5, scale: 1.1 }}
+            whileHover={{ scale: 1.05 }}
             className="w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg relative group overflow-hidden bg-background border border-border"
           >
             <Image src="/logo.png" alt="CareerOrbit Logo" fill className="object-cover" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background animate-pulse" />
           </motion.div>
         </Link>
 
@@ -158,7 +158,7 @@ export default function Navbar() {
         <div className="w-px h-8 bg-border mx-1" />
 
         {/* ── Nav Links Cluster ── */}
-        {!isLandingPage && (
+        {(isLoggedIn || !isLandingPage) && (
           <div className="flex items-center gap-2">
             {appLinks.map((link) => (
               <DockIcon 
@@ -223,11 +223,11 @@ export default function Navbar() {
             {theme === "dark" ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-500" />}
           </motion.button>
 
-          {isLandingPage ? (
+          {!isLoggedIn ? (
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
                 href="/?auth=true" 
-                className="px-5 py-2.5 rounded-2xl bg-blue-600 text-white text-[10px] font-black uppercase tracking-widest hover:bg-blue-500 shadow-[0_5px_15px_rgba(37,99,235,0.3)] block"
+                className="px-5 py-2.5 rounded-2xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-500 shadow-[0_5px_15px_rgba(37,99,235,0.3)] block"
               >
                 {t("nav.signIn")}
               </Link>
@@ -236,7 +236,7 @@ export default function Navbar() {
             <>
               {/* Sign Out */}
               <motion.button
-                whileHover={{ scale: 1.1, rotate: -10 }}
+                whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => signOut({ callbackUrl: window.location.origin })}
                 className="w-10 h-10 flex items-center justify-center rounded-2xl text-foreground/40 hover:bg-rose-500/10 hover:text-rose-500 transition-colors border border-transparent hover:border-rose-500/20"

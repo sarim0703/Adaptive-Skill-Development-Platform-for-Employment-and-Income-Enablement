@@ -10,7 +10,7 @@ import { useLanguage } from "@/context/LanguageContext";
 
 export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
   const { t } = useLanguage();
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
@@ -54,7 +54,7 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
         }
       }
     } catch (err: any) {
-      setError("An error occurred. Please try again.");
+      setError(err?.message || "An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -78,21 +78,21 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
         <h2 className="text-4xl font-black text-foreground mb-2 tracking-tight">
           {isLogin ? t("auth.welcome") : t("auth.join")}
         </h2>
-        <p className="text-slate-500 dark:text-slate-400 font-medium mb-10">
+        <p className="text-text-secondary font-normal mb-10">
           {isLogin ? t("auth.sub") : t("auth.joinsub")}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && (
             <div className="space-y-2">
-              <label className="text-xs font-black uppercase tracking-widest text-slate-500">{t("auth.name")}</label>
+              <label className="text-xs font-medium uppercase tracking-wider text-text-tertiary">{t("auth.name")}</label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                 <input
                   name="name"
                   type="text"
                   required
-                  className="w-full bg-card border border-border rounded-2xl py-4 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
+                  className="w-full bg-card border border-border rounded-2xl py-4 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-foreground/5 transition-all font-normal"
                   placeholder="John Doe"
                 />
               </div>
@@ -100,28 +100,28 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
           )}
 
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-500">{t("auth.email")}</label>
+            <label className="text-xs font-medium text-text-tertiary">{t("auth.email")}</label>
             <div className="relative">
-              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 name="email"
                 type="email"
                 required
-                className="w-full bg-card border border-border rounded-2xl py-4 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
+                className="w-full bg-card border border-border rounded-xl py-3.5 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-foreground/5 transition-all"
                 placeholder="you@example.com"
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <label className="text-xs font-black uppercase tracking-widest text-slate-500">{t("auth.password")}</label>
+            <label className="text-xs font-medium text-text-tertiary">{t("auth.password")}</label>
             <div className="relative">
-              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+              <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
               <input
                 name="password"
                 type="password"
                 required
-                className="w-full bg-card border border-border rounded-2xl py-4 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-medium"
+                className="w-full bg-card border border-border rounded-xl py-3.5 pl-12 pr-4 text-foreground outline-none focus:border-blue-500/50 focus:bg-foreground/5 transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -136,7 +136,7 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary w-full py-5 text-lg rounded-2xl shadow-xl shadow-blue-500/20 active:scale-95 transition-all"
+            className="btn-primary w-full py-3.5 text-sm font-semibold rounded-xl transition-all"
           >
             {loading ? <Loader2 className="w-6 h-6 animate-spin mx-auto" /> : (isLogin ? t("auth.signin") : t("auth.signupBtn"))}
           </button>
@@ -145,14 +145,14 @@ export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
         <div className="mt-8 text-center">
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-sm font-black uppercase tracking-widest text-blue-400 hover:text-blue-300 transition-colors"
+            className="text-sm font-semibold text-blue-500 hover:text-blue-400 transition-colors"
           >
             {isLogin ? t("auth.signup") : t("auth.haveAccount")}
           </button>
         </div>
       </div>
 
-      <div className="text-center text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">
+      <div className="text-center text-xs font-medium text-text-muted">
         CareerOrbit Security Layer © 2026
       </div>
     </div>

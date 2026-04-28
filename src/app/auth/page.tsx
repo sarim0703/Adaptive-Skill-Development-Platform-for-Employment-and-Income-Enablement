@@ -85,10 +85,10 @@ export default function AuthPage() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-indigo-500 mb-4">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-slate-800">
+          <h1 className="text-2xl font-bold text-foreground">
             {isLogin ? t("auth.welcome") : t("auth.join")}
           </h1>
-          <p className="text-slate-500 mt-1 text-sm">
+          <p className="text-text-secondary mt-1 text-sm">
             {isLogin
               ? t("auth.sub")
               : t("auth.joinsub")}
@@ -100,7 +100,7 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {!isLogin && (
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label className="block text-sm font-medium text-text-secondary mb-1.5">
                   {t("auth.name")}
                 </label>
                 <input
@@ -113,7 +113,7 @@ export default function AuthPage() {
               </div>
             )}
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 {t("auth.email")}
               </label>
               <input
@@ -125,7 +125,7 @@ export default function AuthPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">
                 {t("auth.password")}
               </label>
               <input
@@ -172,7 +172,7 @@ export default function AuthPage() {
           </div>
         </div>
 
-        <p className="text-center text-xs text-slate-400 mt-6">
+        <p className="text-center text-xs text-text-tertiary mt-6">
           {t("footer.text2")}
         </p>
       </div>

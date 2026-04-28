@@ -24,7 +24,7 @@ export default function HomeContent() {
       <div className={`aurora-blob w-[600px] h-[600px] bg-violet-600/20 top-1/2 -right-1/4 rounded-full transition-all duration-1000 ${isAuthVisible ? 'blur-[160px] scale-150 opacity-20' : ''}`} style={{ animationDelay: '4s' }}></div>
       
       {/* Dynamic Grid Overlay */}
-      <div className="absolute inset-0 bg-tech-grid pointer-events-none opacity-30 dark:opacity-30 light:opacity-10"></div>
+      <div className="absolute inset-0 bg-tech-grid pointer-events-none opacity-10 dark:opacity-30"></div>
 
       {/* Main Content Wrapper */}
       <div className={`transition-all duration-1000 cubic-bezier(0.4, 0, 0.2, 1) ${isAuthVisible ? 'translate-x-[-30%] opacity-40 scale-95 pointer-events-none blur-sm' : 'translate-x-0 opacity-100 scale-100'}`}>
@@ -34,17 +34,17 @@ export default function HomeContent() {
         <section className="text-center mb-40 animate-fadeInUp">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border backdrop-blur-md mb-10 shadow-2xl">
             <Sparkles className="w-4 h-4 text-blue-400" />
-            <span className="text-xs font-black uppercase tracking-[0.2em] text-blue-400 dark:text-blue-100">{t("hero.badge")}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-blue-500">{t("hero.badge")}</span>
           </div>
 
-          <h1 className="text-6xl md:text-[100px] font-black tracking-tighter leading-[0.9] mb-10 text-foreground">
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tighter leading-[0.9] mb-10 text-foreground">
             {t("hero.title")}<br />
             <span className="bg-gradient-to-r from-blue-400 via-indigo-400 to-violet-400 bg-clip-text text-transparent italic">
               {t("hero.titleHighlight")}
             </span>
           </h1>
 
-          <p className="text-lg md:text-2xl text-slate-500 dark:text-slate-400 max-w-3xl mx-auto mb-16 leading-relaxed font-medium">
+          <p className="text-lg md:text-xl text-text-secondary max-w-3xl mx-auto mb-16 leading-relaxed font-normal">
             {t("hero.subtitle")}
           </p>
 
@@ -63,7 +63,7 @@ export default function HomeContent() {
           {/* Trust Line */}
           <div className="flex flex-wrap items-center justify-center gap-12 mt-24 opacity-50 grayscale hover:grayscale-0 transition-all duration-700">
              {[t("hero.trust1"), t("hero.trust2"), t("hero.trust3")].map((trust, i) => (
-               <div key={i} className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-foreground">
+               <div key={i} className="flex items-center gap-3 text-xs font-medium uppercase tracking-wider text-text-secondary">
                   <CheckCircle2 className="w-5 h-5 text-blue-500" />
                   {trust}
                </div>
@@ -83,9 +83,9 @@ export default function HomeContent() {
                   <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-8">
                      <Brain className="w-8 h-8 text-blue-400" />
                   </div>
-                  <h3 className="text-4xl font-black text-foreground mb-4 leading-tight">Adaptive Learning Engine</h3>
-                  <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">
-                    Our proprietary BKT engine tracks your mastery in real-time, adjusting difficulty as you learn.
+                  <h3 className="text-3xl font-bold text-foreground mb-4 leading-tight">Adaptive Engine</h3>
+                  <p className="text-text-secondary text-base font-normal leading-relaxed">
+                    Bayesian Knowledge Tracing monitors your mastery in real-time, dynamically adjusting task difficulty.
                   </p>
                </div>
                <div className="mt-12 h-2 w-full bg-card border border-border rounded-full overflow-hidden">
@@ -97,8 +97,8 @@ export default function HomeContent() {
             <div className="md:col-span-2 card p-10 group overflow-hidden">
                <div className="flex items-start justify-between gap-6">
                   <div>
-                    <h3 className="text-2xl font-black text-foreground mb-2">Live Market Insights</h3>
-                    <p className="text-slate-500 dark:text-slate-400 font-medium">Real-time demand tracking for your specific region.</p>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">Market Intelligence</h3>
+                    <p className="text-text-secondary font-normal">Real-time job demand data for your region.</p>
                   </div>
                   <TrendingUp className="w-10 h-10 text-emerald-400 group-hover:scale-110 transition-transform" />
                </div>
@@ -107,34 +107,34 @@ export default function HomeContent() {
             {/* Sub Feature 2 */}
             <div className="card p-10 group">
                <Users className="w-8 h-8 text-violet-400 mb-6 group-hover:rotate-12 transition-transform" />
-               <h3 className="text-xl font-black text-foreground mb-2">Social Proof</h3>
-               <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">12k+ Active Learners</p>
+               <h3 className="text-lg font-semibold text-foreground mb-2">Multilingual</h3>
+               <p className="text-sm text-text-secondary font-medium">English, Hindi, Kannada</p>
             </div>
 
             {/* Sub Feature 3 */}
             <div className="card p-10 group border-blue-500/30 bg-blue-500/5">
                <Sparkles className="w-8 h-8 text-blue-400 mb-6 animate-pulse" />
-               <h3 className="text-xl font-black text-foreground mb-2">AI Mentorship</h3>
-               <p className="text-sm text-slate-500 font-bold uppercase tracking-wider">24/7 Support Active</p>
+               <h3 className="text-lg font-semibold text-foreground mb-2">AI Mentor</h3>
+               <p className="text-sm text-text-secondary font-medium">Context-aware guidance</p>
             </div>
           </div>
         </section>
 
         {/* How it Works - Modern Horizontal Loop */}
         <section className="mb-40 text-center">
-           <h2 className="text-4xl md:text-6xl font-black text-foreground mb-20 tracking-tighter">{t("how.title")}</h2>
+           <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-16 tracking-tight">{t("how.title")}</h2>
            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {[0, 1, 2].map((index) => (
                 <div key={index} className="relative group text-left">
-                  <div className="text-[120px] font-black text-foreground/[0.03] dark:text-white/[0.03] absolute -top-16 -left-8 pointer-events-none group-hover:text-blue-500/10 transition-colors">
+                  <div className="text-[80px] font-bold text-foreground/[0.03] absolute -top-10 -left-6 pointer-events-none group-hover:text-blue-500/5 transition-colors">
                     0{index + 1}
                   </div>
                   <div className="relative z-10">
-                    <h3 className="text-3xl font-black text-foreground mb-4 flex items-center gap-4">
+                    <h3 className="text-2xl font-semibold text-foreground mb-4 flex items-center gap-4">
                       {t(`how.step${index + 1}.title` as any)}
                       <ArrowRight className="w-6 h-6 text-blue-500 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all" />
                     </h3>
-                    <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed border-l-2 border-border pl-6 group-hover:border-blue-500/50 transition-colors">
+                    <p className="text-text-secondary text-base font-normal leading-relaxed border-l-2 border-border pl-6 group-hover:border-blue-500/50 transition-colors">
                       {t(`how.step${index + 1}.desc` as any)}
                     </p>
                   </div>
@@ -147,8 +147,8 @@ export default function HomeContent() {
         <section className="mb-24 card p-20 text-center relative overflow-hidden bg-gradient-to-br from-blue-600/10 to-violet-600/10 border-blue-500/20">
            <div className="absolute inset-0 bg-tech-grid opacity-10"></div>
            <div className="relative z-10">
-              <h2 className="text-4xl md:text-6xl font-black text-foreground mb-8 tracking-tighter">Ready to sync your skills?</h2>
-              <p className="text-xl text-slate-500 dark:text-slate-400 mb-12 max-w-2xl mx-auto font-medium">Join thousands of others building their future with adaptive AI learning.</p>
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8 tracking-tight">Ready to start learning?</h2>
+              <p className="text-lg text-text-secondary mb-12 max-w-2xl mx-auto font-normal">Join thousands of others building their future with adaptive AI learning.</p>
               <Link
                 href="/?auth=true"
                 className="btn-primary px-16 py-8 text-2xl rounded-full shadow-[0_0_60px_rgba(59,130,246,0.3)]"
@@ -164,9 +164,9 @@ export default function HomeContent() {
               <div className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center">
                 <Sparkles className="w-5 h-5 text-blue-400" />
               </div>
-              <span className="text-sm font-black uppercase tracking-[0.3em] text-slate-500">{t("footer.text1")}</span>
+              <span className="text-sm font-medium uppercase tracking-wider text-text-tertiary">{t("footer.text1")}</span>
            </div>
-           <div className="flex gap-8 text-xs font-black uppercase tracking-widest text-slate-600">
+           <div className="flex gap-8 text-xs font-medium uppercase tracking-wider text-text-tertiary">
               <a href="#" className="hover:text-foreground transition-colors">Privacy</a>
               <a href="#" className="hover:text-foreground transition-colors">Terms</a>
               <a href="#" className="hover:text-foreground transition-colors">Contact</a>

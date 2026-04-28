@@ -103,13 +103,13 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
   }, [selectedJobId]);
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#0A0A0C]">
+    <div className="relative h-full w-full overflow-hidden bg-background">
       <div className="h-full w-full">
         <MapContainer 
           center={center} 
           zoom={6} 
           scrollWheelZoom={true}
-          style={{ height: "100%", width: "100%", background: "#0A0A0C" }}
+          style={{ height: "100%", width: "100%", background: "var(--bg-primary, #0A0A0C)" }}
           zoomControl={false}
           attributionControl={false}
         >
@@ -138,16 +138,16 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
               >
                 <Popup className="custom-job-popup">
                   <div style={{
-                    background: "#0f0f12",
-                    color: "#fff",
+                    background: "var(--surface-raised, #0f0f12)",
+                    color: "var(--text-primary, #fff)",
                     padding: "0",
-                    borderRadius: "20px",
-                    border: "1px solid rgba(255,255,255,0.08)",
+                    borderRadius: "16px",
+                    border: "1px solid var(--border-primary, rgba(255,255,255,0.08))",
                     minWidth: "280px",
                     maxWidth: "320px",
                     fontFamily: "Inter, sans-serif",
                     overflow: "hidden",
-                    boxShadow: "0 20px 60px rgba(0,0,0,0.6)",
+                    boxShadow: "0 16px 48px rgba(0,0,0,0.4)",
                   }}>
                     {/* Header band with source color */}
                     <div style={{
@@ -158,12 +158,12 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
                     <div style={{ padding: "18px 20px" }}>
                       {/* Role Title */}
                       <p style={{ 
-                        fontSize: "15px", 
-                        fontWeight: 900, 
+                        fontSize: "14px", 
+                        fontWeight: 600, 
                         marginBottom: "6px",
                         lineHeight: 1.3,
-                        letterSpacing: "-0.02em",
-                        color: "#fff",
+                        letterSpacing: "-0.01em",
+                        color: "var(--text-primary, #fff)",
                       }}>
                         {job.title}
                       </p>
@@ -184,7 +184,7 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
                           fontSize: "10px",
                           flexShrink: 0,
                         }}>🏢</span>
-                        <span style={{ fontSize: "13px", color: "#CBD5E1", fontWeight: 700 }}>
+                        <span style={{ fontSize: "13px", color: "var(--text-secondary, #CBD5E1)", fontWeight: 500 }}>
                           {job.company}
                         </span>
                       </div>
@@ -196,14 +196,14 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
                         gap: "8px", 
                         marginBottom: "14px",
                         padding: "12px",
-                        background: "rgba(255,255,255,0.02)",
+                        background: "var(--surface-base, rgba(255,255,255,0.02))",
                         borderRadius: "12px",
-                        border: "1px solid rgba(255,255,255,0.04)",
+                        border: "1px solid var(--border-primary, rgba(255,255,255,0.04))",
                       }}>
                         {/* Location */}
                         <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                           <span style={{ fontSize: "12px" }}>📍</span>
-                          <span style={{ fontSize: "12px", color: "#94A3B8", fontWeight: 600 }}>
+                          <span style={{ fontSize: "12px", color: "var(--text-tertiary, #94A3B8)", fontWeight: 500 }}>
                             {job.location || "India"}
                           </span>
                         </div>
@@ -222,7 +222,7 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
                       {/* Badges */}
                       <div style={{ display: "flex", gap: "6px", alignItems: "center", marginBottom: "16px", flexWrap: "wrap" as const }}>
                         <span style={{
-                          fontSize: "9px", fontWeight: 900,
+                          fontSize: "10px", fontWeight: 600,
                           textTransform: "uppercase" as const,
                           letterSpacing: "0.1em",
                           padding: "3px 10px",
@@ -235,7 +235,7 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
                         </span>
                         {job.is_remote && (
                           <span style={{
-                            fontSize: "9px", fontWeight: 900,
+                            fontSize: "10px", fontWeight: 600,
                             textTransform: "uppercase" as const,
                             letterSpacing: "0.1em",
                             padding: "3px 10px",
@@ -265,11 +265,11 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
                           background: "#3B82F6",
                           color: "#fff",
                           fontSize: "11px",
-                          fontWeight: 900,
+                          fontWeight: 600,
                           textTransform: "uppercase" as const,
                           letterSpacing: "0.15em",
                           textDecoration: "none",
-                          boxShadow: "0 4px 20px rgba(59,130,246,0.3)",
+                          boxShadow: "0 4px 16px rgba(59,130,246,0.2)",
                           transition: "background 0.2s",
                         }}
                       >
@@ -298,10 +298,10 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
       `}</style>
 
       {/* Job count overlay */}
-      <div className="absolute bottom-4 left-4 z-[1000] bg-[#111]/90 backdrop-blur-xl border border-white/10 rounded-2xl px-4 py-2.5 flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
-          {jobs.length} signals tracked
+      <div className="absolute bottom-4 left-4 z-[1000] bg-card/90 backdrop-blur-xl border border-border rounded-xl px-4 py-2 flex items-center gap-2">
+        <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+        <span className="text-xs font-medium text-text-secondary">
+          {jobs.length} jobs found
         </span>
       </div>
     </div>

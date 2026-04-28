@@ -99,25 +99,21 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   // Loading state
   if (loading) {
     return (
-      <div className="relative min-h-screen bg-[#0A0A0C] text-white flex flex-col items-center justify-center p-6 overflow-hidden">
-        <div className="aurora-blob w-[600px] h-[600px] bg-blue-600/10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full animate-pulse blur-[120px]"></div>
-        <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none"></div>
-
-        <div className="relative z-10 text-center max-w-lg animate-fadeInUp">
-          <div className="inline-flex mb-12 relative group">
-            <div className="absolute inset-0 bg-blue-500 rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity"></div>
-            <div className="w-24 h-24 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin flex items-center justify-center bg-black/40 backdrop-blur-xl">
-               <Brain className="w-8 h-8 text-blue-400 animate-pulse" />
+      <div className="relative min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 overflow-hidden transition-colors duration-300">
+        <div className="relative z-10 text-center max-w-lg">
+          <div className="inline-flex mb-10">
+            <div className="w-20 h-20 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin flex items-center justify-center bg-card">
+               <Brain className="w-7 h-7 text-blue-500 animate-pulse" />
             </div>
           </div>
-          <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight uppercase">
-            Synchronizing <span className="italic-gradient">Mentor</span>
+          <h2 className="text-2xl font-semibold tracking-tight mb-4 text-foreground">
+            Preparing questions...
           </h2>
-          <p className="text-xl text-slate-400 font-medium opacity-80 mb-8">
+          <p className="text-base text-text-secondary mb-8">
             {t("pretest.loadingSub")}
           </p>
-          <div className="w-full bg-white/5 rounded-full h-1 overflow-hidden border border-white/5">
-             <div className="h-full bg-blue-500 w-2/3 animate-[loading_3s_ease-in-out_infinite] shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
+          <div className="w-full bg-foreground/5 rounded-full h-1 overflow-hidden border border-border">
+             <div className="h-full bg-blue-500 w-2/3 animate-[loading_3s_ease-in-out_infinite]"></div>
           </div>
         </div>
       </div>
@@ -127,15 +123,15 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   // Error state
   if (error) {
     return (
-      <div className="min-h-screen bg-[#0A0A0C] text-white flex items-center justify-center p-6">
-        <div className="glass-card p-12 text-center max-w-md border-rose-500/20 shadow-[0_0_50px_rgba(244,63,94,0.1)]">
-          <div className="w-20 h-20 rounded-3xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-8">
-            <AlertCircle className="w-10 h-10 text-rose-500" />
+      <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-6 transition-colors duration-300">
+        <div className="bg-card border border-border rounded-xl p-10 text-center max-w-md">
+          <div className="w-16 h-16 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-8 h-8 text-rose-500" />
           </div>
-          <h2 className="text-3xl font-black tracking-tight mb-4">Sync Interrupted</h2>
-          <p className="text-slate-400 mb-10 font-medium leading-relaxed">{error}</p>
-          <button onClick={() => window.location.reload()} className="btn-primary w-full py-5 text-lg rounded-2xl shadow-xl shadow-blue-500/20 active:scale-95 transition-all flex items-center justify-center gap-3">
-            <RefreshCw className="w-5 h-5" />
+          <h2 className="text-xl font-semibold text-foreground mb-3">Something went wrong</h2>
+          <p className="text-text-secondary mb-8 text-sm">{error}</p>
+          <button onClick={() => window.location.reload()} className="btn-primary w-full py-3 text-sm rounded-xl flex items-center justify-center gap-2">
+            <RefreshCw className="w-4 h-4" />
             Try Again
           </button>
         </div>
@@ -146,36 +142,30 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   // Result state
   if (showResult) {
     return (
-      <div className="relative min-h-screen bg-[#0A0A0C] text-white flex flex-col items-center justify-center p-6 overflow-hidden">
-        {/* Background Decor */}
-        <div className="aurora-blob w-[800px] h-[800px] bg-emerald-600/5 -top-1/4 -left-1/4 rounded-full pointer-events-none blur-[100px]"></div>
-        <div className="absolute inset-0 bg-tech-grid opacity-10 pointer-events-none"></div>
-
-        <div className="max-w-xl w-full relative z-10 animate-fadeInUp">
-          <div className="glass-card p-12 text-center border-emerald-500/20 shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
-            <div className="w-24 h-24 rounded-3xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-10 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-              <CheckCircle2 className="w-12 h-12 text-emerald-400" />
+      <div className="relative min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 overflow-hidden transition-colors duration-300">
+        <div className="max-w-md w-full relative z-10">
+          <div className="bg-card border border-border rounded-xl p-10 text-center">
+            <div className="w-16 h-16 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 className="w-8 h-8 text-emerald-500" />
             </div>
             
-            <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-4 leading-tight uppercase italic-gradient">
+            <h2 className="text-2xl font-semibold tracking-tight mb-3 text-foreground">
               {t("pretest.done")}
             </h2>
-            <p className="text-xl text-slate-400 mb-12 font-medium leading-relaxed opacity-80">
+            <p className="text-base text-text-secondary mb-8">
               {t("pretest.doneSub")}
             </p>
 
-            <div className="relative p-12 rounded-[40px] bg-white/[0.03] border border-white/5 mb-12 overflow-hidden group">
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <div className="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4 relative z-10">Baseline Capability</div>
-              <div className="text-8xl font-black text-white mb-2 tracking-tighter relative z-10">
-                {score}<span className="text-emerald-400 text-4xl">%</span>
+            <div className="p-8 rounded-xl bg-input border border-border mb-8">
+              <div className="text-xs font-medium text-text-tertiary mb-2">{t("pretest.baselineScore")}</div>
+              <div className="text-6xl font-bold text-foreground mb-1 tabular-nums">
+                {score}<span className="text-emerald-500 text-2xl">%</span>
               </div>
-              <div className="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] opacity-60 relative z-10">{t("pretest.baselineScore")}</div>
             </div>
 
-            <button onClick={handleContinue} className="w-full py-6 rounded-3xl bg-white text-black font-black uppercase tracking-[0.3em] text-xs shadow-2xl hover:bg-emerald-500 hover:text-white hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-4 group">
+            <button onClick={handleContinue} className="w-full py-3.5 rounded-xl bg-foreground text-background font-semibold text-sm hover:bg-emerald-600 hover:text-white active:scale-[0.98] transition-all flex items-center justify-center gap-2">
               {t("pretest.startLearning")}
-              <ArrowRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -189,50 +179,41 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   const isLast = currentIndex === questions.length - 1;
 
   return (
-    <div className="relative min-h-screen bg-[#0A0A0C] text-white pt-24 pb-24 px-6 overflow-hidden">
-      {/* Background Decor */}
-      <div className="aurora-blob w-[600px] h-[600px] bg-blue-600/5 top-0 right-0 rounded-full pointer-events-none blur-[100px]"></div>
-      <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none"></div>
-
+    <div className="relative min-h-screen bg-background text-foreground pt-24 pb-24 px-6 overflow-hidden transition-colors duration-300">
       <div className="max-w-3xl mx-auto relative z-10">
         {/* Progress Header */}
         <div className="mb-8 flex flex-col items-center">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-6">
-            <Sparkles className="w-3 h-3 text-blue-400" />
-            <span className="text-[8px] font-black uppercase tracking-[0.2em] text-blue-100">Mentor Calibration</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border mb-6">
+            <Sparkles className="w-3 h-3 text-blue-500" />
+            <span className="text-xs font-medium text-text-secondary">Diagnostic Assessment</span>
           </div>
           
-          <div className="w-full flex gap-1.5 px-4 h-2">
+          <div className="w-full flex gap-1.5 px-4 h-1.5">
             {questions.map((_, i) => (
               <div
                 key={i}
                 className={`h-full flex-1 rounded-full transition-all duration-700 ${
-                  i < currentIndex ? "bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.6)]" :
-                  i === currentIndex ? "bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)]" : "bg-white/10"
+                  i < currentIndex ? "bg-blue-500" :
+                  i === currentIndex ? "bg-foreground" : "bg-foreground/10"
                 }`}
               />
             ))}
           </div>
-          <div className="mt-3 flex items-center gap-4">
-             <span className="text-[7px] font-black uppercase tracking-[0.3em] text-slate-500">Query {currentIndex + 1} of {questions.length}</span>
-             <div className="px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[6px] font-black uppercase tracking-widest">{question.difficulty}</div>
+          <div className="mt-3 flex items-center gap-3">
+             <span className="text-xs font-medium text-text-tertiary">Question {currentIndex + 1} of {questions.length}</span>
+             <div className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-medium">{question.difficulty}</div>
           </div>
         </div>
 
         {/* Question Area */}
         <div className="grid grid-cols-1 gap-6" key={currentIndex}>
            <div className="text-center">
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight mb-2 leading-tight animate-fadeInUp">
+              <h1 className="text-xl md:text-2xl font-semibold tracking-tight mb-2 leading-tight text-foreground">
                 {question.question}
               </h1>
            </div>
 
-           <div className="glass-card p-6 md:p-8 relative overflow-hidden group shadow-[0_32px_64px_rgba(0,0,0,0.5)] border-white/10">
-              {/* Question Index Badge */}
-              <div className="absolute top-2 right-6 text-[80px] font-black text-white/[0.02] pointer-events-none select-none z-0">
-                0{currentIndex + 1}
-              </div>
-
+           <div className="bg-card border border-border rounded-xl p-6 md:p-8 relative overflow-hidden">
               <div className="relative z-10 grid grid-cols-1 gap-2">
                 {question.options.map((option, idx) => {
                   const isSelected = answers[currentIndex] === idx;
@@ -240,20 +221,20 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
                     <button
                       key={idx}
                       onClick={() => handleAnswer(idx)}
-                      className={`w-full text-left p-4 rounded-2xl border transition-all flex items-center gap-4 group/btn ${
+                      className={`w-full text-left p-4 rounded-xl border transition-all flex items-center gap-4 group/btn ${
                         isSelected
-                          ? "bg-blue-600 border-blue-400 text-white shadow-[0_15px_40px_rgba(59,130,246,0.3)] scale-[1.01]"
-                          : "bg-white/5 border-white/5 text-slate-300 hover:border-white/20 hover:bg-white/10"
+                          ? "bg-blue-600 border-blue-500 text-white"
+                          : "bg-input border-border text-text-secondary hover:border-border-hover hover:bg-card-hover"
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-black text-sm transition-all ${
+                      <div className={`w-7 h-7 rounded-lg flex items-center justify-center font-semibold text-sm transition-all ${
                         isSelected
                           ? "bg-white text-blue-600"
-                          : "bg-white/10 text-slate-500 group-hover/btn:bg-white/20 group-hover/btn:text-white"
+                          : "bg-foreground/5 text-text-tertiary group-hover/btn:bg-foreground/10"
                       }`}>
                         {String.fromCharCode(65 + idx)}
                       </div>
-                      <span className="text-base md:text-lg font-bold tracking-tight leading-snug">{option}</span>
+                      <span className="text-sm font-medium leading-snug">{option}</span>
                     </button>
                   );
                 })}
@@ -264,7 +245,7 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
                 <button
                   onClick={handleNext}
                   disabled={!isAnswered || submitting}
-                  className="w-full py-4 text-[9px] font-black uppercase tracking-[0.3em] shadow-[0_15px_40px_rgba(59,130,246,0.3)] bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-95 disabled:opacity-30 disabled:grayscale transition-all group/next"
+                  className="w-full py-3.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] disabled:opacity-30 transition-all"
                 >
                   {submitting ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -281,9 +262,9 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
            </div>
         </div>
 
-        <div className="mt-6 flex items-center justify-center gap-3 text-slate-600 font-black uppercase tracking-[0.3em] text-[8px]">
+        <div className="mt-6 flex items-center justify-center gap-2">
            <Award className="w-3.5 h-3.5 text-amber-500 opacity-60" />
-           {t("pretest.noWrong")}
+           <span className="text-xs font-medium text-text-tertiary">{t("pretest.noWrong")}</span>
         </div>
       </div>
     </div>

@@ -35,16 +35,16 @@ export default function OutcomeCard({ onSubmit }: OutcomeCardProps) {
     return (
       <div className="card p-8 text-center">
         <CheckCircle2 className="w-12 h-12 text-green-500 mx-auto mb-4" />
-        <h3 className="text-lg font-bold text-slate-800 mb-1">{t("outcome.thanks")}</h3>
-        <p className="text-slate-400 text-sm">{t("outcome.thanksSub")}</p>
+        <h3 className="text-lg font-semibold text-foreground mb-1">{t("outcome.thanks")}</h3>
+        <p className="text-text-secondary text-sm">{t("outcome.thanksSub")}</p>
       </div>
     );
   }
 
   return (
     <div className="card p-6">
-      <h3 className="text-lg font-bold text-slate-800 mb-1">{t("outcome.title")}</h3>
-      <p className="text-slate-500 text-sm mb-5">{t("outcome.sub")}</p>
+      <h3 className="text-lg font-semibold text-foreground mb-1">{t("outcome.title")}</h3>
+      <p className="text-text-secondary text-sm mb-5">{t("outcome.sub")}</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-5">
         {outcomeOptions.map((opt) => {
@@ -54,8 +54,8 @@ export default function OutcomeCard({ onSubmit }: OutcomeCardProps) {
             <button
               key={opt.type}
               onClick={() => setSelected(opt.type)}
-              className={`p-4 rounded-xl border-1.5 text-left flex items-center gap-3 transition-all ${
-                isSelected ? opt.color + ' ring-2 ring-indigo-200' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50'
+              className={`p-4 rounded-xl border text-left flex items-center gap-3 transition-all ${
+                isSelected ? opt.color + ' ring-2 ring-blue-500/20' : 'bg-input border-border text-text-secondary hover:border-border-hover hover:bg-card-hover'
               }`}
             >
               <Icon className="w-5 h-5 flex-shrink-0" />

@@ -164,10 +164,10 @@ export default function LearnClient({
         {/* ── Top Status Strip ── */}
         <div className="flex items-center justify-between py-4 mb-2">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+            <div className="flex items-center gap-1.5 text-xs font-medium text-text-tertiary">
               <span>{pathTitle}</span>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-slate-400">Module {currentModuleNumber}</span>
+              <span className="text-text-secondary">Module {currentModuleNumber}</span>
               <ChevronRight className="w-3 h-3" />
               <span className="text-foreground">Lesson {currentSubtopicIndex + 1}</span>
             </div>
@@ -321,13 +321,13 @@ export default function LearnClient({
                   <div className="space-y-4">
                     <div className="rounded-xl bg-blue-500/[0.03] border border-blue-500/10 p-5 relative overflow-hidden">
                       <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
-                      <p className="text-base text-slate-500 dark:text-slate-200 leading-relaxed font-medium pl-3">{subtopic.practical_task}</p>
+                      <p className="text-base text-foreground leading-relaxed font-medium pl-3">{subtopic.practical_task}</p>
                     </div>
                     <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-500/[0.03] border border-amber-500/10">
                       <Sparkles className="w-4 h-4 text-amber-500 flex-shrink-0 mt-0.5" />
                       <div>
-                        <h4 className="text-[9px] font-black text-amber-400/60 uppercase tracking-[0.2em] mb-1">{t("learn.quickTip")}</h4>
-                        <p className="text-xs text-slate-400 leading-relaxed">
+                        <h4 className="text-[9px] font-black text-amber-500 uppercase tracking-[0.2em] mb-1">{t("learn.quickTip")}</h4>
+                        <p className="text-xs text-text-secondary leading-relaxed">
                           {subtopic.task_type === "install" && t("learn.tip.install")}
                           {subtopic.task_type === "create" && t("learn.tip.create")}
                           {subtopic.task_type === "apply" && t("learn.tip.apply")}
@@ -342,9 +342,9 @@ export default function LearnClient({
                 )}
                 {activeTab === "notes" && (
                   subtopic.key_learning_notes ? (
-                    <div className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap">{subtopic.key_learning_notes}</div>
+                    <div className="text-sm text-text-secondary leading-relaxed whitespace-pre-wrap">{subtopic.key_learning_notes}</div>
                   ) : (
-                    <div className="text-center py-8 text-slate-600">
+                    <div className="text-center py-8 text-text-secondary">
                       <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
                       <p className="text-xs font-medium">No notes available for this lesson.</p>
                     </div>
