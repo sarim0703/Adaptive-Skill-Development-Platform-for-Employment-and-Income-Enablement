@@ -3,6 +3,8 @@ import LearnClient from "./LearnClient";
 import ModuleComplete from "./ModuleComplete";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 export default async function LearnPage({ searchParams }: { searchParams: { exploreId?: string } }) {
   const [roadmap, userModel, userProfile] = await Promise.all([
     getUserRoadmap(),

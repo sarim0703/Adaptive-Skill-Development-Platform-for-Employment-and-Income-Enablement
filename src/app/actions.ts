@@ -50,9 +50,13 @@ export async function registerUser(formData: FormData) {
 // Step 1.1: Determine correct redirect for returning users
 export async function checkUserState(): Promise<string> {
   const session = await auth();
-  if (!session?.user?.id) return '/auth';
+  if (!session?.user?.id) {
+    console.log("[StateCheck] No session, redirecting to /auth");
+    return '/auth';
+  }
 
   const userId = session.user.id;
+  console.log(`[StateCheck] Checking state for user: ${userId}`);
   
   // Parallel fetch for profile, active roadmap, and path options
   const [profile, roadmap, paths] = await Promise.all([
@@ -68,20 +72,31 @@ export async function checkUserState(): Promise<string> {
   ]);
 
   if (!profile) {
+    console.log("[StateCheck] No profile found, redirecting to /onboarding");
     return '/onboarding';
   }
 
   if (roadmap) {
+    console.log(`[StateCheck] Active roadmap found: ${roadmap.id}`);
     const model = await db.query.userModel.findFirst({
       where: (um, { eq }) => eq(um.userId, userId),
     });
-    if (model && (model.preTestScore === null || model.preTestScore === undefined)) {
+    
+    if (!model || model.preTestScore === null || model.preTestScore === undefined) {
+      console.log("[StateCheck] Pre-test pending, redirecting to /pre-test");
       return '/pre-test';
     }
+    
+    console.log("[StateCheck] Roadmap and Pre-test complete, redirecting to /learn");
     return '/learn';
   }
 
-  if (paths.length > 0) return '/path-selection';
+  if (paths.length > 0) {
+    console.log(`[StateCheck] ${paths.length} path options found, redirecting to /path-selection`);
+    return '/path-selection';
+  }
+
+  console.log("[StateCheck] No roadmap or paths, redirecting to /path-selection (initial)");
   return '/path-selection';
 }
 
@@ -121,11 +136,14 @@ export async function saveOnboardingProfile(answers: Record<number, string>) {
     await db.insert(profiles).values({ userId, ...profileData });
   }
 
+  // Force cache revalidation
   revalidatePath('/path-selection');
   revalidatePath('/onboarding');
+  revalidatePath('/learn');
   revalidatePath('/');
 
-  return { success: true };
+  const destination = await checkUserState();
+  return { success: true, destination };
 }
 
 export async function getPathOptions() {

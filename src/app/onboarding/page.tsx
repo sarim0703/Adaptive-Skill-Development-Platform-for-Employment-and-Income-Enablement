@@ -46,7 +46,7 @@ export default function OnboardingPage() {
       try {
         const res = await saveOnboardingProfile(answers);
         if (res.success) {
-          router.push("/path-selection");
+          router.push(res.destination || "/path-selection");
         }
       } catch (err) {
         console.error(err);

@@ -6,6 +6,8 @@ import { eq } from "drizzle-orm";
 import { redirect } from "next/navigation";
 import PathSelectionClient from "./PathSelectionClient";
 
+export const dynamic = 'force-dynamic';
+
 export default async function PathSelectionPage() {
   const session = await auth();
   if (!session?.user?.id) {
