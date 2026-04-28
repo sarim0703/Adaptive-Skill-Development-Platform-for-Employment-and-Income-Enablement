@@ -4,9 +4,11 @@ import ModuleComplete from "./ModuleComplete";
 import { redirect } from "next/navigation";
 
 export default async function LearnPage({ searchParams }: { searchParams: { exploreId?: string } }) {
-  const roadmap = await getUserRoadmap();
-  const userModel = await getUserModel();
-  const userProfile = await getUserProfile();
+  const [roadmap, userModel, userProfile] = await Promise.all([
+    getUserRoadmap(),
+    getUserModel(),
+    getUserProfile()
+  ]);
 
   if (!roadmap) {
     redirect("/path-selection");

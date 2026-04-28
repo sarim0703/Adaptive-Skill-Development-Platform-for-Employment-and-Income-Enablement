@@ -6,7 +6,7 @@ import { submitQuizResult } from "@/app/actions";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
-import { z } from "zod";
+import { quizSchema } from "@/lib/ai/schemas";
 
 type QuizModalProps = {
   roadmapId: string;
@@ -51,16 +51,7 @@ export default function QuizModal({
   // STREAMING HOOK
   const { object, submit, isLoading } = useObject({
     api: "/api/quiz",
-    schema: z.object({
-      questions: z.array(
-        z.object({
-          question: z.string(),
-          options: z.array(z.string()),
-          correct_index: z.number(),
-          explanation: z.string(),
-        })
-      )
-    })
+    schema: quizSchema,
   });
 
   // START GENERATING ON MOUNT

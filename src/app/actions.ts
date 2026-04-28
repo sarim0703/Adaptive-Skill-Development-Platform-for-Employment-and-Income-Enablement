@@ -53,24 +53,25 @@ export async function checkUserState(): Promise<string> {
   if (!session?.user?.id) return '/auth';
 
   const userId = session.user.id;
-
-  // 1. Check if user has a profile
-  const profile = await db.query.profiles.findFirst({
-    where: (p, { eq }) => eq(p.userId, userId),
-  });
+  
+  // Parallel fetch for profile, active roadmap, and path options
+  const [profile, roadmap, paths] = await Promise.all([
+    db.query.profiles.findFirst({
+      where: (p, { eq }) => eq(p.userId, userId),
+    }),
+    db.query.roadmaps.findFirst({
+      where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')),
+    }),
+    db.query.pathOptions.findMany({
+      where: (p, { eq }) => eq(p.userId, userId),
+    }),
+  ]);
 
   if (!profile) {
-    console.log(`[checkUserState] User ${userId} has no profile. Redirecting to /onboarding`);
     return '/onboarding';
   }
 
-  // 2. Check if user has an active roadmap
-  const roadmap = await db.query.roadmaps.findFirst({
-    where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')),
-  });
-
   if (roadmap) {
-    // 3. Check if pre-test is done
     const model = await db.query.userModel.findFirst({
       where: (um, { eq }) => eq(um.userId, userId),
     });
@@ -80,14 +81,7 @@ export async function checkUserState(): Promise<string> {
     return '/learn';
   }
 
-  // 4. Has profile but no roadmap — check for path options
-  const paths = await db.query.pathOptions.findMany({
-    where: (p, { eq }) => eq(p.userId, userId),
-  });
-
   if (paths.length > 0) return '/path-selection';
-
-  // 5. Default fallback for users with profile but no paths/roadmap
   return '/path-selection';
 }
 
@@ -591,6 +585,9 @@ export async function submitPreTestResults(params: {
       initialKnowledgeState: knowledgeState,
     },
   });
+
+  revalidatePath('/learn');
+  revalidatePath('/');
 
   return { success: true };
 }

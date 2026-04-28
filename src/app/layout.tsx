@@ -10,6 +10,7 @@ const inter = Inter({
 });
 
 import { Providers } from "@/components/Providers";
+import PageTransition from "@/components/PageTransition";
 
 export const metadata: Metadata = {
   title: "CareerOrbit - Adaptive Career Navigation",
@@ -28,7 +29,9 @@ export default function RootLayout({
           <LanguageProvider>
             <Navbar />
             <main className="pt-24 min-h-screen">
-              {children}
+              <PageTransition>
+                {children}
+              </PageTransition>
             </main>
           </LanguageProvider>
         </Providers>

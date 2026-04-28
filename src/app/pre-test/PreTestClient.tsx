@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Brain, CheckCircle2, ArrowRight, Sparkles, Award, AlertCircle } from "lucide-react";
+import { Loader2, Brain, CheckCircle2, ArrowRight, Sparkles, Award, AlertCircle, RefreshCw } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { submitPreTestResults } from "@/app/actions";
+import { experimental_useObject as useObject } from "@ai-sdk/react";
+import { preTestSchema } from "@/lib/ai/schemas";
 
 type Question = {
   question: string;
@@ -13,6 +15,19 @@ type Question = {
   topic_area: string;
   difficulty: string;
 };
+
+// Define schema for useObject
+const preTestSchema = z.object({
+  questions: z.array(
+    z.object({
+      question: z.string(),
+      options: z.array(z.string()),
+      correct_index: z.number(),
+      topic_area: z.string(),
+      difficulty: z.enum(["easy", "medium", "hard"]),
+    })
+  )
+});
 
 type PreTestClientProps = {
   pathTitle: string;
@@ -23,8 +38,6 @@ type PreTestClientProps = {
 export default function PreTestClient({ pathTitle, profileSummary, language }: PreTestClientProps) {
   const { t } = useLanguage();
   const router = useRouter();
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -32,28 +45,24 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
 
-  useEffect(() => {
-    async function fetchQuestions() {
-      try {
-        const res = await fetch("/api/pre-test", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pathTitle, profileSummary, language }),
-        });
-        const data = await res.json();
-        if (data.questions) {
-          setQuestions(data.questions);
-        } else {
-          setError("Failed to load assessment questions");
-        }
-      } catch {
-        setError("Failed to connect to the server");
-      } finally {
-        setLoading(false);
-      }
+  // STREAMING HOOK
+  const { object, submit, isLoading } = useObject({
+    api: "/api/pre-test",
+    schema: preTestSchema,
+    onError: (err) => {
+      console.error(err);
+      setError("Failed to load assessment questions");
     }
-    fetchQuestions();
-  }, [pathTitle, profileSummary, language]);
+  });
+
+  const questions = (object?.questions || []) as Question[];
+  const TOTAL_QUESTIONS = 8;
+
+  // Start generation on mount
+  useEffect(() => {
+    submit({ pathTitle, profileSummary, language });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleAnswer(optionIndex: number) {
     setAnswers({ ...answers, [currentIndex]: optionIndex });
@@ -101,11 +110,12 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   }
 
   function handleContinue() {
+    router.refresh();
     router.push("/learn");
   }
 
   // Loading state
-  if (loading) {
+  if (isLoading && questions.length === 0) {
     return (
       <div className="relative min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 overflow-hidden transition-colors duration-300">
         <div className="relative z-10 text-center max-w-lg">

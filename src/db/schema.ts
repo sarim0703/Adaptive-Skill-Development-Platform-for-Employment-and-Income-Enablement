@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, jsonb, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, text, timestamp, integer, jsonb, boolean, index } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -32,7 +32,9 @@ export const profiles = pgTable('profile', {
   languagePreference: text('language_preference'),
   confidenceLevel: integer('confidence_level'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => [
+  index('profile_user_id_idx').on(table.userId),
+]);
 
 export const pathOptions = pgTable('path_option', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -47,7 +49,10 @@ export const pathOptions = pgTable('path_option', {
   displayOrder: integer('display_order'),
   isSelected: boolean('is_selected').default(false),
   generatedAt: timestamp('generated_at').defaultNow(),
-});
+}, (table) => [
+  index('path_option_user_id_idx').on(table.userId),
+  index('path_option_selected_idx').on(table.isSelected),
+]);
 
 export const roadmaps = pgTable('roadmap', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -66,7 +71,10 @@ export const roadmaps = pgTable('roadmap', {
   archivedAt: timestamp('archived_at'),
   archiveReason: text('archive_reason'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
-});
+}, (table) => [
+  index('roadmap_user_id_idx').on(table.userId),
+  index('roadmap_status_idx').on(table.status),
+]);
 
 export const userModel = pgTable('user_model', {
   userId: text('userId').primaryKey().references(() => users.id, { onDelete: 'cascade' }),
@@ -107,7 +115,11 @@ export const quizAttempts = pgTable('quiz_attempt', {
   passed: boolean('passed').notNull(),
   attemptNumber: integer('attempt_number').notNull(),
   completedAt: timestamp('completed_at').defaultNow(),
-});
+}, (table) => [
+  index('quiz_attempt_user_id_idx').on(table.userId),
+  index('quiz_attempt_roadmap_id_idx').on(table.roadmapId),
+  index('quiz_attempt_subtopic_idx').on(table.subtopicId),
+]);
 
 export const outcomes = pgTable('outcome', {
   id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),

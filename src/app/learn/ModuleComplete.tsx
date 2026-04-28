@@ -5,6 +5,8 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { recalibrateModuleAction, saveOutcome } from "@/app/actions";
 import OutcomeCard from "@/components/OutcomeCard";
+import { experimental_useObject as useObject } from "@ai-sdk/react";
+import { moduleSchema } from "@/lib/ai/schemas";
 import { useState } from "react";
 
 type ModuleCompleteProps = {
@@ -39,15 +41,19 @@ export default function ModuleComplete({
   const isPathComplete = !hasNextModule;
   const progressPercent = Math.round((completedSubtopics / totalSubtopics) * 100);
 
-  async function handleNextModule() {
-    setIsLoading(true);
-    try {
-      await recalibrateModuleAction(roadmapId, lastCompletedModuleId + 1);
-      router.refresh();
-    } catch (err) {
-      console.error(err);
-      setIsLoading(false);
+  const { object: streamingModule, submit: startRecalibrate, isLoading: isStreaming } = useObject({
+    api: '/api/roadmap/recalibrate',
+    schema: moduleSchema,
+    onFinish: () => {
+      setTimeout(() => {
+        router.push("/learn");
+        router.refresh();
+      }, 1000);
     }
+  });
+
+  async function handleNextModule() {
+    startRecalibrate({ roadmapId, targetModuleId: lastCompletedModuleId + 1 });
   }
 
   async function handleOutcome(outcomeType: string) {
@@ -148,22 +154,42 @@ export default function ModuleComplete({
             {pathTitle} · {t("learn.module")} {lastCompletedModuleId} / {totalModules}
           </div>
 
-          {/* Next Module Button */}
+          {/* Next Module Button / Streaming State */}
           {hasNextModule && (
-            <button
-              onClick={handleNextModule}
-              disabled={isLoading}
-              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 transition-all"
-            >
-              {isLoading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
+            <div className="space-y-4">
+              {isStreaming || streamingModule ? (
+                <div className="p-6 rounded-xl bg-blue-500/5 border border-blue-500/20 text-left animate-fadeIn">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                    <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">Crafting Next Module...</span>
+                  </div>
+                  <h4 className="text-sm font-bold text-foreground mb-2">{streamingModule?.module_title || "..."}</h4>
+                  <div className="space-y-2">
+                    {streamingModule?.subtopics?.map((st: any, idx: number) => (
+                      <div key={idx} className="flex items-center gap-2 text-[11px] text-text-secondary">
+                        <div className="w-1 h-1 rounded-full bg-blue-500/40" />
+                        {st?.title || "..."}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               ) : (
-                <>
-                  {t("learn.nextModule")}
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </>
+                <button
+                  onClick={handleNextModule}
+                  disabled={isLoading}
+                  className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] disabled:opacity-50 transition-all"
+                >
+                  {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      {t("learn.nextModule")}
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
               )}
-            </button>
+            </div>
           )}
         </div>
 

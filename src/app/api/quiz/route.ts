@@ -6,17 +6,7 @@ import { fetchSpecificVideo } from "@/lib/youtube/fetch-video";
 import { fetchVideoTranscript } from "@/lib/youtube/fetch-transcript";
 import fs from "fs";
 import path from "path";
-
-const quizSchema = z.object({
-  questions: z.array(
-    z.object({
-      question: z.string().describe("A complex, scenario-based multiple-choice question testing deep conceptual mastery"),
-      options: z.array(z.string()).length(4).describe("Exactly 4 options, making sure incorrect options are plausible distractors"),
-      correct_index: z.number().min(0).max(3).describe("The index (0-3) of the correct option"),
-      explanation: z.string().describe("Detailed explanation of why this is correct and why distractors are wrong"),
-    })
-  ).length(8).describe("Generate exactly 8 research-grade, highly analytical questions"),
-});
+import { quizSchema } from "@/lib/ai/schemas";
 
 export async function POST(req: Request) {
   try {

@@ -4,20 +4,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { eq } from "drizzle-orm";
 import { roadmaps } from "@/db/schema";
-
-const moduleSchema = z.object({
-  module_id: z.number().describe("The ID of the module being generated"),
-  module_title: z.string().describe("A descriptive title for this specific module"),
-  subtopics: z.array(
-    z.object({
-      subtopic_id: z.string().describe("A unique slug for the subtopic, e.g., 'ac-repair-tools'"),
-      title: z.string().describe("The name of the subtopic"),
-      practical_task: z.string().describe("A highly specific, actionable task. What exactly must they DO?"),
-      task_type: z.string().describe("The type of task (e.g., 'Research', 'Hands-on', 'Setup')"),
-      youtube_search_query: z.string().describe("A specific YouTube search query that yields tutorials for this task"),
-    })
-  ).length(3).describe("Generate exactly 3 subtopics for this module"),
-});
+import { moduleSchema } from "./schemas";
 
 export async function recalibrateAndGenerateNextModule(userId: string, roadmapId: string, targetModuleId: number) {
   // 1. Fetch necessary context

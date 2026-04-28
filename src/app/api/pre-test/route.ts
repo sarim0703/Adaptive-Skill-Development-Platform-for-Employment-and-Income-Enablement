@@ -1,19 +1,8 @@
 import { getGPT5InstantModel } from "@/lib/ai/models";
-import { generateObject } from "ai";
+import { streamObject } from "ai";
 import { z } from "zod";
 import { NextResponse } from "next/server";
-
-const preTestSchema = z.object({
-  questions: z.array(
-    z.object({
-      question: z.string().describe("A practical multiple-choice question"),
-      options: z.array(z.string()).length(4).describe("Exactly 4 options"),
-      correct_index: z.number().min(0).max(3).describe("The index (0-3) of the correct option"),
-      topic_area: z.string().describe("The skill/knowledge area this question tests (e.g., 'navigation', 'customer_service', 'basic_tools')"),
-      difficulty: z.enum(["easy", "medium", "hard"]).describe("Difficulty level of this question"),
-    })
-  ).length(8).describe("Generate exactly 8 diagnostic questions"),
-});
+import { preTestSchema } from "@/lib/ai/schemas";
 
 export async function POST(req: Request) {
   try {
@@ -22,7 +11,7 @@ export async function POST(req: Request) {
 
     const model = getGPT5InstantModel();
 
-    const { object } = await generateObject({
+    const result = await streamObject({
       model,
       schema: preTestSchema,
       system: `You are an expert diagnostic assessor for India's workforce skill development programs.
@@ -41,7 +30,7 @@ IMPORTANT RULES:
       prompt: `Career Path: ${pathTitle}\nLearner Background: ${profileSummary}\nGeneration Seed: ${Date.now()}`,
     });
 
-    return NextResponse.json({ questions: object.questions });
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error("Pre-test generation error:", error);
     return NextResponse.json({ error: "Failed to generate diagnostic assessment" }, { status: 500 });
