@@ -61,8 +61,10 @@ export default function LearnClient({
   const [showQuiz, setShowQuiz] = useState(false);
   const [activeTrigger, setActiveTrigger] = useState<string | null>(null);
   const [videoData, setVideoData] = useState<{ videoId: string; title: string } | null>(null);
-  const [activeTab, setActiveTab] = useState<"task" | "notes">("task");
+  const [activeTab, setActiveTab] = useState<"task" | "notes" | "resources">("task");
   const [expandedModules, setExpandedModules] = useState<Set<number>>(new Set([moduleId]));
+  const [resources, setResources] = useState<any[]>([]);
+  const [loadingResources, setLoadingResources] = useState(false);
   const timeRef = useRef(0);
 
   const capScore = userModel?.capabilityScore ?? 50;
@@ -85,6 +87,32 @@ export default function LearnClient({
     }
     getGroundedVideo();
   }, [subtopic.youtube_search_query]);
+
+  // Fetch resources
+  useEffect(() => {
+    async function fetchResources() {
+      setLoadingResources(true);
+      try {
+        const res = await fetch("/api/resources", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            subtopicTitle: subtopic.title,
+            practicalTask: subtopic.practical_task,
+          }),
+        });
+        const data = await res.json();
+        if (data.resources) {
+          setResources(data.resources);
+        }
+      } catch (err) {
+        console.error("Failed to fetch resources:", err);
+      } finally {
+        setLoadingResources(false);
+      }
+    }
+    fetchResources();
+  }, [subtopic.subtopic_id, subtopic.title, subtopic.practical_task]);
 
 
 
@@ -281,6 +309,12 @@ export default function LearnClient({
                   }`}>
                   <BookOpen className="w-3.5 h-3.5" /> Notes
                 </button>
+                <button onClick={() => setActiveTab("resources")}
+                  className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
+                    activeTab === "resources" ? "border-blue-500 text-foreground bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
+                  }`}>
+                  <Globe className="w-3.5 h-3.5" /> Resources
+                </button>
 
               </div>
 
@@ -318,6 +352,45 @@ export default function LearnClient({
                       <p className="text-xs font-medium">No notes available for this lesson.</p>
                     </div>
                   )
+                )}
+                {activeTab === "resources" && (
+                  <div className="space-y-4">
+                    {loadingResources ? (
+                      <div className="flex flex-col items-center justify-center py-10 gap-3">
+                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Curating Free Resources...</p>
+                      </div>
+                    ) : resources.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {resources.map((res, idx) => (
+                          <a key={idx} href={res.url} target="_blank" rel="noopener noreferrer"
+                            className="group p-4 rounded-xl bg-card border border-border hover:bg-white/[0.04] hover:border-blue-500/30 transition-all flex flex-col h-full relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+                              {res.type === "video" ? <PlayCircle className="w-8 h-8 text-red-500" /> : <Globe className="w-8 h-8 text-blue-500" />}
+                            </div>
+                            <div className="flex items-start justify-between mb-2">
+                              <h4 className="text-sm font-bold text-foreground group-hover:text-blue-500 transition-colors line-clamp-1 pr-6">{res.title}</h4>
+                              <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-500 flex-shrink-0 ml-2" />
+                            </div>
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[9px] font-bold uppercase tracking-widest ${
+                                res.type === "video" ? "border-red-500/20 text-red-400 bg-red-500/5" : "border-blue-500/20 text-blue-400 bg-blue-500/5"
+                              }`}>
+                                {res.type === "video" ? <PlayCircle className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
+                                {res.type === "video" ? (res.source || "YouTube") : (res.source || "Web Resource")}
+                              </span>
+                            </div>
+                            <p className="text-xs text-slate-400 leading-relaxed mt-auto line-clamp-2">{res.description}</p>
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-slate-600">
+                        <Globe className="w-8 h-8 mx-auto mb-2 opacity-40" />
+                        <p className="text-xs font-medium">No resources found for this lesson.</p>
+                      </div>
+                    )}
+                  </div>
                 )}
 
               </div>

@@ -2,6 +2,7 @@ import { getGPT5InstantModel } from "@/lib/ai/models";
 import { generateObject } from "ai";
 import { z } from "zod";
 import { NextResponse } from "next/server";
+import { findVerifiedResources } from "@/lib/verified-resources-data";
 
 export const runtime = 'edge';
 
@@ -26,6 +27,10 @@ export async function POST(req: Request) {
   try {
     const { subtopicTitle, practicalTask } = await req.json();
 
+    // 1. Try to find verified resources first (Knowledge Base)
+    const verified = findVerifiedResources(subtopicTitle);
+    
+    // 2. Generate supplemental resources using LLM
     const model = getGPT5InstantModel();
     const { object } = await generateObject({
       model,
@@ -40,8 +45,8 @@ Rules:
       prompt: `Topic: ${subtopicTitle}\nPractical Task: ${practicalTask}`,
     });
 
-    // Transform search queries into working YouTube links for the frontend
-    const enrichedResources = [
+    // 3. Merge verified data with LLM data (prioritizing verified)
+    const llmResources = [
       ...object.youtube_videos.map(v => ({
         ...v,
         type: "video",
@@ -53,9 +58,13 @@ Rules:
       }))
     ];
 
-    return NextResponse.json({ resources: enrichedResources });
+    // Take top 6 combined
+    const finalResources = [...verified, ...llmResources].slice(0, 6);
+
+    return NextResponse.json({ resources: finalResources });
   } catch (error: any) {
     console.error("Resources API error:", error);
     return NextResponse.json({ resources: [] }, { status: 500 });
   }
 }
+
