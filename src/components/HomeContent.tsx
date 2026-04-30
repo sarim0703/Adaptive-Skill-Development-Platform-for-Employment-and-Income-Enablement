@@ -6,12 +6,15 @@ import { Sparkles, Target, Brain, TrendingUp, ArrowRight, CheckCircle2, Users, B
 import { useLanguage } from "@/context/LanguageContext";
 import { useSearchParams, useRouter } from "next/navigation";
 import AuthSidePanel from "@/components/AuthSidePanel";
+import { useSession } from "next-auth/react";
 
 export default function HomeContent() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const isAuthVisible = searchParams.get("auth") === "true";
+  const isLoggedIn = !!session?.user;
 
   const closeAuth = () => {
     router.push("/", { scroll: false });
@@ -50,11 +53,11 @@ export default function HomeContent() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
             <Link
-              href="/?auth=true"
+              href={isLoggedIn ? "/learn" : "/?auth=true"}
               className="btn-primary px-12 py-6 text-2xl rounded-2xl shadow-[0_20px_50px_rgba(59,130,246,0.3)] group"
             >
               <span className="flex items-center gap-3">
-                {t("hero.cta")}
+                {isLoggedIn ? t("hero.ctaLoggedIn") : t("hero.cta")}
                 <ArrowRight className="w-8 h-8 group-hover:translate-x-2 transition-transform" />
               </span>
             </Link>
@@ -150,10 +153,10 @@ export default function HomeContent() {
               <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8 tracking-tight">Ready to start learning?</h2>
               <p className="text-lg text-text-secondary mb-12 max-w-2xl mx-auto font-normal">Join thousands of others building their future with adaptive AI learning.</p>
               <Link
-                href="/?auth=true"
+                href={isLoggedIn ? "/learn" : "/?auth=true"}
                 className="btn-primary px-16 py-8 text-2xl rounded-full shadow-[0_0_60px_rgba(59,130,246,0.3)]"
               >
-                {t("hero.cta")}
+                {isLoggedIn ? t("hero.ctaLoggedIn") : t("hero.cta")}
               </Link>
            </div>
         </section>
