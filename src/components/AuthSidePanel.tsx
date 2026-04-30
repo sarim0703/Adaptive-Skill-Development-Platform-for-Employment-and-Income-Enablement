@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { registerUser, checkUserState } from "@/app/actions";
 import { useRouter } from "next/navigation";
@@ -8,9 +8,19 @@ import Image from "next/image";
 import { Loader2, Sparkles, X, Mail, Lock, User } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 
-export default function AuthSidePanel({ onClose }: { onClose: () => void }) {
+export default function AuthSidePanel({ 
+  onClose,
+  mode = "signup"
+}: { 
+  onClose: () => void;
+  mode?: "signin" | "signup";
+}) {
   const { t } = useLanguage();
-  const [isLogin, setIsLogin] = useState(false);
+  const [isLogin, setIsLogin] = useState(mode === "signin");
+
+  useEffect(() => {
+    setIsLogin(mode === "signin");
+  }, [mode]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();

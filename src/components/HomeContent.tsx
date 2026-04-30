@@ -14,6 +14,7 @@ export default function HomeContent() {
   const router = useRouter();
   const { data: session } = useSession();
   const isAuthVisible = searchParams.get("auth") === "true";
+  const authMode = (searchParams.get("mode") as "signin" | "signup") || "signup";
   const isLoggedIn = !!session?.user;
 
   const closeAuth = () => {
@@ -53,7 +54,7 @@ export default function HomeContent() {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
             <Link
-              href={isLoggedIn ? "/learn" : "/?auth=true"}
+              href={isLoggedIn ? "/learn" : "/?auth=true&mode=signup"}
               className="btn-primary px-12 py-6 text-2xl rounded-2xl shadow-[0_20px_50px_rgba(59,130,246,0.3)] group"
             >
               <span className="flex items-center gap-3">
@@ -153,7 +154,7 @@ export default function HomeContent() {
               <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8 tracking-tight">Ready to start learning?</h2>
               <p className="text-lg text-text-secondary mb-12 max-w-2xl mx-auto font-normal">Join thousands of others building their future with adaptive AI learning.</p>
               <Link
-                href={isLoggedIn ? "/learn" : "/?auth=true"}
+                href={isLoggedIn ? "/learn" : "/?auth=true&mode=signup"}
                 className="btn-primary px-16 py-8 text-2xl rounded-full shadow-[0_0_60px_rgba(59,130,246,0.3)]"
               >
                 {isLoggedIn ? t("hero.ctaLoggedIn") : t("hero.cta")}
@@ -183,7 +184,7 @@ export default function HomeContent() {
         isAuthVisible ? 'translate-x-0' : 'translate-x-full'
       }`}>
         <div className="h-full bg-background/40 backdrop-blur-3xl border-l border-border shadow-[-50px_0_100px_rgba(0,0,0,0.5)]">
-          <AuthSidePanel onClose={closeAuth} />
+          <AuthSidePanel onClose={closeAuth} mode={authMode} />
         </div>
       </div>
 

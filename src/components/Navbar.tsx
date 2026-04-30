@@ -226,7 +226,7 @@ export default function Navbar() {
           {!isLoggedIn ? (
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link 
-                href="/?auth=true" 
+                href="/?auth=true&mode=signin" 
                 className="px-5 py-2.5 rounded-2xl bg-blue-600 text-white text-xs font-semibold hover:bg-blue-500 shadow-[0_5px_15px_rgba(37,99,235,0.3)] block"
               >
                 {t("nav.signIn")}
