@@ -163,6 +163,9 @@ export const translations = {
     "pretest.intro.title": "Find Your Starting Point",
     "pretest.intro.desc": "Before we begin, we need to understand your current level. This isn't a formal test—please answer honestly so we can adjust your learning path perfectly for you.",
     "pretest.intro.btn": "Got it, let's start!",
+    "pretest.syncing": "Syncing Assessment Stream...",
+    "pretest.task": "Task",
+
 
 
     // Analytics Dashboard
@@ -400,6 +403,9 @@ export const translations = {
     "pretest.intro.title": "अपना शुरुआती बिंदु खोजें",
     "pretest.intro.desc": "शुरू करने से पहले, हमें आपके वर्तमान स्तर को समझने की आवश्यकता है। यह कोई औपचारिक परीक्षा नहीं है—कृपया ईमानदारी से उत्तर दें ताकि हम आपके सीखने के पथ को आपके लिए पूरी तरह से समायोजित कर सकें।",
     "pretest.intro.btn": "समझ गया, चलिए शुरू करते हैं!",
+    "pretest.syncing": "मूल्यांकन स्ट्रीम सिंक हो रहा है...",
+    "pretest.task": "कार्य",
+
 
 
     // Analytics Dashboard
@@ -637,6 +643,9 @@ export const translations = {
     "pretest.intro.title": "ನಿಮ್ಮ ಪ್ರಾರಂಭದ ಹಂತವನ್ನು ಕಂಡುಕೊಳ್ಳಿ",
     "pretest.intro.desc": "ನಾವು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು, ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಮಟ್ಟವನ್ನು ನಾವು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬೇಕು. ಇದು ಔಪಚಾರಿಕ ಪರೀಕ್ಷೆಯಲ್ಲ—ದಯವಿಟ್ಟು ಪ್ರಾಮಾಣಿಕವಾಗಿ ಉತ್ತರಿಸಿ ಇದರಿಂದ ನಿಮ್ಮ ಕಲಿಕೆಯ ಹಾದಿಯನ್ನು ನಿಮಗಾಗಿ ಅಚ್ಚುಕಟ್ಟಾಗಿ ಸರಿಹೊಂದಿಸಬಹುದು.",
     "pretest.intro.btn": "ಅರ್ಥವಾಯಿತು, ಪ್ರಾರಂಭಿಸೋಣ!",
+    "pretest.syncing": "ಮೌಲ್ಯಮಾಪನ ಸ್ಟ್ರೀಮ್ ಸಿಂಕ್ ಆಗುತ್ತಿದೆ...",
+    "pretest.task": "ಕಾರ್ಯ",
+
 
 
     // Analytics Dashboard

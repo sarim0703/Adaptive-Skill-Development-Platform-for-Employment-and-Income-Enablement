@@ -24,7 +24,7 @@ type PreTestClientProps = {
 };
 
 export default function PreTestClient({ pathTitle, profileSummary, language }: PreTestClientProps) {
-  const { t } = useLanguage();
+  const { t, language: currentLangCode } = useLanguage();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -32,6 +32,15 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   const [submitting, setSubmitting] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [score, setScore] = useState(0);
+
+  // Map language codes to names for the AI prompt
+  const LANG_NAMES: Record<string, string> = {
+    en: 'English',
+    hi: 'Hindi',
+    kn: 'Kannada'
+  };
+
+  const targetLanguage = LANG_NAMES[currentLangCode] || language;
 
   // STREAMING HOOK
   const { object, submit, isLoading } = useObject({
@@ -48,7 +57,7 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
 
   // Start generation on mount
   useEffect(() => {
-    submit({ pathTitle, profileSummary, language });
+    submit({ pathTitle, profileSummary, language: targetLanguage });
   }, []);
 
   function handleAnswer(optionIndex: number) {
@@ -116,10 +125,10 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
              <div className="absolute inset-0 rounded-[2rem] bg-blue-500/5 animate-ping" />
           </div>
           <h2 className="text-3xl font-black tracking-tight mb-4 text-foreground">
-            Crafting Assessment...
+            {t("pretest.loading")}
           </h2>
           <p className="text-base text-text-tertiary mb-12 font-medium">
-            AI is analyzing your background to generate a personalized diagnostic.
+            {t("pretest.loadingSub")}
           </p>
           <div className="w-full bg-input rounded-full h-1.5 overflow-hidden border border-border">
              <motion.div 
@@ -216,7 +225,7 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
       <div className="relative min-h-screen bg-background flex flex-col items-center justify-center p-6">
         <div className="text-center max-w-lg">
           <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-6" />
-          <h2 className="text-xl font-bold text-foreground">Syncing Assessment Stream...</h2>
+          <h2 className="text-xl font-bold text-foreground">{t("pretest.syncing")}</h2>
         </div>
       </div>
     );
@@ -230,7 +239,7 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
         <div className="mb-12 flex flex-col items-center">
           <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-card border border-border mb-8 shadow-sm">
             <Sparkles className="w-4 h-4 text-blue-500" />
-            <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest">Diagnostic Assessment</span>
+            <span className="text-[10px] font-black text-text-secondary uppercase tracking-widest">{t("pretest.badge")}</span>
           </div>
           
           <div className="w-full flex gap-2 px-4 h-2 mb-4">
@@ -245,7 +254,7 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
             ))}
           </div>
           <div className="flex items-center gap-4">
-             <span className="text-[10px] font-black text-text-tertiary uppercase tracking-widest">Task {currentIndex + 1} of {TOTAL_QUESTIONS}</span>
+             <span className="text-[10px] font-black text-text-tertiary uppercase tracking-widest">{t("pretest.task")} {currentIndex + 1} {t("onboarding.of")} {TOTAL_QUESTIONS}</span>
              <div className={`px-3 py-1 rounded-full border text-[9px] font-black uppercase tracking-widest ${
                question.difficulty === 'hard' ? "bg-rose-500/10 text-rose-500 border-rose-500/20" :
                question.difficulty === 'medium' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" :
