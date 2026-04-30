@@ -26,6 +26,7 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
   const [selectingPathId, setSelectingPathId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const hasFetched = useRef(false);
+  const [showPreTestIntro, setShowPreTestIntro] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -62,9 +63,9 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
     api: '/api/roadmap/stream',
     schema: roadmapSchema,
     onFinish: () => {
-      // Small delay to ensure DB persistence completes
+      // Small delay to ensure DB persistence completes, then show intro
       setTimeout(() => {
-        router.push("/pre-test");
+        setShowPreTestIntro(true);
       }, 1000);
     },
     onError: (err) => {
@@ -83,7 +84,31 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
   if (isStreamingRoadmap || (selectingPathId && streamingRoadmap)) {
     return (
       <div className="relative min-h-screen bg-background text-foreground flex flex-col items-center justify-start py-20 px-6 overflow-y-auto">
-        <div className="max-w-2xl w-full text-center mb-12">
+        
+        {/* Intro Modal Overlay */}
+        {showPreTestIntro && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-background/80 backdrop-blur-md animate-fadeIn">
+            <div className="max-w-md w-full bg-card border border-border p-10 rounded-[32px] shadow-[0_50px_100px_rgba(0,0,0,0.4)] text-center animate-scaleIn">
+              <div className="w-20 h-20 rounded-3xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-8">
+                <Sparkles className="w-10 h-10 text-blue-500" />
+              </div>
+              <h2 className="text-3xl font-black text-foreground mb-4 tracking-tight">
+                {t("pretest.intro.title")}
+              </h2>
+              <p className="text-text-secondary leading-relaxed mb-10 font-medium">
+                {t("pretest.intro.desc")}
+              </p>
+              <button
+                onClick={() => router.push("/pre-test")}
+                className="w-full py-5 rounded-2xl bg-blue-600 text-white font-bold text-lg hover:bg-blue-500 shadow-[0_20px_40px_rgba(37,99,235,0.3)] active:scale-95 transition-all"
+              >
+                {t("pretest.intro.btn")}
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className={`max-w-2xl w-full text-center mb-12 transition-all duration-700 ${showPreTestIntro ? 'blur-xl opacity-20 scale-95' : 'blur-0 opacity-100 scale-100'}`}>
           <div className="inline-flex mb-6 relative">
             <div className="w-16 h-16 rounded-full border-4 border-blue-500/20 border-t-blue-500 animate-spin flex items-center justify-center bg-card">
               <Sparkles className="w-6 h-6 text-blue-500" />
@@ -93,7 +118,7 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
           <p className="text-text-secondary">Our AI is designing a practical, step-by-step roadmap for your selected career path.</p>
         </div>
 
-        <div className="max-w-2xl w-full space-y-6">
+        <div className={`max-w-2xl w-full space-y-6 transition-all duration-700 ${showPreTestIntro ? 'blur-xl opacity-20 scale-95' : 'blur-0 opacity-100 scale-100'}`}>
           {streamingRoadmap?.modules?.map((mod: any, idx: number) => (
             <div key={idx} className="p-6 rounded-2xl bg-card border border-border animate-fadeInUp shadow-xl relative overflow-hidden group">
                <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 opacity-30 group-hover:opacity-100 transition-opacity" />

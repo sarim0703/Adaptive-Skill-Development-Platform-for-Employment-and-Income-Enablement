@@ -160,6 +160,10 @@ export const translations = {
     "pretest.baselineScore": "Your starting point",
     "pretest.baselineNote": "This score is your baseline. As you learn, we'll measure your progress against it.",
     "pretest.startLearning": "Start Learning",
+    "pretest.intro.title": "Find Your Starting Point",
+    "pretest.intro.desc": "Before we begin, we need to understand your current level. This isn't a formal test—please answer honestly so we can adjust your learning path perfectly for you.",
+    "pretest.intro.btn": "Got it, let's start!",
+
 
     // Analytics Dashboard
     "analytics.title": "Research Analytics",
@@ -393,6 +397,10 @@ export const translations = {
     "pretest.baselineScore": "आपका शुरुआती बिंदु",
     "pretest.baselineNote": "यह स्कोर आपकी बेसलाइन है। जैसे-जैसे आप सीखेंगे, हम इसके मुकाबले आपकी प्रगति मापेंगे।",
     "pretest.startLearning": "सीखना शुरू करें",
+    "pretest.intro.title": "अपना शुरुआती बिंदु खोजें",
+    "pretest.intro.desc": "शुरू करने से पहले, हमें आपके वर्तमान स्तर को समझने की आवश्यकता है। यह कोई औपचारिक परीक्षा नहीं है—कृपया ईमानदारी से उत्तर दें ताकि हम आपके सीखने के पथ को आपके लिए पूरी तरह से समायोजित कर सकें।",
+    "pretest.intro.btn": "समझ गया, चलिए शुरू करते हैं!",
+
 
     // Analytics Dashboard
     "analytics.title": "अनुसंधान विश्लेषिकी (Analytics)",
@@ -626,6 +634,10 @@ export const translations = {
     "pretest.baselineScore": "ನಿಮ್ಮ ಪ್ರಾರಂಭದ ಸ್ಥಾನ",
     "pretest.baselineNote": "ಈ ಸ್ಕೋರ್ ನಿಮ್ಮ ಬೇಸ್‌ಲೈನ್. ನೀವು ಕಲಿಯುತ್ತಾ ನಿಮ್ಮ ಪ್ರಗತಿಯನ್ನು ಇದರ ವಿರುದ್ಧ ಅಳೆಯುತ್ತೇವೆ.",
     "pretest.startLearning": "ಕಲಿಯಲು ಪ್ರಾರಂಭಿಸಿ",
+    "pretest.intro.title": "ನಿಮ್ಮ ಪ್ರಾರಂಭದ ಹಂತವನ್ನು ಕಂಡುಕೊಳ್ಳಿ",
+    "pretest.intro.desc": "ನಾವು ಪ್ರಾರಂಭಿಸುವ ಮೊದಲು, ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಮಟ್ಟವನ್ನು ನಾವು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಬೇಕು. ಇದು ಔಪಚಾರಿಕ ಪರೀಕ್ಷೆಯಲ್ಲ—ದಯವಿಟ್ಟು ಪ್ರಾಮಾಣಿಕವಾಗಿ ಉತ್ತರಿಸಿ ಇದರಿಂದ ನಿಮ್ಮ ಕಲಿಕೆಯ ಹಾದಿಯನ್ನು ನಿಮಗಾಗಿ ಅಚ್ಚುಕಟ್ಟಾಗಿ ಸರಿಹೊಂದಿಸಬಹುದು.",
+    "pretest.intro.btn": "ಅರ್ಥವಾಯಿತು, ಪ್ರಾರಂಭಿಸೋಣ!",
+
 
     // Analytics Dashboard
     "analytics.title": "ಸಂಶೋಧನಾ ವಿಶ್ಲೇಷಣೆ (Analytics)",
