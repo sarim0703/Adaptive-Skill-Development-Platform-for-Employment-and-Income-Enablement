@@ -199,7 +199,7 @@ export const translations = {
     "q8.hint": "This helps us give you tasks you can actually do on your device",
     "q9.text": "Preferred language for learning?",
     "q9.hint": "Learn in the language you're most comfortable with",
-    "q10.text": "How comfortable are you using a phone or computer for learning?",
+    "q10.text": "How confident are you with learning skills online?",
     "q10.hint": "Be honest — there's no wrong answer here",
 
     "q1.opt1": "Metro City",
@@ -432,7 +432,7 @@ export const translations = {
     "q8.hint": "इससे हम आपके डिवाइस पर करने योग्य कार्य दे सकते हैं",
     "q9.text": "सीखने के लिए पसंदीदा भाषा?",
     "q9.hint": "उस भाषा में सीखें जिसमें आप सबसे अधिक सहज हों",
-    "q10.text": "सीखने के लिए फोन या कंप्यूटर का उपयोग करने में आप कितने सहज हैं?",
+    "q10.text": "ऑनलाइन कौशल सीखने में आप कितने आश्वस्त हैं?",
     "q10.hint": "ईमानदार रहें — यहाँ कोई गलत उत्तर नहीं है",
 
     "q1.opt1": "मेट्रो शहर",
@@ -665,7 +665,7 @@ export const translations = {
     "q8.hint": "ನಿಮ್ಮ ಸಾಧನದಲ್ಲಿ ಮಾಡಬಹುದಾದ ಕಾರ್ಯಗಳನ್ನು ನೀಡಲು ಇದು ಸಹಾಯ ಮಾಡುತ್ತದೆ",
     "q9.text": "ಕಲಿಯಲು ಆದ್ಯತೆಯ ಭಾಷೆ ಯಾವುದು?",
     "q9.hint": "ನಿಮಗೆ ಹೆಚ್ಚು ಆರಾಮದಾಯಕವಾದ ಭಾಷೆಯಲ್ಲಿ ಕಲಿಯಿರಿ",
-    "q10.text": "ಕಲಿಯಲು ಫೋನ್ ಅಥವಾ ಕಂಪ್ಯೂಟರ್ ಬಳಸಲು ನಿಮಗೆ ಎಷ್ಟು ಆರಾಮದಾಯಕ ಎನಿಸುತ್ತದೆ?",
+    "q10.text": "ಆನ್‌ಲೈನ್‌ನಲ್ಲಿ ಕೌಶಲ್ಯಗಳನ್ನು ಕಲಿಯುವಲ್ಲಿ ನಿಮಗೆ ಎಷ್ಟು ವಿಶ್ವಾಸವಿದೆ?",
     "q10.hint": "ಪ್ರಾಮಾಣಿಕವಾಗಿರಿ — ಇಲ್ಲಿ ತಪ್ಪು ಉತ್ತರವಿಲ್ಲ",
 
     "q1.opt1": "ಮೆಟ್ರೋ ನಗರ",
