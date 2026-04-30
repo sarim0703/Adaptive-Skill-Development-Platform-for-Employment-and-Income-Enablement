@@ -373,36 +373,62 @@ export async function submitQuizResult(params: {
 
   let isFirstTimeComplete = false;
 
-  const updatedModules = (roadmap.modules as unknown[]).map((mod: unknown) => {
+  const updatedModules = (roadmap.modules as unknown[]).map((mod: unknown, mIdx: number, mArr: unknown[]) => {
     const typedMod = mod as { module_id: number; subtopics: unknown[] };
-    if (typedMod.module_id !== params.moduleId) return mod;
-
-    return {
-      ...typedMod,
-      subtopics: typedMod.subtopics.map((st: unknown, idx: number, arr: unknown[]) => {
-        const typedSt = st as { subtopic_id: string; status: string; attempt_count?: number; time_spent_seconds?: number };
-        // Update current subtopic
-        if (typedSt.subtopic_id === params.subtopicId) {
-          if (params.passed && typedSt.status !== 'complete') {
-            isFirstTimeComplete = true;
+    
+    // 1. Handle current module updates
+    if (typedMod.module_id === params.moduleId) {
+      return {
+        ...typedMod,
+        subtopics: typedMod.subtopics.map((st: unknown, idx: number, arr: unknown[]) => {
+          const typedSt = st as { subtopic_id: string; status: string; attempt_count?: number; time_spent_seconds?: number };
+          
+          // Update current subtopic
+          if (typedSt.subtopic_id === params.subtopicId) {
+            if (params.passed && typedSt.status !== 'complete') {
+              isFirstTimeComplete = true;
+            }
+            return {
+              ...typedSt,
+              status: params.passed ? 'complete' : 'needs_review',
+              quiz_score: params.score,
+              attempt_count: (typedSt.attempt_count || 0) + 1,
+              time_spent_seconds: (typedSt.time_spent_seconds || 0) + params.timeSpent,
+            };
           }
-          return {
-            ...typedSt,
-            status: params.passed ? 'complete' : 'needs_review',
-            quiz_score: params.score,
-            attempt_count: (typedSt.attempt_count || 0) + 1,
-            time_spent_seconds: (typedSt.time_spent_seconds || 0) + params.timeSpent,
-          };
-        }
 
-        // Unlock next subtopic if current passed
-        if (params.passed && idx > 0 && (arr[idx - 1] as { subtopic_id: string }).subtopic_id === params.subtopicId && typedSt.status === 'locked') {
-          return { ...typedSt, status: 'active' };
-        }
+          // Unlock next subtopic in SAME module
+          if (params.passed && idx > 0 && (arr[idx - 1] as { subtopic_id: string }).subtopic_id === params.subtopicId && typedSt.status === 'locked') {
+            return { ...typedSt, status: 'active' };
+          }
 
-        return typedSt;
-      }),
-    };
+          return typedSt;
+        }),
+      };
+    }
+
+    // 2. Handle NEXT module first subtopic unlocking
+    // If the current module (params.moduleId) is the one BEFORE this one (typedMod.module_id)
+    const prevMod = mArr[mIdx - 1] as { module_id: number; subtopics: unknown[] } | undefined;
+    if (params.passed && prevMod && prevMod.module_id === params.moduleId) {
+      // Check if the current subtopic was the LAST one in the previous module
+      const lastStInPrev = prevMod.subtopics[prevMod.subtopics.length - 1] as { subtopic_id: string };
+      if (lastStInPrev.subtopic_id === params.subtopicId) {
+        // Unlock first subtopic of this module
+        return {
+          ...typedMod,
+          subtopics: typedMod.subtopics.map((st: unknown, idx: number) => {
+            const typedSt = st as { subtopic_id: string; status: string };
+            if (idx === 0 && typedSt.status === 'locked') {
+              return { ...typedSt, status: 'active' };
+            }
+            return typedSt;
+          }),
+        };
+      }
+    }
+
+    return mod;
   });
 
   // Update roadmap JSONB

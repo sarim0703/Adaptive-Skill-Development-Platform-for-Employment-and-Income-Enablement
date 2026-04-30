@@ -22,6 +22,8 @@ type QuizModalProps = {
   onClose: () => void;
 };
 
+const PASSING_SCORE = 75; // Requires 6 out of 8 correct answers to pass
+
 const MOTIVATIONAL_PASS = [
   "You're on fire! 🔥 Keep this momentum going!",
   "Excellent work! You truly understood this lesson.",
@@ -81,7 +83,7 @@ export default function QuizModal({
       if (answers[idx] === q?.correct_index) correctCount++;
     });
     const score = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
-    const passed = score >= 75;
+    const passed = score >= PASSING_SCORE;
 
     const cleanQuestions = questions.map(q => ({
       question: q?.question || "",
@@ -103,6 +105,7 @@ export default function QuizModal({
 
   const handleContinue = () => {
     onClose();
+    // Refresh to update the UI (locking/unlocking next topics)
     router.refresh();
   };
 
