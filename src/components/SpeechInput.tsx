@@ -23,7 +23,7 @@ export default function SpeechInput({ onResult, onInterimResult, language = "en-
     if (SpeechRecognition) {
       setIsSupported(true);
       const recog = new SpeechRecognition();
-      recog.continuous = true; // Use continuous for live updates
+      recog.continuous = true; 
       recog.interimResults = true;
       recog.lang = language;
 
@@ -41,13 +41,13 @@ export default function SpeechInput({ onResult, onInterimResult, language = "en-
 
         if (finalTranscript) {
           onResult(finalTranscript.trim());
-          if (onInterimResult) onInterimResult(""); // Clear interim when final arrives
+          if (onInterimResult) onInterimResult(""); 
         } else if (interimTranscript && onInterimResult) {
           onInterimResult(interimTranscript);
         }
       };
 
-      recog.onerror = (event: SpeechRecognitionErrorEvent) => {
+      recog.onerror = (event: any) => {
         console.error("Speech recognition error", event.error);
         setIsListening(false);
       };
@@ -58,7 +58,19 @@ export default function SpeechInput({ onResult, onInterimResult, language = "en-
 
       recognitionRef.current = recog;
     }
-  }, [language, onResult]);
+
+    // CLEANUP: Important to prevent the "microphone won't turn off" bug
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.onresult = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.onend = null;
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+      }
+    };
+  }, [language, onResult, onInterimResult]);
 
   const startListening = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
@@ -68,14 +80,18 @@ export default function SpeechInput({ onResult, onInterimResult, language = "en-
       recognitionRef.current?.start();
       setIsListening(true);
     } catch (err) {
-      console.error("Speech recognition start error", err);
+      console.log("Recognition already started or error:", err);
     }
   };
 
   const stopListening = () => {
     if (!isListening) return;
-    recognitionRef.current?.stop();
+    try {
+      // abort() is faster than stop() as it kills the connection immediately
+      recognitionRef.current?.abort();
+    } catch (e) {}
     setIsListening(false);
+    if (onInterimResult) onInterimResult(""); // Clear the live preview on release
   };
 
   if (!isSupported) return null;

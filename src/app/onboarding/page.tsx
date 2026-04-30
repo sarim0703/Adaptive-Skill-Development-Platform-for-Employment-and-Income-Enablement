@@ -55,8 +55,14 @@ export default function OnboardingPage() {
         setLoading(false);
       }
     } else {
+      setInterimSpeech(""); // Safety clear
       setCurrentStep((s) => s + 1);
     }
+  }
+
+  function handleBack() {
+    setInterimSpeech(""); // Safety clear
+    if (currentStep > 0) setCurrentStep((s) => s - 1);
   }
 
   return (
