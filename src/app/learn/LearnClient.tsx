@@ -361,14 +361,22 @@ export default function LearnClient({
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {resources.map((res, idx) => (
                           <a key={idx} href={res.url} target="_blank" rel="noopener noreferrer"
-                            className="group p-4 rounded-xl bg-card border border-border hover:bg-white/[0.04] hover:border-blue-500/30 transition-all flex flex-col h-full">
+                            className="group p-4 rounded-xl bg-card border border-border hover:bg-white/[0.04] hover:border-blue-500/30 transition-all flex flex-col h-full relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:opacity-30 transition-opacity">
+                              {res.type === "video" ? <PlayCircle className="w-8 h-8 text-red-500" /> : <Globe className="w-8 h-8 text-blue-500" />}
+                            </div>
                             <div className="flex items-start justify-between mb-2">
-                              <h4 className="text-sm font-bold text-foreground group-hover:text-blue-500 transition-colors line-clamp-1">{res.title}</h4>
+                              <h4 className="text-sm font-bold text-foreground group-hover:text-blue-500 transition-colors line-clamp-1 pr-6">{res.title}</h4>
                               <ExternalLink className="w-3.5 h-3.5 text-slate-500 group-hover:text-blue-500 flex-shrink-0 ml-2" />
                             </div>
-                            <span className="inline-block px-2 py-0.5 rounded border border-border text-[9px] font-bold text-slate-400 uppercase tracking-widest w-max mb-2">
-                              {res.type}
-                            </span>
+                            <div className="flex items-center gap-2 mb-3">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[9px] font-bold uppercase tracking-widest ${
+                                res.type === "video" ? "border-red-500/20 text-red-400 bg-red-500/5" : "border-blue-500/20 text-blue-400 bg-blue-500/5"
+                              }`}>
+                                {res.type === "video" ? <PlayCircle className="w-2.5 h-2.5" /> : <Globe className="w-2.5 h-2.5" />}
+                                {res.type === "video" ? "YouTube" : "Web Resource"}
+                              </span>
+                            </div>
                             <p className="text-xs text-slate-400 leading-relaxed mt-auto line-clamp-2">{res.description}</p>
                           </a>
                         ))}

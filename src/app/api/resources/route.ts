@@ -6,14 +6,20 @@ import { NextResponse } from "next/server";
 export const runtime = 'edge';
 
 const resourceSchema = z.object({
-  resources: z.array(
+  youtube_videos: z.array(
     z.object({
-      title: z.string().describe("Name of the free learning resource"),
-      url: z.string().describe("Direct URL to the resource"),
-      type: z.enum(["article", "tutorial", "course", "documentation", "tool"]).describe("Type of resource"),
-      description: z.string().describe("One-line description of what the learner will find"),
+      title: z.string().describe("Engaging title for the video"),
+      search_query: z.string().describe("A very specific YouTube search query that will find this exact tutorial"),
+      description: z.string().describe("What the user will learn from this video (max 15 words)"),
     })
-  ).min(4).max(6).describe("4-6 free, high-quality learning resources"),
+  ).length(3).describe("Exactly 3 high-quality YouTube video recommendations"),
+  web_resources: z.array(
+    z.object({
+      title: z.string().describe("Clear title of the article or course"),
+      url: z.string().describe("A REAL, verified URL to a reputable site (GeeksforGeeks, MDN, W3Schools, etc.)"),
+      description: z.string().describe("Concise description of the resource (max 15 words)"),
+    })
+  ).length(3).describe("Exactly 3 verified web-based learning resources"),
 });
 
 export async function POST(req: Request) {
@@ -24,17 +30,30 @@ export async function POST(req: Request) {
     const { object } = await generateObject({
       model,
       schema: resourceSchema,
-      system: `You are a learning resource curator. Recommend 4-6 FREE, high-quality learning resources for the given topic. 
+      system: `You are a learning resource curator. Provide exactly 3 YouTube recommendations and 3 Web Resources for the given topic.
 Rules:
-- Only recommend genuinely free resources (no paywalled content)
-- Prioritize: official documentation, MDN, W3Schools, freeCodeCamp, Khan Academy, GeeksforGeeks, Coursera (free courses), YouTube channels, open-source tools
-- Every URL must be a real, working URL to a specific page (not a generic homepage unless it's directly relevant)
-- Mix resource types: articles, tutorials, interactive courses, documentation, tools
-- Keep descriptions concise (under 15 words)`,
+- YouTube: Provide specific search queries that are GUARANTEED to return high-quality results.
+- Web Resources: ONLY use extremely reputable domains (GeeksforGeeks, MDN, W3Schools, freeCodeCamp, Khan Academy, Coursera, HubSpot).
+- NO HALLUCINATED URLS: If you are not 100% sure a deep link works, provide a search-based link to the reputable domain (e.g., https://www.google.com/search?q=site:geeksforgeeks.org+topic).
+- Every resource must be FREE and highly relevant to the practical task.
+- Keep descriptions under 15 words.`,
       prompt: `Topic: ${subtopicTitle}\nPractical Task: ${practicalTask}`,
     });
 
-    return NextResponse.json(object);
+    // Transform search queries into working YouTube links for the frontend
+    const enrichedResources = [
+      ...object.youtube_videos.map(v => ({
+        ...v,
+        type: "video",
+        url: `https://www.youtube.com/results?search_query=${encodeURIComponent(v.search_query)}`
+      })),
+      ...object.web_resources.map(w => ({
+        ...w,
+        type: "article",
+      }))
+    ];
+
+    return NextResponse.json({ resources: enrichedResources });
   } catch (error: any) {
     console.error("Resources API error:", error);
     return NextResponse.json({ resources: [] }, { status: 500 });
