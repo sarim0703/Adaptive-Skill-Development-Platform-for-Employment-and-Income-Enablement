@@ -163,16 +163,4 @@ export const videoCache = pgTable('video_cache', {
 });
 
 
-// Table for researched and verified learning links to prevent hallucinations
-export const verifiedResources = pgTable('verified_resource', {
-  id: text('id').primaryKey().(() => crypto.randomUUID()),
-  topicSearchKey: text('topic_search_key').notNull(), // Normalized key for searching (lowercase subtopic title)
-  title: text('title').notNull(),
-  url: text('url').notNull(),
-  type: text('type').notNull(), // 'video' | 'article'
-  description: text('description'),
-  source: text('source'), // e.g., 'MDN', 'GeeksforGeeks', 'YouTube'
-  verifiedAt: timestamp('verified_at').defaultNow(),
-}, (table) => [
-  index('verified_resource_topic_idx').on(table.topicSearchKey),
-]);
+
