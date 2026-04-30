@@ -16,18 +16,7 @@ type Question = {
   difficulty: string;
 };
 
-// Define schema for useObject
-const preTestSchema = z.object({
-  questions: z.array(
-    z.object({
-      question: z.string(),
-      options: z.array(z.string()),
-      correct_index: z.number(),
-      topic_area: z.string(),
-      difficulty: z.enum(["easy", "medium", "hard"]),
-    })
-  )
-});
+
 
 type PreTestClientProps = {
   pathTitle: string;
