@@ -114,8 +114,9 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
               <Sparkles className="w-6 h-6 text-blue-500" />
             </div>
           </div>
-          <h2 className="text-3xl font-bold mb-4">Building Your Journey</h2>
-          <p className="text-text-secondary">Our AI is designing a practical, step-by-step roadmap for your selected career path.</p>
+          <h2 className="text-3xl font-bold mb-4">{t("paths.building")}</h2>
+          <p className="text-text-secondary">{t("paths.designing")}</p>
+
         </div>
 
         <div className={`max-w-2xl w-full space-y-6 transition-all duration-700 ${showPreTestIntro ? 'blur-xl opacity-20 scale-95' : 'blur-0 opacity-100 scale-100'}`}>
@@ -126,7 +127,8 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
                   <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-xs font-black text-blue-500 border border-blue-500/20">
                     {idx + 1}
                   </div>
-                  <h3 className="text-lg font-bold text-foreground">{mod?.module_title || "Drafting Module..."}</h3>
+                  <h3 className="text-lg font-bold text-foreground">{mod?.module_title || t("paths.drafting")}</h3>
+
                </div>
                
                <div className="space-y-3 pl-12">
@@ -162,11 +164,12 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
             </div>
           </div>
           <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4 text-foreground">
-            Finding best paths...
+            {t("paths.finding")}
           </h2>
           <p className="text-base text-text-secondary mb-8">
-            Mapping your skills to career opportunities in your area.
+            {t("paths.mapping")}
           </p>
+
           <div className="w-full bg-foreground/5 rounded-full h-1 overflow-hidden border border-border">
              <div className="h-full bg-blue-500 w-2/3 animate-[loading_3s_ease-in-out_infinite]"></div>
           </div>
@@ -198,11 +201,12 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
       <div className="max-w-7xl mx-auto relative z-10">
         <div className="text-center mb-16">
           <h1 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-foreground">
-            Choose Your Path
+            {t("paths.choose")}
           </h1>
           <p className="text-lg text-text-secondary max-w-2xl mx-auto">
-            Three career paths tailored to your profile and local market data.
+            {t("paths.tailored")}
           </p>
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 stagger">
@@ -219,7 +223,8 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
                     index === 0 ? 'bg-blue-600 text-white' : 'bg-bg-secondary text-text-secondary border border-border'
                  }`}>
                     <Sparkles className="w-3 h-3" />
-                    {index === 0 ? "Best Match" : "Good Match"}
+                    {index === 0 ? t("paths.bestMatch") : t("paths.goodMatch")}
+
                  </div>
               </div>
 
@@ -235,17 +240,18 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
               {/* Stats Highlighting */}
               <div className="grid grid-cols-2 gap-3 mb-6">
                 <div className="bg-input rounded-xl p-4 border border-border">
-                  <div className="text-xs font-medium text-text-tertiary mb-1">Est. Income</div>
+                  <div className="text-xs font-medium text-text-tertiary mb-1">{t("paths.income")}</div>
                   <div className="text-lg font-semibold text-emerald-500">
                     ₹{((path.estimatedIncomeMin ?? 0) / 1000).toFixed(0)}k<span className="text-text-tertiary font-normal text-sm ml-0.5">/mo</span>
                   </div>
                 </div>
                 <div className="bg-input rounded-xl p-4 border border-border">
-                  <div className="text-xs font-medium text-text-tertiary mb-1">Duration</div>
+                  <div className="text-xs font-medium text-text-tertiary mb-1">{t("paths.duration")}</div>
                   <div className="text-lg font-semibold text-foreground">
-                    {path.estimatedWeeks} <span className="text-text-tertiary font-normal text-sm">weeks</span>
+                    {path.estimatedWeeks} <span className="text-text-tertiary font-normal text-sm">{t("paths.weeks")}</span>
                   </div>
                 </div>
+
               </div>
 
               {/* Match Logic */}
@@ -258,7 +264,8 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
               <div className="mb-8 flex-grow">
                 <h3 className="text-xs font-medium text-text-tertiary uppercase tracking-wide mb-4 flex items-center gap-2">
                   <BookOpen className="w-3.5 h-3.5" />
-                  Curriculum Preview
+                  {t("paths.preview")}
+
                 </h3>
                 <div className="space-y-3">
                   {Array.isArray(path.previewWeeks) && (path.previewWeeks as { week: number; focus: string }[]).slice(0, 3).map((pw) => (
@@ -281,9 +288,10 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
-                    Select Path
+                    {t("paths.select")}
                     <ChevronRight className="w-4 h-4" />
                   </>
+
                 )}
               </button>
             </div>
@@ -298,7 +306,8 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
             className="group flex items-center gap-2 px-6 py-3 rounded-xl bg-card border border-border text-text-secondary font-medium text-sm hover:text-foreground hover:border-border-hover transition-all"
           >
             <RefreshCw className={`w-4 h-4 group-hover:rotate-180 transition-transform duration-700`} />
-            Regenerate Paths
+            {t("paths.regenerate")}
+
           </button>
         </div>
       </div>

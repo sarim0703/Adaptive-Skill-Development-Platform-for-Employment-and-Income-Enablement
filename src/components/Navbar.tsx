@@ -118,10 +118,10 @@ export default function Navbar() {
   const userInitial = userName?.charAt(0)?.toUpperCase() || '?';
 
   const appLinks = [
-    { href: "/learn", label: "Learn", icon: BookOpen },
-    { href: "/analytics", label: "Analytics", icon: BarChart3 },
-    { href: "/opportunities", label: "Jobs", icon: Briefcase },
-    { href: "/badges", label: "Badges", icon: Award },
+    { href: "/learn", label: t("nav.learn"), icon: BookOpen },
+    { href: "/analytics", label: t("nav.analytics"), icon: BarChart3 },
+    { href: "/opportunities", label: t("nav.jobs"), icon: Briefcase },
+    { href: "/badges", label: t("nav.badges"), icon: Award },
   ];
 
   return (
@@ -194,7 +194,7 @@ export default function Navbar() {
                     whileHover={{ opacity: 1, y: -45 }}
                     className="absolute px-3 py-1.5 rounded-lg bg-card border border-border text-foreground text-[10px] font-bold uppercase tracking-widest pointer-events-none whitespace-nowrap shadow-2xl opacity-0 group-hover:opacity-100"
                   >
-                    Profile
+                    {t("nav.profile")}
                   </motion.div>
                 </AnimatePresence>
               </motion.div>
@@ -243,7 +243,7 @@ export default function Navbar() {
                   window.location.href = '/';
                 }}
                 className="w-10 h-10 flex items-center justify-center rounded-2xl text-foreground/40 hover:bg-rose-500/10 hover:text-rose-500 transition-colors border border-transparent hover:border-rose-500/20"
-                title="Sign out"
+                title={t("nav.signOut")}
               >
                 <LogOut className="w-5 h-5" />
               </motion.button>

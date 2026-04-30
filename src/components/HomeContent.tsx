@@ -87,9 +87,9 @@ export default function HomeContent() {
                   <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-8">
                      <Brain className="w-8 h-8 text-blue-400" />
                   </div>
-                  <h3 className="text-3xl font-bold text-foreground mb-4 leading-tight">Adaptive Engine</h3>
+                  <h3 className="text-3xl font-bold text-foreground mb-4 leading-tight">{t("features.engine.title")}</h3>
                   <p className="text-text-secondary text-base font-normal leading-relaxed">
-                    Bayesian Knowledge Tracing monitors your mastery in real-time, dynamically adjusting task difficulty.
+                    {t("features.engine.desc")}
                   </p>
                </div>
                <div className="mt-12 h-2 w-full bg-card border border-border rounded-full overflow-hidden">
@@ -101,8 +101,8 @@ export default function HomeContent() {
             <div className="md:col-span-2 card p-10 group overflow-hidden">
                <div className="flex items-start justify-between gap-6">
                   <div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">Market Intelligence</h3>
-                    <p className="text-text-secondary font-normal">Real-time job demand data for your region.</p>
+                    <h3 className="text-xl font-semibold text-foreground mb-2">{t("features.market.title")}</h3>
+                    <p className="text-text-secondary font-normal">{t("features.market.desc")}</p>
                   </div>
                   <TrendingUp className="w-10 h-10 text-emerald-400 group-hover:scale-110 transition-transform" />
                </div>
@@ -111,15 +111,15 @@ export default function HomeContent() {
             {/* Sub Feature 2 */}
             <div className="card p-10 group">
                <Users className="w-8 h-8 text-violet-400 mb-6 group-hover:rotate-12 transition-transform" />
-               <h3 className="text-lg font-semibold text-foreground mb-2">Multilingual</h3>
-               <p className="text-sm text-text-secondary font-medium">English, Hindi, Kannada</p>
+               <h3 className="text-lg font-semibold text-foreground mb-2">{t("features.multi.title")}</h3>
+               <p className="text-sm text-text-secondary font-medium">{t("features.multi.desc")}</p>
             </div>
 
             {/* Sub Feature 3 */}
             <div className="card p-10 group border-blue-500/30 bg-blue-500/5">
                <Sparkles className="w-8 h-8 text-blue-400 mb-6 animate-pulse" />
-               <h3 className="text-lg font-semibold text-foreground mb-2">AI Mentor</h3>
-               <p className="text-sm text-text-secondary font-medium">Context-aware guidance</p>
+               <h3 className="text-lg font-semibold text-foreground mb-2">{t("features.mentor.title")}</h3>
+               <p className="text-sm text-text-secondary font-medium">{t("features.mentor.desc")}</p>
             </div>
           </div>
         </section>
@@ -151,8 +151,9 @@ export default function HomeContent() {
         <section className="mb-24 card p-20 text-center relative overflow-hidden bg-gradient-to-br from-blue-600/10 to-violet-600/10 border-blue-500/20">
            <div className="absolute inset-0 bg-tech-grid opacity-10"></div>
            <div className="relative z-10">
-              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8 tracking-tight">Ready to start learning?</h2>
-              <p className="text-lg text-text-secondary mb-12 max-w-2xl mx-auto font-normal">Join thousands of others building their future with adaptive AI learning.</p>
+              <h2 className="text-3xl md:text-5xl font-bold text-foreground mb-8 tracking-tight">{t("cta.final.title")}</h2>
+              <p className="text-lg text-text-secondary mb-12 max-w-2xl mx-auto font-normal">{t("cta.final.desc")}</p>
+
               <Link
                 href={isLoggedIn ? "/learn" : "/?auth=true&mode=signup"}
                 className="btn-primary px-16 py-8 text-2xl rounded-full shadow-[0_0_60px_rgba(59,130,246,0.3)]"

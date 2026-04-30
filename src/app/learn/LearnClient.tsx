@@ -143,9 +143,10 @@ export default function LearnClient({
             <div className="flex items-center gap-1.5 text-xs font-medium text-text-tertiary">
               <span>{pathTitle}</span>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-text-secondary">Module {currentModuleNumber}</span>
+              <span className="text-text-secondary">{t("learn.module")} {currentModuleNumber}</span>
               <ChevronRight className="w-3 h-3" />
-              <span className="text-foreground">Lesson {currentSubtopicIndex + 1}</span>
+              <span className="text-foreground">{t("learn.lesson")} {currentSubtopicIndex + 1}</span>
+
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -172,13 +173,14 @@ export default function LearnClient({
                   <Sparkles className="w-5 h-5 text-blue-400" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-bold text-foreground tracking-tight">Exploration Mode Active</h4>
-                  <p className="text-[11px] text-slate-400">You are viewing a future lesson. Mastery quizzes are locked until you reach this stage.</p>
+                  <h4 className="text-sm font-bold text-foreground tracking-tight">{t("learn.exploration")}</h4>
+                  <p className="text-[11px] text-slate-400">{t("learn.explorationSub")}</p>
                 </div>
               </div>
               <Link href="/learn" className="px-5 py-2.5 bg-white/5 hover:bg-white/10 border border-border rounded-xl text-[10px] font-black uppercase tracking-widest transition-all">
-                Return to Active Task
+                {t("learn.returnActive")}
               </Link>
+
             </div>
           </div>
         )}
@@ -281,8 +283,9 @@ export default function LearnClient({
                   className={`flex items-center gap-2 px-5 py-3.5 text-xs font-bold uppercase tracking-widest transition-all border-b-2 ${
                     activeTab === "notes" ? "border-blue-500 text-foreground bg-white/[0.02]" : "border-transparent text-slate-500 hover:text-slate-300"
                   }`}>
-                  <BookOpen className="w-3.5 h-3.5" /> Notes
+                  <BookOpen className="w-3.5 h-3.5" /> {t("learn.notes")}
                 </button>
+
 
 
               </div>
@@ -318,7 +321,8 @@ export default function LearnClient({
                   ) : (
                     <div className="text-center py-8 text-text-secondary">
                       <FileText className="w-8 h-8 mx-auto mb-2 opacity-40" />
-                      <p className="text-xs font-medium">No notes available for this lesson.</p>
+                      <p className="text-xs font-medium">{t("learn.noNotes")}</p>
+
                     </div>
                   )
                 )}
@@ -332,8 +336,9 @@ export default function LearnClient({
               <Link href="/learn"
                 className="w-full py-5 rounded-2xl bg-card border border-border text-foreground font-bold text-sm uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-white/10 transition-all group">
                 <PlayCircle className="w-5 h-5 text-blue-400" />
-                Return to Active Lesson
+                {t("learn.returnActive")}
                 <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+
               </Link>
             ) : (
               <button onClick={() => setShowQuiz(true)}
@@ -365,19 +370,21 @@ export default function LearnClient({
                   </div>
                 </div>
                 <div className="min-w-0">
-                  <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">Path Progress</h3>
-                  <p className="text-sm font-bold text-foreground">{completedSubtopics} <span className="text-slate-500 font-normal">of {totalSubtopics} lessons</span></p>
-                  <p className="text-[10px] text-slate-600 mt-0.5">Capability: {capScore}/100</p>
+                  <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-1">{t("learn.pathProgress")}</h3>
+                  <p className="text-sm font-bold text-foreground">{completedSubtopics} <span className="text-slate-500 font-normal">{t("onboarding.of")} {totalSubtopics} {t("learn.lessons")}</span></p>
+                  <p className="text-[10px] text-slate-600 mt-0.5">{t("learn.capability")}: {capScore}/100</p>
                 </div>
+
               </div>
             </div>
 
             {/* Course Curriculum */}
             <div className="rounded-2xl bg-card border border-border overflow-hidden">
               <div className="px-5 py-5 border-b border-border flex items-center justify-between">
-                <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">Course Content</h3>
-                <span className="text-[10px] text-slate-600">{totalModules} modules</span>
+                <h3 className="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">{t("learn.content")}</h3>
+                <span className="text-[10px] text-slate-600">{totalModules} {t("learn.modulesCount")}</span>
               </div>
+
 
               <div className="max-h-[72vh] overflow-y-auto custom-scrollbar">
                 {allModules.map((mod) => {
@@ -395,7 +402,8 @@ export default function LearnClient({
                           <p className={`text-xs font-bold truncate ${isCurrent ? "text-foreground" : "text-slate-400"}`}>
                             {mod.module_title}
                           </p>
-                          <p className="text-[10px] text-slate-600 mt-0.5">{completedInMod}/{totalInMod} done</p>
+                          <p className="text-[10px] text-slate-600 mt-0.5">{completedInMod}/{totalInMod} {t("learn.done")}</p>
+
                         </div>
                       </button>
 
