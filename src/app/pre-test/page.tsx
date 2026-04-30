@@ -14,7 +14,7 @@ export default async function PreTestPage() {
     where: (um, { eq }) => eq(um.userId, userId),
   });
 
-  if (model?.preTestScore !== null && model?.preTestScore !== undefined) {
+  if (model && model.preTestScore !== null && model.preTestScore !== undefined) {
     redirect("/learn");
   }
 

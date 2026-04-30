@@ -182,6 +182,31 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
 
   // Quiz UI
   const question = questions[currentIndex];
+
+  // Guard: if streaming hasn't delivered this question yet, show loading
+  if (!question || !question.question || !question.options || question.options.length < 4) {
+    return (
+      <div className="relative min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 overflow-hidden transition-colors duration-300">
+        <div className="relative z-10 text-center max-w-lg">
+          <div className="inline-flex mb-10">
+            <div className="w-20 h-20 rounded-full border-4 border-blue-500/30 border-t-blue-500 animate-spin flex items-center justify-center bg-card">
+               <Brain className="w-7 h-7 text-blue-500 animate-pulse" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-semibold tracking-tight mb-4 text-foreground">
+            Preparing questions...
+          </h2>
+          <p className="text-base text-text-secondary mb-8">
+            {t("pretest.loadingSub")}
+          </p>
+          <div className="w-full bg-foreground/5 rounded-full h-1 overflow-hidden border border-border">
+             <div className="h-full bg-blue-500 w-2/3 animate-[loading_3s_ease-in-out_infinite]"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const isAnswered = answers[currentIndex] !== undefined;
   const isLast = currentIndex === questions.length - 1;
 
@@ -208,7 +233,7 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
           </div>
           <div className="mt-3 flex items-center gap-3">
              <span className="text-xs font-medium text-text-tertiary">Question {currentIndex + 1} of {questions.length}</span>
-             <div className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-medium">{question.difficulty}</div>
+             <div className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-medium">{question?.difficulty || '...'}</div>
           </div>
         </div>
 
