@@ -24,7 +24,7 @@ export default function OnboardingPage() {
 
   const QUESTIONS = [
     { id: 1, text: t("q1.text"), hint: t("q1.hint"), type: "select", options: [t("q1.opt1"), t("q1.opt2"), t("q1.opt3"), t("q1.opt4")] },
-    { id: 2, text: t("q2.text"), hint: t("q2.hint"), type: "select", options: [t("q2.opt1"), t("q2.opt2"), t("q2.opt3"), t("q2.opt4")] },
+    { id: 2, text: t("q2.text"), hint: t("q2.hint"), type: "select", options: [t("q2.opt1"), t("q2.opt2"), t("q2.opt3"), t("q2.opt4"), t("q2.opt5")] },
     { id: 3, text: t("q3.text"), hint: t("q3.hint"), type: "select", options: [t("q3.opt1"), t("q3.opt2"), t("q3.opt3"), t("q3.opt4")] },
     { id: 4, text: t("q4.text"), hint: t("q4.hint"), type: "select", options: [t("q4.opt1"), t("q4.opt2"), t("q4.opt3"), t("q4.opt4")] },
     { id: 5, text: t("q5.text"), hint: t("q5.hint"), type: "text", placeholder: "e.g. 'electrical wiring', 'cooking', 'bikes'" },
@@ -133,16 +133,17 @@ export default function OnboardingPage() {
                       placeholder={question.placeholder || "Describe in your own words..."}
                       value={answers[question.id] || ""}
                       onChange={(e) => setAnswers({ ...answers, [question.id]: e.target.value })}
-                      className="w-full bg-input border border-border rounded-xl p-4 pr-16 text-base font-normal text-foreground placeholder:text-text-muted outline-none focus:border-blue-500/50 focus:bg-card-hover transition-all"
+                      className="w-full bg-input border border-border rounded-xl p-5 pr-16 text-base font-normal text-foreground placeholder:text-text-muted outline-none focus:border-blue-500/50 focus:bg-card-hover transition-all"
                       autoFocus
                     />
-                    <div className="absolute right-4 bottom-4">
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
                       <SpeechInput 
                         language={LANG_MAP[language]} 
                         onResult={(text) => setAnswers(prev => ({ ...prev, [question.id]: prev[question.id] ? `${prev[question.id]} ${text}` : text }))}
-                        className="w-12 h-12 rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all"
+                        className="w-10 h-10 rounded-xl shadow-lg hover:scale-110 active:scale-95 transition-all"
                       />
                     </div>
+
                   </div>
                 )}
               </div>
