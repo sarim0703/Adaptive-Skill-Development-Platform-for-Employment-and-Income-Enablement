@@ -125,7 +125,8 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="fixed top-8 inset-x-0 z-50 flex justify-center px-4 pointer-events-none">
+    <div className="fixed top-8 inset-x-0 z-[9999] flex justify-center px-4 pointer-events-none">
+
       
       {/* ── The Dock Container ── */}
       <motion.nav

@@ -259,7 +259,8 @@ export default function OpportunitiesPage() {
     <div className="flex h-[calc(100vh-4rem)] w-full bg-background text-foreground overflow-hidden font-sans">
       
       {/* ── Left Side: Job Feed ── */}
-      <aside className="w-[480px] h-full flex flex-col border-r border-border bg-background relative z-20">
+      <aside className="w-[480px] h-full flex flex-col border-r border-border bg-background relative z-[1001]">
+
         
         {/* Header */}
         <div className="p-6 pt-8 border-b border-border bg-card/80 backdrop-blur-xl">
