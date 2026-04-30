@@ -21,8 +21,10 @@ export default function OnboardingPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(false);
+  const [interimSpeech, setInterimSpeech] = useState("");
 
   const QUESTIONS = [
+// ... (QUESTIONS array remains same)
     { id: 1, text: t("q1.text"), hint: t("q1.hint"), type: "select", options: [t("q1.opt1"), t("q1.opt2"), t("q1.opt3"), t("q1.opt4")] },
     { id: 2, text: t("q2.text"), hint: t("q2.hint"), type: "select", options: [t("q2.opt1"), t("q2.opt2"), t("q2.opt3"), t("q2.opt4"), t("q2.opt5")] },
     { id: 3, text: t("q3.text"), hint: t("q3.hint"), type: "select", options: [t("q3.opt1"), t("q3.opt2"), t("q3.opt3"), t("q3.opt4")] },
@@ -128,6 +130,16 @@ export default function OnboardingPage() {
 
                 {(question.type === "text" || question.type === "number") && (
                   <div className="relative pt-6">
+                    {/* Live Preview Bubble */}
+                    {interimSpeech && (
+                      <div className="absolute -top-4 left-0 right-0 z-20 flex justify-center pointer-events-none">
+                        <div className="bg-blue-600 text-white text-sm font-medium px-4 py-2 rounded-full shadow-[0_10px_30px_rgba(37,99,235,0.4)] animate-bounce flex items-center gap-2">
+                           <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                           {interimSpeech}
+                        </div>
+                      </div>
+                    )}
+
                     <input
                       type={question.type}
                       placeholder={question.placeholder || "Describe in your own words..."}
@@ -139,7 +151,11 @@ export default function OnboardingPage() {
                     <div className="absolute right-4 top-[58%] -translate-y-1/2 flex items-center">
                       <SpeechInput 
                         language={LANG_MAP[language]} 
-                        onResult={(text) => setAnswers(prev => ({ ...prev, [question.id]: prev[question.id] ? `${prev[question.id]} ${text}` : text }))}
+                        onInterimResult={(text) => setInterimSpeech(text)}
+                        onResult={(text) => {
+                          setAnswers(prev => ({ ...prev, [question.id]: prev[question.id] ? `${prev[question.id]} ${text}` : text }));
+                          setInterimSpeech("");
+                        }}
                         className="w-12 h-12 rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all"
                       />
                     </div>

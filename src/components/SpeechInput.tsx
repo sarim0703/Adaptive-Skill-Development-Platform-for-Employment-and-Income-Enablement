@@ -5,20 +5,14 @@ import { Mic, MicOff } from "lucide-react";
 
 type SpeechInputProps = {
   onResult: (text: string) => void;
+  onInterimResult?: (text: string) => void;
   language?: string; // e.g. 'en-US', 'hi-IN', 'kn-IN'
   className?: string;
 };
 
-// Define types for Web Speech API
-interface SpeechRecognitionEvent extends Event {
-  results: SpeechRecognitionResultList;
-}
+// ... (types)
 
-interface SpeechRecognitionErrorEvent extends Event {
-  error: string;
-}
-
-export default function SpeechInput({ onResult, language = "en-IN", className = "" }: SpeechInputProps) {
+export default function SpeechInput({ onResult, onInterimResult, language = "en-IN", className = "" }: SpeechInputProps) {
   const [isListening, setIsListening] = useState(false);
   const recognitionRef = useRef<any>(null);
   const [isSupported, setIsSupported] = useState(false);
@@ -29,14 +23,27 @@ export default function SpeechInput({ onResult, language = "en-IN", className = 
     if (SpeechRecognition) {
       setIsSupported(true);
       const recog = new SpeechRecognition();
-      recog.continuous = false; // Changed to false to prevent multiple results
-      recog.interimResults = false;
+      recog.continuous = true; // Use continuous for live updates
+      recog.interimResults = true;
       recog.lang = language;
 
-      recog.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        if (transcript) {
-          onResult(transcript.trim());
+      recog.onresult = (event: any) => {
+        let interimTranscript = "";
+        let finalTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        if (finalTranscript) {
+          onResult(finalTranscript.trim());
+          if (onInterimResult) onInterimResult(""); // Clear interim when final arrives
+        } else if (interimTranscript && onInterimResult) {
+          onInterimResult(interimTranscript);
         }
       };
 
