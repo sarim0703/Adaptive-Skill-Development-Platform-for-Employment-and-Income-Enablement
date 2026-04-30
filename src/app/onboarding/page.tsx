@@ -127,23 +127,22 @@ export default function OnboardingPage() {
                 )}
 
                 {(question.type === "text" || question.type === "number") && (
-                  <div className="relative pt-4">
+                  <div className="relative pt-6">
                     <input
                       type={question.type}
                       placeholder={question.placeholder || "Describe in your own words..."}
                       value={answers[question.id] || ""}
                       onChange={(e) => setAnswers({ ...answers, [question.id]: e.target.value })}
-                      className="w-full bg-input border border-border rounded-xl p-5 pr-16 text-base font-normal text-foreground placeholder:text-text-muted outline-none focus:border-blue-500/50 focus:bg-card-hover transition-all"
+                      className="w-full bg-input border border-border rounded-2xl p-6 pr-20 text-lg font-medium text-foreground placeholder:text-text-muted outline-none focus:border-blue-500/50 focus:bg-card-hover transition-all min-h-[80px]"
                       autoFocus
                     />
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center">
+                    <div className="absolute right-4 top-[58%] -translate-y-1/2 flex items-center">
                       <SpeechInput 
                         language={LANG_MAP[language]} 
                         onResult={(text) => setAnswers(prev => ({ ...prev, [question.id]: prev[question.id] ? `${prev[question.id]} ${text}` : text }))}
-                        className="w-10 h-10 rounded-xl shadow-lg hover:scale-110 active:scale-95 transition-all"
+                        className="w-12 h-12 rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all"
                       />
                     </div>
-
                   </div>
                 )}
               </div>
