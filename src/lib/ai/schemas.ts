@@ -67,5 +67,5 @@ export const pathOptionSchema = z.object({
         })
       ).max(3).describe("A maximum 3-week preview of the curriculum"),
     })
-  ).min(3).max(4).describe("Generate exactly 3 or 4 path options"),
+  ).length(3).describe("Generate exactly 3 path options"),
 });

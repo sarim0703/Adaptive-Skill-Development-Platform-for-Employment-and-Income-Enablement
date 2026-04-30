@@ -23,7 +23,7 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
   const { t } = useLanguage();
   const [paths, setPaths] = useState(initialPaths);
   const [isGenerating, setIsGenerating] = useState(initialPaths.length === 0);
-  const [isSelecting, setIsSelecting] = useState(false);
+  const [selectingPathId, setSelectingPathId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const hasFetched = useRef(false);
   const router = useRouter();
@@ -69,18 +69,18 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
     },
     onError: (err) => {
       console.error("Streaming error:", err);
-      setIsSelecting(false);
+      setSelectingPathId(null);
       setError("Failed to generate roadmap. Please try again.");
     }
   });
 
   async function handleSelect(pathId: string) {
-    setIsSelecting(true);
+    setSelectingPathId(pathId);
     startStreaming({ pathId });
   }
 
   // Show the "Generating Roadmap" screen if we are streaming
-  if (isStreamingRoadmap || (isSelecting && streamingRoadmap)) {
+  if (isStreamingRoadmap || (selectingPathId && streamingRoadmap)) {
     return (
       <div className="relative min-h-screen bg-background text-foreground flex flex-col items-center justify-start py-20 px-6 overflow-y-auto">
         <div className="max-w-2xl w-full text-center mb-12">
@@ -249,10 +249,10 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
 
               <button
                 onClick={() => handleSelect(path.id)}
-                disabled={isSelecting}
+                disabled={!!selectingPathId}
                 className="w-full py-3.5 rounded-xl bg-foreground text-background font-semibold text-sm hover:bg-blue-600 hover:text-white active:scale-[0.98] disabled:opacity-50 transition-all flex items-center justify-center gap-2"
               >
-                {isSelecting ? (
+                {selectingPathId === path.id ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <>
