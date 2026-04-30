@@ -427,12 +427,13 @@ export async function submitQuizResult(params: {
 
   if (currentModel) {
     const currentKS = (currentModel.knowledgeState as KnowledgeState) || {};
-    const questions = params.questions as { correct_index: number }[];
+    const questions = params.questions as { correct_index: number; difficulty: string }[];
     const userAnswers = params.userAnswers as number[];
 
-    // Map each quiz question to a BKT observation
+    // Map each quiz question to a BKT observation with difficulty for IRT scaling
     const answers = questions.map((q, i) => ({
       isCorrect: userAnswers[i] === q.correct_index,
+      difficulty: (q.difficulty || 'medium') as 'easy' | 'medium' | 'hard',
     }));
 
     // Run BKT update

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, CheckCircle2, XCircle, Trophy, Flame, ArrowRight, RotateCcw, Sparkles } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Trophy, Flame, ArrowRight, RotateCcw, Sparkles, BrainCircuit } from "lucide-react";
 import { submitQuizResult } from "@/app/actions";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { quizSchema } from "@/lib/ai/schemas";
+import { motion, AnimatePresence } from "framer-motion";
 
 type QuizModalProps = {
   roadmapId: string;
@@ -45,35 +46,29 @@ export default function QuizModal({
   const [submitting, setSubmitting] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [resultData, setResultData] = useState<{ score: number; passed: boolean; correct: number; total: number } | null>(null);
-  const [showExplanation, setShowExplanation] = useState(false);
   const router = useRouter();
 
-  // STREAMING HOOK
   const { object, submit, isLoading } = useObject({
     api: "/api/quiz",
     schema: quizSchema,
   });
 
-  // START GENERATING ON MOUNT
   useEffect(() => {
     submit({ subtopicTitle, practicalTask, youtubeSearchQuery, capabilityScore, language });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const questions = object?.questions || [];
-  const TOTAL_QUESTIONS = 8; // We strictly requested 8 questions in the API
+  const TOTAL_QUESTIONS = 8;
 
   const handleSelect = (idx: number) => {
     const newAnswers = [...answers];
     newAnswers[currentQ] = idx;
     setAnswers(newAnswers);
-    setShowExplanation(false);
   };
 
   const handleNext = () => {
     if (currentQ < TOTAL_QUESTIONS - 1) {
       setCurrentQ(currentQ + 1);
-      setShowExplanation(false);
     } else {
       handleSubmit();
     }
@@ -88,12 +83,12 @@ export default function QuizModal({
     const score = Math.round((correctCount / TOTAL_QUESTIONS) * 100);
     const passed = score >= 75;
 
-    // Use a clean version of the questions for the database
     const cleanQuestions = questions.map(q => ({
       question: q?.question || "",
       options: q?.options || [],
       correct_index: q?.correct_index || 0,
       explanation: q?.explanation || "",
+      difficulty: q?.difficulty || "medium",
     }));
 
     await submitQuizResult({
@@ -113,174 +108,201 @@ export default function QuizModal({
 
   const randomMotivation = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
-  // ── INITIAL LOADING STATE (Before any stream data arrives) ──
   if (isLoading && questions.length === 0) {
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div className="w-full max-w-lg rounded-3xl bg-[#141416] border border-white/10 p-8 flex flex-col items-center shadow-2xl relative">
-          <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-colors z-10">✕</button>
-          <div className="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-5">
-            <Loader2 className="w-8 h-8 text-blue-500 animate-spin" />
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4">
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-full max-w-lg rounded-[2.5rem] bg-card border border-border p-12 flex flex-col items-center shadow-2xl relative overflow-hidden"
+        >
+          <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent animate-pulse" />
+          <div className="w-20 h-20 rounded-3xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-8 relative">
+            <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
+            <div className="absolute inset-0 rounded-3xl bg-blue-500/5 animate-ping" />
           </div>
-          <h2 className="text-lg font-bold text-white mb-1">Generating Quiz...</h2>
-          <p className="text-sm text-slate-500 text-center">Creating {TOTAL_QUESTIONS} research-grade questions</p>
-        </div>
+          <h2 className="text-2xl font-black text-foreground mb-2">Analyzing Mastery...</h2>
+          <p className="text-sm text-text-tertiary text-center max-w-xs font-medium">Generating {TOTAL_QUESTIONS} scenario-based questions tailored to your skill level.</p>
+        </motion.div>
       </div>
     );
   }
 
-  // ── Results Screen ──
   if (showResults && resultData) {
     const { score, passed, correct, total } = resultData;
     return (
-      <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-        <div className="w-full max-w-lg rounded-3xl bg-[#141416] border border-white/10 shadow-2xl overflow-hidden relative">
-          <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-colors z-10">✕</button>
-          {/* Result Header */}
-          <div className={`p-8 text-center ${passed ? "bg-gradient-to-b from-emerald-500/10 to-transparent" : "bg-gradient-to-b from-amber-500/10 to-transparent"}`}>
-            <div className={`w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center ${passed ? "bg-emerald-500/10 border-2 border-emerald-500/30" : "bg-amber-500/10 border-2 border-amber-500/30"}`}>
-              {passed ? <Trophy className="w-10 h-10 text-emerald-500" /> : <RotateCcw className="w-10 h-10 text-amber-500" />}
-            </div>
-            <h2 className="text-2xl font-black text-white mb-1">
-              {passed ? "Lesson Mastered!" : "Keep Practicing!"}
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4">
+        <motion.div 
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="w-full max-w-lg rounded-[3rem] bg-card border border-border shadow-2xl overflow-hidden relative"
+        >
+          <div className={`p-10 text-center relative ${passed ? "bg-emerald-500/5" : "bg-amber-500/5"}`}>
+            <motion.div 
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", damping: 12 }}
+              className={`w-24 h-24 rounded-[2rem] mx-auto mb-6 flex items-center justify-center ${passed ? "bg-emerald-500/20 border-2 border-emerald-500/30" : "bg-amber-500/20 border-2 border-amber-500/30"}`}
+            >
+              {passed ? <Trophy className="w-12 h-12 text-emerald-500" /> : <RotateCcw className="w-12 h-12 text-amber-500" />}
+            </motion.div>
+            <h2 className="text-3xl font-black text-foreground mb-2">
+              {passed ? "Module Mastered!" : "Session Incomplete"}
             </h2>
-            <p className="text-sm text-slate-400">{subtopicTitle}</p>
+            <p className="text-sm font-bold text-text-tertiary uppercase tracking-widest">{subtopicTitle}</p>
           </div>
 
-          {/* Score */}
-          <div className="px-8 pb-6">
-            <div className="flex items-center justify-center gap-6 py-5 mb-5 rounded-2xl bg-white/[0.03] border border-white/5">
+          <div className="px-10 pb-10">
+            <div className="flex items-center justify-center gap-8 py-8 mb-8 rounded-[2rem] bg-input border border-border">
               <div className="text-center">
-                <div className={`text-4xl font-black tabular-nums ${passed ? "text-emerald-400" : "text-amber-400"}`}>{score}%</div>
-                <div className="text-[9px] font-black text-slate-600 uppercase tracking-widest mt-1">Score</div>
+                <div className={`text-5xl font-black tabular-nums ${passed ? "text-emerald-500" : "text-amber-500"}`}>{score}%</div>
+                <div className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mt-2">Proficiency</div>
               </div>
-              <div className="w-px h-12 bg-white/10" />
+              <div className="w-px h-16 bg-border" />
               <div className="text-center">
-                <div className="text-4xl font-black text-white tabular-nums">{correct}<span className="text-slate-600 text-lg">/{total}</span></div>
-                <div className="text-[9px] font-black text-slate-600 uppercase tracking-widest mt-1">Correct</div>
+                <div className="text-5xl font-black text-foreground tabular-nums">{correct}<span className="text-text-tertiary text-xl">/{total}</span></div>
+                <div className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mt-2">Accuracy</div>
               </div>
             </div>
 
-            {/* Motivation */}
-            <div className={`flex items-start gap-3 p-4 rounded-xl mb-5 ${passed ? "bg-emerald-500/5 border border-emerald-500/10" : "bg-amber-500/5 border border-amber-500/10"}`}>
-              <Sparkles className={`w-4 h-4 flex-shrink-0 mt-0.5 ${passed ? "text-emerald-500" : "text-amber-500"}`} />
-              <p className={`text-sm leading-relaxed ${passed ? "text-emerald-300" : "text-amber-300"}`}>
+            <div className={`flex items-start gap-4 p-5 rounded-2xl mb-8 ${passed ? "bg-emerald-500/5 border border-emerald-500/10" : "bg-amber-500/5 border border-amber-500/10"}`}>
+              <Sparkles className={`w-5 h-5 flex-shrink-0 mt-0.5 ${passed ? "text-emerald-500" : "text-amber-500"}`} />
+              <p className={`text-sm font-bold leading-relaxed ${passed ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
                 {randomMotivation(passed ? MOTIVATIONAL_PASS : MOTIVATIONAL_FAIL)}
               </p>
             </div>
 
-            {/* Answer Review */}
-            <div className="space-y-2 mb-6 max-h-48 overflow-y-auto">
-              {questions.map((q, idx) => {
-                const isCorrect = answers[idx] === q?.correct_index;
-                return (
-                  <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <div className="flex-shrink-0 mt-0.5">
-                      {isCorrect
-                        ? <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-                        : <XCircle className="w-4 h-4 text-rose-500" />}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs text-slate-300 leading-snug line-clamp-2">{q?.question}</p>
-                      {!isCorrect && q?.explanation && (
-                        <p className="text-[10px] text-slate-500 mt-1 leading-snug">{q.explanation}</p>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* CTA */}
             <button onClick={handleContinue}
-              className={`w-full py-4 rounded-2xl font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] ${
+              className={`w-full py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] ${
                 passed
-                  ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-[0_10px_30px_rgba(16,185,129,0.2)]"
-                  : "bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-[0_10px_30px_rgba(245,158,11,0.2)]"
+                  ? "bg-emerald-600 text-white shadow-xl shadow-emerald-600/20"
+                  : "bg-amber-600 text-white shadow-xl shadow-amber-600/20"
               }`}>
               {passed ? (
-                <><ArrowRight className="w-4 h-4" /> Continue Learning</>
+                <><ArrowRight className="w-4 h-4" /> Deploy Knowledge</>
               ) : (
-                <><RotateCcw className="w-4 h-4" /> Try Again</>
+                <><RotateCcw className="w-4 h-4" /> Recalibrate & Retry</>
               )}
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
-  // ── Quiz Questions ──
   const q = questions[currentQ];
   const isSelected = (idx: number) => answers[currentQ] === idx;
-  const isQuestionReady = q && q.question && q.options && q.options.length === 4 && q.correct_index !== undefined;
-  
-  // We disable interactions if the current question is still typing out
+  const isQuestionReady = q && q.question && q.options && q.options.length === 4;
   const disableInteractions = isLoading && !isQuestionReady;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="w-full max-w-4xl rounded-3xl bg-[#141416] border border-white/10 shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[400px]">
-
-        {/* Left Column: Header & Question */}
-        <div className="w-full md:w-1/2 p-6 md:p-8 md:border-r border-white/10 flex flex-col bg-[#141416]">
-          {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-              {t("quiz.question")} {currentQ + 1} {t("onboarding.of")} {TOTAL_QUESTIONS}
-              {isLoading && <Loader2 className="w-3 h-3 animate-spin text-blue-500" />}
-            </h2>
-            <button onClick={onClose} className="md:hidden w-7 h-7 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-colors text-sm">✕</button>
-          </div>
-          {/* Progress Dots */}
-          <div className="flex gap-1.5 mb-8">
-            {Array.from({ length: TOTAL_QUESTIONS }).map((_, i) => (
-              <div key={i} className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
-                i < currentQ ? "bg-emerald-500" : i === currentQ ? "bg-blue-500" : "bg-white/10"
-              }`} />
-            ))}
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-xl flex items-center justify-center z-[100] p-4 font-sans">
+      <motion.div 
+        layout
+        className="w-full max-w-5xl rounded-[3rem] bg-card border border-border shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[500px]"
+      >
+        <div className="w-full md:w-1/2 p-8 md:p-12 md:border-r border-border flex flex-col relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-1 bg-input">
+            <motion.div 
+              className="h-full bg-blue-500" 
+              initial={{ width: 0 }}
+              animate={{ width: `${((currentQ + 1) / TOTAL_QUESTIONS) * 100}%` }}
+            />
           </div>
 
-          {/* Question */}
-          <div className="flex-1">
-            <p className="text-white text-lg md:text-xl font-medium leading-relaxed">
-              {q?.question || "..."}
-              {disableInteractions && <span className="inline-block w-1 h-5 ml-1 bg-blue-500 animate-pulse align-middle" />}
+          <div className="flex justify-between items-center mb-10">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+                <BrainCircuit className="w-4 h-4 text-blue-500" />
+              </div>
+              <span className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">
+                Assessment {currentQ + 1} / {TOTAL_QUESTIONS}
+              </span>
+            </div>
+            {q?.difficulty && (
+              <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest border ${
+                q.difficulty === 'hard' ? "bg-rose-500/10 text-rose-500 border-rose-500/20" : 
+                q.difficulty === 'medium' ? "bg-amber-500/10 text-amber-500 border-amber-500/20" : 
+                "bg-emerald-500/10 text-emerald-500 border-emerald-500/20"
+              }`}>
+                {q.difficulty}
+              </span>
+            )}
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={currentQ}
+              initial={{ x: -20, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: 20, opacity: 0 }}
+              className="flex-1"
+            >
+              <h2 className="text-2xl md:text-3xl font-black text-foreground leading-[1.3] tracking-tight">
+                {q?.question || "Initializing Assessment..."}
+                {disableInteractions && <motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity }} className="inline-block w-1 h-6 ml-2 bg-blue-500 align-middle" />}
+              </h2>
+            </motion.div>
+          </AnimatePresence>
+          
+          <div className="mt-8 pt-8 border-t border-border">
+            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest leading-relaxed">
+              This question targets your <span className="text-blue-500">Zone of Proximal Development</span> to ensure optimal learning gain.
             </p>
           </div>
         </div>
 
-        {/* Right Column: Options & Submit */}
-        <div className="w-full md:w-1/2 p-6 md:p-8 bg-white/[0.02] flex flex-col relative">
-          <button onClick={onClose} className="hidden md:flex absolute top-6 right-6 w-8 h-8 rounded-lg bg-white/5 border border-white/5 items-center justify-center text-slate-500 hover:text-white hover:bg-white/10 transition-colors text-sm">✕</button>
+        <div className="w-full md:w-1/2 p-8 md:p-12 bg-input/30 flex flex-col relative">
+          <button onClick={onClose} className="absolute top-8 right-8 text-text-tertiary hover:text-foreground transition-colors">
+             <XCircle className="w-6 h-6 opacity-40 hover:opacity-100" />
+          </button>
 
-          {/* Options */}
-          <div className="space-y-3 mb-8 mt-10 md:mt-0 flex-1">
-            {[0, 1, 2, 3].map((idx) => {
-              const optText = q?.options?.[idx];
-              return (
-                <button key={idx} onClick={() => handleSelect(idx)}
-                  disabled={disableInteractions || !optText}
-                  className={`w-full text-left p-4 rounded-xl border transition-all text-sm flex items-center gap-3 ${
-                    isSelected(idx)
-                      ? "border-blue-500/40 bg-blue-500/10 text-white"
-                      : "border-white/5 bg-white/[0.02] text-slate-400 hover:border-white/10 hover:bg-white/[0.04] hover:text-slate-300"
-                  } ${disableInteractions ? "opacity-50 cursor-not-allowed" : ""}`}>
-                  <span className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all ${
-                    isSelected(idx) ? "border-blue-500 bg-blue-500" : "border-slate-600"
-                  }`}>
-                    {isSelected(idx) && <CheckCircle2 className="w-3 h-3 text-white" />}
-                  </span>
-                  <span className="leading-snug">{optText || "..."}</span>
-                </button>
-              );
-            })}
+          <div className="space-y-4 mb-10 flex-1 flex flex-col justify-center">
+            <AnimatePresence mode="wait">
+              <motion.div 
+                key={currentQ}
+                className="space-y-4"
+              >
+                {[0, 1, 2, 3].map((idx) => {
+                  const optText = q?.options?.[idx];
+                  return (
+                    <motion.button 
+                      key={`${currentQ}-${idx}`}
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      transition={{ delay: idx * 0.1 }}
+                      onClick={() => handleSelect(idx)}
+                      disabled={disableInteractions || !optText}
+                      className={`w-full text-left p-6 rounded-3xl border-2 transition-all group relative overflow-hidden ${
+                        isSelected(idx)
+                          ? "border-blue-500 bg-blue-500/5 text-foreground"
+                          : "border-border bg-card text-text-secondary hover:border-border-hover hover:scale-[1.01]"
+                      } ${disableInteractions ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      <div className="flex items-center gap-5 relative z-10">
+                        <div className={`w-8 h-8 rounded-xl border-2 flex items-center justify-center flex-shrink-0 transition-all ${
+                          isSelected(idx) ? "bg-blue-500 border-blue-500 text-white" : "border-border bg-input group-hover:border-text-tertiary"
+                        }`}>
+                          <span className="text-[10px] font-black">{String.fromCharCode(65 + idx)}</span>
+                        </div>
+                        <span className="text-sm font-bold leading-snug">{optText || "..."}</span>
+                      </div>
+                      {isSelected(idx) && (
+                        <motion.div 
+                          layoutId="active-bg"
+                          className="absolute inset-0 bg-blue-500/5 z-0"
+                        />
+                      )}
+                    </motion.button>
+                  );
+                })}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Submit / Next */}
           <button onClick={handleNext}
             disabled={answers[currentQ] === undefined || submitting || disableInteractions || (currentQ === TOTAL_QUESTIONS - 1 && isLoading)}
-            className="w-full py-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-2 disabled:opacity-30 disabled:cursor-not-allowed hover:scale-[1.01] active:scale-[0.99] transition-all shadow-[0_10px_30px_rgba(59,130,246,0.2)] mt-auto">
+            className="w-full py-5 rounded-2xl bg-foreground text-background font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 disabled:opacity-30 disabled:grayscale transition-all hover:scale-[1.02] active:scale-[0.98] shadow-xl">
             {submitting ? (
               <Loader2 className="w-5 h-5 animate-spin" />
             ) : currentQ < TOTAL_QUESTIONS - 1 ? (
@@ -290,8 +312,7 @@ export default function QuizModal({
             )}
           </button>
         </div>
-
-      </div>
+      </motion.div>
     </div>
   );
 }

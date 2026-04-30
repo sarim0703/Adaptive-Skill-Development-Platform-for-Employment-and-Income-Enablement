@@ -80,6 +80,7 @@ Your goal is to generate exactly 8 highly analytical, non-generic questions to v
 - DISTRACTORS MUST BE PLAUSIBLE. Incorrect options should represent common misconceptions or plausible but sub-optimal approaches.
 - FOCUS ON THE "WHY" AND "HOW", not just the "WHAT".
 - ALL QUESTIONS MUST BE IN THE SPECIFIED LANGUAGE: ${lang}
+- MIX DIFFICULTY: Generate 2 easy, 4 medium, and 2 hard questions. Use the "difficulty" field to tag them.
 
 ### CONTEXT:
 - Video Title: "${video?.title || subtopicTitle}"
@@ -98,6 +99,7 @@ The user is learning about "${subtopicTitle}" but we do not have a video transcr
 - DO NOT reference any "video", "instructor", or "tutorial".
 - Ensure the questions are challenging and represent a difficulty level of ${capabilityScore}/100.
 - ALL QUESTIONS MUST BE IN THE SPECIFIED LANGUAGE: ${lang}
+- MIX DIFFICULTY: Generate 2 easy, 4 medium, and 2 hard questions. Use the "difficulty" field to tag them.
 
 [Practical Task]:
 ${practicalTask}`;

@@ -46,6 +46,7 @@ export const quizSchema = z.object({
       options: z.array(z.string()).length(4).describe("Exactly 4 options"),
       correct_index: z.number().min(0).max(3).describe("The index (0-3) of the correct option"),
       explanation: z.string().describe("Detailed explanation"),
+      difficulty: z.enum(["easy", "medium", "hard"]).describe("Difficulty level of this question"),
     })
   ).length(8).describe("Generate exactly 8 research-grade questions"),
 });
