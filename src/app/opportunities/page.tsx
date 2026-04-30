@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getAnalyticsData } from "@/app/actions";
+import { useLanguage } from "@/context/LanguageContext";
+
 
 // ── Dynamic import for Leaflet (SSR-incompatible) ──
 const JobMap = dynamic(() => import("@/components/JobMap"), { 
@@ -130,7 +132,9 @@ function getScatteredCoords(center: [number, number], index: number): [number, n
 }
 
 export default function OpportunitiesPage() {
+  const { t } = useLanguage();
   const [data, setData] = useState<JobData | null>(null);
+
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [cityTerm, setCityTerm] = useState("");
@@ -265,15 +269,17 @@ export default function OpportunitiesPage() {
                 <Sparkles className="w-5 h-5 text-blue-500" />
               </div>
               <div>
-                <h1 className="text-lg font-semibold text-foreground tracking-tight">Job Explorer</h1>
-                <p className="text-xs text-text-tertiary">Find opportunities</p>
+                <h1 className="text-lg font-semibold text-foreground tracking-tight">{t("jobs.explorer")}</h1>
+                <p className="text-xs text-text-tertiary">{t("jobs.findOps")}</p>
               </div>
+
             </div>
             {/* Total Results Badge */}
             {data?.total_results && (
               <div className="px-3 py-1.5 rounded-lg bg-blue-600/10 border border-blue-500/20">
-                <p className="text-xs font-medium text-blue-500">{data.total_results} Found</p>
+                <p className="text-xs font-medium text-blue-500">{data.total_results} {t("jobs.found")}</p>
               </div>
+
             )}
           </div>
 
@@ -283,7 +289,7 @@ export default function OpportunitiesPage() {
               <input 
                 value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                placeholder="Role or skill..."
+                placeholder={t("jobs.roleSkill")}
                 className="bg-transparent text-sm focus:outline-none w-full text-foreground"
               />
             </div>
@@ -293,7 +299,7 @@ export default function OpportunitiesPage() {
                 <input 
                   value={cityTerm}
                   onChange={e => setCityTerm(e.target.value)}
-                  placeholder="City..."
+                  placeholder={t("jobs.city")}
                   className="bg-transparent text-sm focus:outline-none w-full text-foreground"
                 />
               </div>
@@ -303,8 +309,9 @@ export default function OpportunitiesPage() {
                 className="bg-blue-600 h-[42px] px-5 rounded-xl hover:bg-blue-500 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {loading ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Search className="w-4 h-4 text-white" />}
-                <span className="text-xs font-medium text-white">Search</span>
+                <span className="text-xs font-medium text-white">{t("jobs.search")}</span>
               </button>
+
             </div>
           </div>
         </div>
@@ -317,8 +324,9 @@ export default function OpportunitiesPage() {
                 <div className="absolute inset-0 rounded-full border-2 border-blue-500/20 border-t-blue-500 animate-spin" />
                 <Globe className="w-6 h-6 text-blue-500" />
               </div>
-              <p className="text-xs text-text-tertiary">Searching...</p>
+              <p className="text-xs text-text-tertiary">{t("jobs.searching")}</p>
             </div>
+
           ) : activeJobs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <div className="relative mb-8">
@@ -327,10 +335,11 @@ export default function OpportunitiesPage() {
                 </div>
                 <Target className="absolute inset-0 m-auto w-8 h-8 text-blue-500/40" />
               </div>
-              <h3 className="text-sm font-medium text-text-secondary mb-2">Search for jobs</h3>
+              <h3 className="text-sm font-medium text-text-secondary mb-2">{t("jobs.searchPrompt")}</h3>
               <p className="text-xs text-text-tertiary max-w-[220px] leading-relaxed">
-                Enter a role and city to find opportunities.
+                {t("jobs.searchDesc")}
               </p>
+
             </div>
           ) : (
             activeJobs.map((job, i) => {
@@ -391,8 +400,9 @@ export default function OpportunitiesPage() {
                   <div className="flex items-center justify-between">
                     <div className="flex gap-2">
                       <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-input border border-border text-text-tertiary">{job.source}</span>
-                      {job.is_remote && <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">Remote</span>}
+                      {job.is_remote && <span className="text-[10px] font-medium px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">{t("jobs.remote")}</span>}
                     </div>
+
                     <a 
                       href={job.job_url} 
                       target="_blank" 
@@ -410,8 +420,9 @@ export default function OpportunitiesPage() {
 
         {/* Footer */}
         <div className="p-3 bg-card border-t border-border flex items-center justify-center">
-          <span className="text-xs text-text-tertiary">{data?.total_results ?? 0} results</span>
+          <span className="text-xs text-text-tertiary">{data?.total_results ?? 0} {t("jobs.results")}</span>
         </div>
+
       </aside>
 
       {/* ── Right Side: Situation Map ── */}

@@ -72,13 +72,14 @@ function zpdText(zpd: ZPDStatus) {
   }
 }
 
-function zpdLabel(zpd: ZPDStatus) {
+function zpdLabel(zpd: ZPDStatus, t: any) {
   switch (zpd) {
-    case 'mastered': return 'Mastered';
-    case 'in_zpd': return 'Active ZPD';
-    case 'below_zpd': return 'Prerequisites';
+    case 'mastered': return t("analytics.mastered");
+    case 'in_zpd': return t("analytics.zpd");
+    case 'below_zpd': return t("analytics.needsReview");
   }
 }
+
 
 export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
   const { t } = useLanguage();
@@ -112,14 +113,16 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
           >
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-xs font-medium text-blue-500 mb-4">
               <BarChart3 className="w-3.5 h-3.5" />
-              Research Analytics
+              {t("analytics.research")}
             </div>
+
             <h1 className="text-3xl font-bold text-foreground leading-tight tracking-tight">
-              Learning Analytics
+              {t("analytics.learning")}
             </h1>
             <p className="text-text-secondary font-medium mt-2">
-              Analyzing <span className="text-foreground">{data.userName}</span>&apos;s progress in <span className="text-blue-500">{data.pathTitle}</span>
+              {t("analytics.analyzing")} <span className="text-foreground">{data.userName}</span>&apos;s {t("analytics.progressIn")} <span className="text-blue-500">{data.pathTitle}</span>
             </p>
+
           </motion.div>
 
           <motion.div 
@@ -132,8 +135,9 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-card border border-border text-sm font-medium text-text-secondary hover:text-foreground hover:border-border-hover transition-all group"
             >
               <Download className="w-4 h-4 transition-transform group-hover:translate-y-0.5" />
-              Export CSV
+              {t("profile.exportCV")}
             </button>
+
           </motion.div>
         </div>
 
@@ -141,10 +145,11 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           
           {[
-            { label: t("analytics.capability"), val: data.capabilityScore, icon: Brain, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", sub: "Cognitive Level" },
-            { label: t("analytics.nlg"), val: data.normalizedLearningGain !== null ? `${data.normalizedLearningGain}%` : '—', icon: TrendingUp, color: nlgColor, bg: "bg-emerald-500/10", border: "border-emerald-500/20", sub: "Learning Gain" },
-            { label: t("analytics.streak"), val: `${data.currentStreak} Days`, icon: Flame, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20", sub: "Consistency" },
-            { label: t("analytics.quizzes"), val: data.totalQuizzes, icon: Zap, color: "text-violet-500", bg: "bg-violet-500/10", border: "border-violet-500/20", sub: "Assessments" }
+            { label: t("analytics.capability"), val: data.capabilityScore, icon: Brain, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", sub: t("analytics.cognitive") },
+            { label: t("analytics.nlg"), val: data.normalizedLearningGain !== null ? `${data.normalizedLearningGain}%` : '—', icon: TrendingUp, color: nlgColor, bg: "bg-emerald-500/10", border: "border-emerald-500/20", sub: t("analytics.learningGain") },
+            { label: t("analytics.streak"), val: `${data.currentStreak} ${t("learn.done")}`, icon: Flame, color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/20", sub: t("analytics.consistency") },
+            { label: t("analytics.quizzes"), val: data.totalQuizzes, icon: Zap, color: "text-violet-500", bg: "bg-violet-500/10", border: "border-violet-500/20", sub: t("analytics.assessments") }
+
           ].map((kpi, i) => (
             <motion.div 
               key={i}
@@ -175,13 +180,15 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             <div className="rounded-xl bg-card border border-border p-8 relative overflow-hidden">
               <div className="flex items-center justify-between mb-10">
                 <div>
-                  <h3 className="text-xs font-medium text-text-tertiary mb-1">Learning Curve</h3>
-                  <h2 className="text-lg font-semibold text-foreground">BKT Mastery Over Time</h2>
+                  <h3 className="text-xs font-medium text-text-tertiary mb-1">{t("analytics.learningCurve")}</h3>
+                  <h2 className="text-lg font-semibold text-foreground">{t("analytics.bktMastery")}</h2>
                 </div>
+
                 <div className="flex items-center gap-4 text-xs font-medium text-text-tertiary">
-                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500" /> Mastery</span>
-                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-foreground/10" /> Quiz Scores</span>
+                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500" /> {t("analytics.mastered")}</span>
+                  <span className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-foreground/10" /> {t("analytics.assessments")}</span>
                 </div>
+
               </div>
 
               {data.learningCurve.length > 0 ? (
@@ -216,14 +223,16 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                         <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-[10px] font-black text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity">{point.mastery}%</div>
                       </motion.div>
                       
-                      <div className="mt-4 text-xs font-medium text-text-tertiary">Attempt {point.attempt}</div>
+                      <div className="mt-4 text-xs font-medium text-text-tertiary">{t("onboarding.of")} {point.attempt}</div>
+
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="h-72 flex flex-col items-center justify-center text-text-tertiary gap-4">
                   <Info className="w-8 h-8 text-text-muted" />
-                  <p className="italic text-sm">Calibration required: Complete your first module to see your curve.</p>
+                  <p className="italic text-sm">{t("analytics.calibration")}</p>
+
                 </div>
               )}
             </div>
@@ -232,9 +241,10 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             <div className="rounded-xl bg-card border border-border p-8">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h3 className="text-xs font-medium text-text-tertiary mb-1">Detailed Breakdown</h3>
-                  <h2 className="text-lg font-semibold text-foreground">Knowledge Components</h2>
+                  <h3 className="text-xs font-medium text-text-tertiary mb-1">{t("analytics.breakdown")}</h3>
+                  <h2 className="text-lg font-semibold text-foreground">{t("analytics.kcs")}</h2>
                 </div>
+
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -249,8 +259,9 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-sm font-medium text-foreground truncate max-w-[180px] group-hover:text-blue-500 transition-colors">{kc.subtopicId}</span>
                       <span className={`text-[10px] font-medium px-2 py-0.5 rounded-lg bg-foreground/5 border border-border ${zpdText(kc.zpd)}`}>
-                        {zpdLabel(kc.zpd)}
+                        {zpdLabel(kc.zpd, t)}
                       </span>
+
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="flex-1 h-2 bg-foreground/5 rounded-full overflow-hidden p-0.5">
@@ -274,27 +285,30 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             
             {/* Mastery Distribution Card */}
             <div className="rounded-xl bg-card border border-border p-6">
-              <h3 className="text-xs font-medium text-text-tertiary mb-6">Mastery Distribution</h3>
+              <h3 className="text-xs font-medium text-text-tertiary mb-6">{t("analytics.distribution")}</h3>
+
               
               <div className="space-y-8">
                 {/* Visual Stacked Bar */}
                 <div className="relative h-16 rounded-xl overflow-hidden p-1 bg-input border border-border flex gap-1">
                   <div className="h-full bg-emerald-500/80 rounded-lg relative group transition-all" style={{ width: `${(data.knowledgeSummary.masteredCount / data.knowledgeSummary.totalKCs) * 100}%` }}>
-                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">Mastered</div>
+                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">{t("analytics.mastered")}</div>
                   </div>
                   <div className="h-full bg-blue-500/80 rounded-lg relative group transition-all" style={{ width: `${(data.knowledgeSummary.inZPDCount / data.knowledgeSummary.totalKCs) * 100}%` }}>
-                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">ZPD</div>
+                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">{t("analytics.zpd")}</div>
                   </div>
                   <div className="h-full bg-amber-500/80 rounded-lg relative group transition-all" style={{ width: `${(data.knowledgeSummary.belowZPDCount / data.knowledgeSummary.totalKCs) * 100}%` }}>
-                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">Active</div>
+                     <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-white opacity-0 group-hover:opacity-100 transition-opacity">{t("analytics.needsReview")}</div>
                   </div>
+
                 </div>
 
                 <div className="space-y-4">
                   {[
-                    { label: "Mastered", count: data.knowledgeSummary.masteredCount, color: "bg-emerald-500" },
-                    { label: "Active ZPD", count: data.knowledgeSummary.inZPDCount, color: "bg-blue-500" },
-                    { label: "Needs Review", count: data.knowledgeSummary.belowZPDCount, color: "bg-amber-500" }
+                    { label: t("analytics.mastered"), count: data.knowledgeSummary.masteredCount, color: "bg-emerald-500" },
+                    { label: t("analytics.zpd"), count: data.knowledgeSummary.inZPDCount, color: "bg-blue-500" },
+                    { label: t("analytics.needsReview"), count: data.knowledgeSummary.belowZPDCount, color: "bg-amber-500" }
+
                   ].map((item, i) => (
                     <div key={i} className="flex items-center justify-between px-2">
                       <div className="flex items-center gap-3">
@@ -314,15 +328,17 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                 <Briefcase className="w-20 h-20 text-foreground" />
               </div>
               
-              <h3 className="text-xs font-medium text-text-tertiary mb-6">SDG 8 Outcomes</h3>
+              <h3 className="text-xs font-medium text-text-tertiary mb-6">{t("analytics.sdg8")}</h3>
+
               
               <div className="space-y-3">
                 {Object.entries(data.outcomeDistribution).map(([type, count]) => {
                   const labels: Record<string, string> = {
-                    gig_found: 'Job/Gig Secured',
-                    interview: 'Interview Invitation',
-                    confidence: 'Skill Confidence',
-                    still_learning: 'Training Active',
+                    gig_found: t("analytics.jobSecured"),
+                    interview: t("analytics.interview"),
+                    confidence: t("analytics.confidence"),
+                    still_learning: t("analytics.trainingActive"),
+
                   };
                   return (
                     <div key={type} className="flex items-center justify-between bg-input p-4 rounded-xl border border-border group/row hover:bg-card-hover transition-all">
@@ -352,9 +368,10 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             </div>
             <div>
               <h4 className="text-xs font-semibold text-foreground mb-2 flex items-center gap-2">
-                BKT Analytics Methodology
+                {t("analytics.methodology")}
                 <Info className="w-3.5 h-3.5 text-text-muted" />
               </h4>
+
               <p className="text-xs text-text-secondary max-w-2xl leading-relaxed">
                 CareerOrbit utilizes <span className="text-foreground">Bayesian Knowledge Tracing (BKT)</span> to model your mastery as a latent variable. 
                 Our algorithms process response patterns to distinguish between luck and true cognitive mastery. 
@@ -365,8 +382,9 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
           
           <div className="flex items-center gap-4 border-l border-border pl-8 md:pl-12">
             <div className="text-right hidden md:block">
-              <p className="text-xs font-medium text-text-tertiary">Integrity</p>
-              <p className="text-xs font-medium text-emerald-500">Research Verified</p>
+              <p className="text-xs font-medium text-text-tertiary">{t("analytics.integrity")}</p>
+              <p className="text-xs font-medium text-emerald-500">{t("analytics.verified")}</p>
+
             </div>
             <PieChart className="w-8 h-8 text-text-muted" />
           </div>
@@ -383,11 +401,13 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
               <div className="max-w-2xl text-center md:text-left">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-xs font-medium text-violet-500 mb-4">
                   <Sparkles className="w-3 h-3" />
-                  AI Analysis
+                  {t("analytics.aiAnalysis")}
                 </div>
+
                 <h2 className="text-2xl md:text-3xl font-bold text-foreground tracking-tight mb-3">
-                  Performance Analysis
+                  {t("analytics.performanceAnalysis")}
                 </h2>
+
                 <p className="text-text-secondary text-sm leading-relaxed">
                   AI analyzes your diagnostic patterns, BKT mastery data, and learning behavior to generate a personalized breakdown.
                 </p>
@@ -401,14 +421,15 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
                 {isLoadingAnalysis ? (
                   <div className="flex items-center gap-3">
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    Analyzing Patterns...
+                    {t("analytics.analyzingPatterns")}
                   </div>
                 ) : (
                   <div className="flex items-center gap-3">
-                    Analyze My Performance
+                    {t("analytics.analyzePerformance")}
                     <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
                   </div>
                 )}
+
               </button>
             </div>
 
@@ -416,8 +437,9 @@ export default function AnalyticsDashboard({ data }: { data: AnalyticsData }) {
             {analysisError && (
               <div className="mt-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm flex items-center gap-3">
                 <AlertCircle className="w-5 h-5" />
-                Failed to generate analysis. Please try again.
+                {t("analytics.failedAnalysis")}
               </div>
+
             )}
 
             {(completion || isLoadingAnalysis) && (

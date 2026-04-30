@@ -21,9 +21,13 @@ import {
 import { motion } from "framer-motion";
 import { getAnalyticsData } from "@/app/actions";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
+
 
 export default function ProfilePage() {
+  const { t } = useLanguage();
   const [userData, setUserData] = useState<any>(null);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -52,13 +56,17 @@ export default function ProfilePage() {
   if (!userData) {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Profile Not Ready</h2>
-          <p className="text-text-secondary mb-8">Please select a learning path to view your profile.</p>
-          <Link href="/path-selection" className="btn-primary px-6 py-3 rounded-xl">
-            Go to Path Selection
-          </Link>
+      <div className="max-w-md w-full bg-card border border-border p-10 rounded-3xl text-center shadow-2xl">
+        <div className="w-20 h-20 rounded-3xl bg-blue-500/10 flex items-center justify-center mx-auto mb-8">
+           <User className="w-10 h-10 text-blue-500" />
         </div>
+        <h2 className="text-3xl font-black text-foreground mb-4 tracking-tight">{t("profile.notReady")}</h2>
+        <p className="text-text-secondary leading-relaxed mb-10 font-medium">{t("profile.selectPathDesc")}</p>
+        <Link href="/path-selection" className="w-full inline-block py-4 rounded-2xl bg-blue-600 text-white font-black text-[10px] uppercase tracking-widest hover:bg-blue-500 transition-all shadow-xl shadow-blue-600/20">
+          {t("profile.goPathSelection")}
+        </Link>
+      </div>
+
       </div>
     );
   }
@@ -100,29 +108,32 @@ export default function ProfilePage() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h1 className="text-4xl font-black tracking-tight">{userData.userName || "Career Operative"}</h1>
-                <span className="px-3 py-1 rounded-full bg-input border border-border text-[10px] font-black uppercase tracking-widest text-text-secondary">Level {Math.max(1, Math.floor(userData.capabilityScore / 10))}</span>
+                <span className="px-3 py-1 rounded-full bg-input border border-border text-[10px] font-black uppercase tracking-widest text-text-secondary">{t("profile.level")} {Math.max(1, Math.floor(userData.capabilityScore / 10))}</span>
+
               </div>
               <p className="text-xl text-text-secondary font-bold mb-4">{userData?.pathTitle || "Active Learner"}</p>
-              <div className="flex items-center gap-6">
+                <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2 text-xs font-bold text-text-tertiary">
                   <MapPin className="w-4 h-4 text-blue-500" />
-                  Local Hub
+                  {t("profile.localHub")}
                 </div>
                 <div className="flex items-center gap-2 text-xs font-bold text-text-tertiary">
                   <Zap className="w-4 h-4 text-amber-500" />
-                  Active Learning Mode
+                  {t("profile.activeMode")}
                 </div>
               </div>
+
             </div>
           </div>
 
           <div className="flex gap-4">
             <button className="px-6 py-3 rounded-2xl bg-input border border-border hover:bg-card-hover transition-all font-black text-[10px] uppercase tracking-widest text-text-secondary">
-              Edit Intel
+              {t("profile.editIntel")}
             </button>
             <button className="px-6 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 transition-all font-black text-[10px] uppercase tracking-widest text-white shadow-lg shadow-blue-600/20">
-              Export CV
+              {t("profile.exportCV")}
             </button>
+
           </div>
         </div>
 
@@ -135,7 +146,8 @@ export default function ProfilePage() {
               <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <TrendingUp className="w-20 h-20 text-blue-500" />
               </div>
-              <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-8">Career Readiness Score</p>
+              <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-8">{t("profile.readinessScore")}</p>
+
               <div className="flex items-end gap-4 mb-2">
                 <span className="text-6xl font-black text-foreground">{userData?.capabilityScore || 0}</span>
                 <span className="text-2xl font-black text-blue-500 mb-2">/100</span>
@@ -149,13 +161,15 @@ export default function ProfilePage() {
                 />
               </div>
               <p className="text-xs font-bold text-text-secondary leading-relaxed">
-                You are outperforming <span className="text-blue-500">{Math.min(99, Math.floor(userData.capabilityScore * 1.2))}%</span> of applicants in your target market.
+                {t("profile.outperforming")} <span className="text-blue-500">{Math.min(99, Math.floor(userData.capabilityScore * 1.2))}%</span> {t("profile.ofApplicants")}
               </p>
+
             </div>
 
             {/* Path Stats */}
             <div className="p-8 rounded-[2.5rem] bg-card border border-border">
-              <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-8">Training Modules</p>
+              <p className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-8">{t("profile.trainingModules")}</p>
+
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
@@ -163,9 +177,10 @@ export default function ProfilePage() {
                       <BookOpen className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-black text-foreground">Roadmap Progress</p>
-                      <p className="text-[10px] font-bold text-text-secondary">{completedModules} of {totalModules} complete</p>
+                      <p className="text-sm font-black text-foreground">{t("profile.roadmapProgress")}</p>
+                      <p className="text-[10px] font-bold text-text-secondary">{completedModules} {t("onboarding.of")} {totalModules} {t("profile.completeCount")}</p>
                     </div>
+
                   </div>
                   <span className="text-xs font-black text-blue-500">{roadmapProgress}%</span>
                 </div>
@@ -175,9 +190,10 @@ export default function ProfilePage() {
                       <Target className="w-5 h-5" />
                     </div>
                     <div>
-                      <p className="text-sm font-black text-foreground">Milestones Hit</p>
+                      <p className="text-sm font-black text-foreground">{t("profile.milestonesHit")}</p>
                       <p className="text-[10px] font-bold text-text-secondary">Core Foundations</p>
                     </div>
+
                   </div>
                   <span className="text-xs font-black text-emerald-500">{completedModules}</span>
                 </div>
@@ -194,9 +210,10 @@ export default function ProfilePage() {
                     <BrainCircuit className="w-6 h-6 text-violet-500" />
                   </div>
                   <div>
-                    <h2 className="text-xl font-black text-foreground">Skill Matrix</h2>
-                    <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">Real-time Proficiency Trace</p>
+                    <h2 className="text-xl font-black text-foreground">{t("profile.skillMatrix")}</h2>
+                    <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest">{t("profile.proficiencyTrace")}</p>
                   </div>
+
                 </div>
                 <BarChart3 className="w-6 h-6 text-text-tertiary" />
               </div>
@@ -219,8 +236,9 @@ export default function ProfilePage() {
                   </div>
                 )) : (
                   <div className="col-span-2 text-center py-8 text-text-secondary text-sm font-medium">
-                    Complete tasks to see your skills grow.
+                    {t("learn.noNotes")}
                   </div>
+
                 )}
               </div>
             </div>
@@ -232,15 +250,16 @@ export default function ProfilePage() {
               </div>
               <div className="flex items-center gap-4 mb-8">
                 <Cpu className="w-5 h-5 text-blue-500" />
-                <h3 className="text-xs font-black uppercase tracking-widest text-blue-500">Current Objective</h3>
+                <h3 className="text-xs font-black uppercase tracking-widest text-blue-500">{t("profile.currentObjective")}</h3>
               </div>
-              <h2 className="text-3xl font-black mb-4 leading-tight text-foreground">Continue Your<br />Learning Journey</h2>
+              <h2 className="text-3xl font-black mb-4 leading-tight text-foreground">{t("profile.continueJourney")}</h2>
               <p className="text-sm font-bold text-text-secondary mb-8 max-w-md">
-                You are currently working on Module {completedModules + 1} of your roadmap. Completion will boost your Capability Score.
+                {t("profile.workingOnModule")} {completedModules + 1} {t("onboarding.of")} {totalModules}. {t("profile.boostScore")}
               </p>
               <Link href="/learn" className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-foreground text-background font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-transform">
-                Continue Training <ChevronRight className="w-4 h-4" />
+                {t("profile.continueTraining")} <ChevronRight className="w-4 h-4" />
               </Link>
+
             </div>
           </div>
 
@@ -249,15 +268,16 @@ export default function ProfilePage() {
         {/* ── Bottom Row: Recent Activity ── */}
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
            <div className="p-8 rounded-[2.5rem] bg-card border border-border">
-              <h3 className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-8">Market Insights</h3>
+              <h3 className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-8">{t("profile.marketInsights")}</h3>
               <div className="space-y-6">
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-input border border-border">
                   <div className="flex items-center gap-4">
                     <Briefcase className="w-5 h-5 text-blue-500" />
                     <div>
-                      <p className="text-sm font-black text-foreground">Matched Roles</p>
-                      <p className="text-[10px] font-bold text-text-secondary italic">Opportunities in your area</p>
+                      <p className="text-sm font-black text-foreground">{t("profile.matchedRoles")}</p>
+                      <p className="text-[10px] font-bold text-text-secondary italic">{t("profile.opsInArea")}</p>
                     </div>
+
                   </div>
                   <ChevronRight className="w-4 h-4 text-text-tertiary" />
                 </div>
@@ -265,7 +285,7 @@ export default function ProfilePage() {
            </div>
 
            <div className="p-8 rounded-[2.5rem] bg-card border border-border">
-              <h3 className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-8">Recent Milestones</h3>
+              <h3 className="text-[10px] font-black text-text-tertiary uppercase tracking-widest mb-8">{t("profile.recentMilestones")}</h3>
               <div className="space-y-4">
                 {[
                   { label: "Started Learning Path", time: "Recently", icon: <Award className="w-3 h-3" /> },

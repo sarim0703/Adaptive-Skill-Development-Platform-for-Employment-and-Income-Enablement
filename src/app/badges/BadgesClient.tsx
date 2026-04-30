@@ -6,6 +6,8 @@ import {
   Award, Hexagon, Star
 } from "lucide-react";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+
 
 const ICON_MAP: Record<string, any> = {
   Rocket,
@@ -34,7 +36,9 @@ type UserData = {
 };
 
 export default function BadgesClient({ initialData }: { initialData: { user: UserData, badges: Badge[] } }) {
+  const { t } = useLanguage();
   const { user, badges } = initialData;
+
   const userInitial = user.name ? user.name.charAt(0).toUpperCase() : "?";
 
   const unlockedCount = badges.filter(b => b.isUnlocked).length;
@@ -62,7 +66,7 @@ export default function BadgesClient({ initialData }: { initialData: { user: Use
                   <Star className="w-3 h-3" /> Lv. {unlockedCount + 1}
                 </div>
               </div>
-              <p className="text-base text-text-secondary mb-6">Pursuing <span className="text-foreground">{user.path}</span></p>
+              <p className="text-base text-text-secondary mb-6">{t("badges.pursuing")} <span className="text-foreground">{user.path}</span></p>
               
               <div className="flex flex-wrap gap-6">
                 <div className="flex items-center gap-3">
@@ -70,8 +74,8 @@ export default function BadgesClient({ initialData }: { initialData: { user: Use
                     <Award className="w-5 h-5 text-emerald-500" />
                   </div>
                   <div>
-                    <div className="text-xs text-text-tertiary font-medium">Unlocked</div>
-                    <div className="text-base font-semibold text-foreground">{unlockedCount} / {badges.length} Badges</div>
+                    <div className="text-xs text-text-tertiary font-medium">{t("badges.unlocked")}</div>
+                    <div className="text-base font-semibold text-foreground">{unlockedCount} / {badges.length} {t("nav.badges")}</div>
                   </div>
                 </div>
                 <div className="w-px h-10 bg-border hidden md:block" />
@@ -80,8 +84,8 @@ export default function BadgesClient({ initialData }: { initialData: { user: Use
                     <Target className="w-5 h-5 text-cyan-500" />
                   </div>
                   <div>
-                    <div className="text-xs text-text-tertiary font-medium">Completed</div>
-                    <div className="text-base font-semibold text-foreground">{user.modulesCompleted} Modules</div>
+                    <div className="text-xs text-text-tertiary font-medium">{t("badges.completed")}</div>
+                    <div className="text-base font-semibold text-foreground">{user.modulesCompleted} {t("learn.modulesCount")}</div>
                   </div>
                 </div>
               </div>
@@ -93,7 +97,7 @@ export default function BadgesClient({ initialData }: { initialData: { user: Use
         <div className="mb-8">
           <h2 className="text-xl font-semibold tracking-tight mb-6 flex items-center gap-3 text-foreground">
             <Trophy className="w-5 h-5 text-yellow-500" />
-            Achievements
+            {t("badges.achievements")}
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -141,8 +145,9 @@ export default function BadgesClient({ initialData }: { initialData: { user: Use
                           ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500" 
                           : "bg-foreground/5 border-border text-text-tertiary"
                       }`}>
-                        {badge.isUnlocked ? "Unlocked" : "Locked"}
+                        {badge.isUnlocked ? t("badges.unlocked") : t("badges.locked")}
                       </div>
+
                     </div>
 
                     <div>
