@@ -55,10 +55,15 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   const questions = (object?.questions || []) as Question[];
   const TOTAL_QUESTIONS = 8;
 
-  // Start generation on mount
+  // Re-start generation if language changes
   useEffect(() => {
+    // Reset state when language changes to avoid mixing languages
+    setCurrentIndex(0);
+    setAnswers({});
+    setError(null);
+    
     submit({ pathTitle, profileSummary, language: targetLanguage });
-  }, []);
+  }, [targetLanguage, pathTitle, profileSummary]);
 
   function handleAnswer(optionIndex: number) {
     setAnswers({ ...answers, [currentIndex]: optionIndex });
