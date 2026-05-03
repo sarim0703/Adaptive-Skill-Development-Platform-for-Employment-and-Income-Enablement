@@ -4,10 +4,12 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Brain, CheckCircle2, ArrowRight, Sparkles, Award, AlertCircle, RefreshCw, BrainCircuit } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { submitPreTestResults } from "@/app/actions";
+import { submitPreTestResults, checkRoadmapStatus } from "@/app/actions";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
-import { preTestSchema } from "@/lib/ai/schemas";
+import { preTestSchema, roadmapSchema } from "@/lib/ai/schemas";
 import { motion, AnimatePresence } from "framer-motion";
+import { StreamingModuleCard } from "@/components/StreamingModuleCard";
+import { useRef } from "react";
 
 type Question = {
   question: string;
@@ -18,12 +20,13 @@ type Question = {
 };
 
 type PreTestClientProps = {
+  pathId: string;
   pathTitle: string;
   profileSummary: string;
   language: string;
 };
 
-export default function PreTestClient({ pathTitle, profileSummary, language }: PreTestClientProps) {
+export default function PreTestClient({ pathId, pathTitle, profileSummary, language }: PreTestClientProps) {
   const { t, language: currentLangCode } = useLanguage();
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
@@ -41,9 +44,15 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
   };
 
   const targetLanguage = LANG_NAMES[currentLangCode] || language;
+  const [roadmapReady, setRoadmapReady] = useState(false);
+  const [showDisclaimer, setShowDisclaimer] = useState(true);
+  const [hasStarted, setHasStarted] = useState(false);
+  
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  // STREAMING HOOK
-  const { object, submit, isLoading } = useObject({
+
+  // PRE-TEST QUESTIONS STREAMING HOOK
+  const { object: preTestObject, submit, isLoading } = useObject({
     api: "/api/pre-test",
     schema: preTestSchema,
     onError: (err) => {
@@ -52,18 +61,66 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
     }
   });
 
-  const questions = (object?.questions || []) as Question[];
-  const TOTAL_QUESTIONS = 8;
+  // ROADMAP STREAMING HOOK
+  const { 
+    object: roadmapObject,
+    submit: startRoadmapStreaming, 
+    isLoading: isGeneratingRoadmap 
+  } = useObject({
+    api: "/api/roadmap/stream",
+    schema: roadmapSchema,
+    onFinish: async () => {
+      // Poll until the server confirms the roadmap is persisted
+      let attempts = 0;
+      const maxAttempts = 30; // Increased to 30s to allow for DB latency
+      
+      const poll = async () => {
+        const { ready } = await checkRoadmapStatus();
+        if (ready) {
+          setRoadmapReady(true);
+        } else if (attempts < maxAttempts) {
+          attempts++;
+          setTimeout(poll, 1000); // Check every 1s
+        } else {
+          console.error("Roadmap generation timed out in DB persistence");
+          setError("Curriculum generation is taking longer than expected. Please refresh the dashboard in a moment.");
+        }
+      };
+      
+      poll();
+    },
+    onError: (err) => {
+      console.error("Roadmap generation error:", err);
+      setError("Failed to generate personalized curriculum. Please refresh.");
+    }
+  });
 
-  // Re-start generation if language changes
+  // Auto-scroll the live feed as new modules arrive
   useEffect(() => {
-    // Reset state when language changes to avoid mixing languages
-    setCurrentIndex(0);
-    setAnswers({});
-    setError(null);
-    
-    submit({ pathTitle, profileSummary, language: targetLanguage });
-  }, [targetLanguage, pathTitle, profileSummary]);
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [roadmapObject?.modules?.length]);
+
+  const questions = (preTestObject?.questions || []) as Question[];
+  const TOTAL_QUESTIONS = 10;
+
+  // Trigger generation only when user clicks 'Start' on disclaimer
+  useEffect(() => {
+    if (hasStarted) {
+      // Reset state
+      setCurrentIndex(0);
+      setAnswers({});
+      setError(null);
+      
+      submit({ pathTitle, profileSummary, language: targetLanguage });
+    }
+  }, [hasStarted, targetLanguage, pathTitle, profileSummary]);
+
+  const handleStart = () => {
+    setShowDisclaimer(false);
+    setHasStarted(true);
+  };
 
   function handleAnswer(optionIndex: number) {
     setAnswers({ ...answers, [currentIndex]: optionIndex });
@@ -99,6 +156,7 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
           questionResults,
         });
         setShowResult(true);
+        startRoadmapStreaming({ pathId });
       } catch (err) {
         console.error("Submission error:", err);
         setError("Network error: Failed to save your baseline. Please try again.");
@@ -115,6 +173,78 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
 
   const isLast = currentIndex === questions.length - 1;
   const isAnswered = answers[currentIndex] !== undefined;
+
+  // ── DISCLAIMER OVERLAY ──
+  if (showDisclaimer) {
+    return (
+      <div className="fixed inset-0 z-[300] bg-background/80 backdrop-blur-2xl flex items-center justify-center p-6">
+        <motion.div 
+          initial={{ scale: 0.9, opacity: 0, y: 20 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          className="max-w-2xl w-full bg-card border-2 border-border p-12 rounded-[3rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] relative overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+          
+          <div className="relative z-10">
+            <div className="w-20 h-20 rounded-[2rem] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mb-10">
+              <BrainCircuit className="w-10 h-10 text-blue-500" />
+            </div>
+
+            <h1 className="text-4xl font-black text-foreground mb-6 tracking-tight">
+              Ready for your <span className="text-blue-500">Diagnostic?</span>
+            </h1>
+            
+            <div className="space-y-6 mb-12">
+              <div className="flex gap-6 items-start">
+                <div className="w-12 h-12 rounded-2xl bg-foreground/5 flex items-center justify-center flex-shrink-0">
+                   <Sparkles className="w-5 h-5 text-blue-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-lg mb-1">Pedagogical Baseline</h3>
+                  <p className="text-text-tertiary leading-relaxed">This 10-question assessment uses Bayesian Knowledge Tracing to understand your current skill levels.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-6 items-start">
+                <div className="w-12 h-12 rounded-2xl bg-foreground/5 flex items-center justify-center flex-shrink-0">
+                   <Brain className="w-5 h-5 text-indigo-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-lg mb-1">Adaptive Curriculum</h3>
+                  <p className="text-text-tertiary leading-relaxed">Your roadmap will be dynamically recalibrated based on your accuracy and response time.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-6 items-start">
+                <div className="w-12 h-12 rounded-2xl bg-foreground/5 flex items-center justify-center flex-shrink-0">
+                   <AlertCircle className="w-5 h-5 text-emerald-500" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-lg mb-1">No Pressure</h3>
+                  <p className="text-text-tertiary leading-relaxed">There is no "pass" or "fail". We just want to find the perfect starting point for your journey.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+               <button 
+                onClick={handleStart}
+                className="flex-[2] py-5 rounded-[1.5rem] bg-blue-600 text-white font-black uppercase tracking-widest text-sm hover:bg-blue-500 hover:scale-[1.02] active:scale-95 transition-all shadow-2xl shadow-blue-600/30"
+               >
+                 Initialize Assessment
+               </button>
+               <button 
+                onClick={() => router.push('/path-selection')}
+                className="flex-1 py-5 rounded-[1.5rem] bg-card border border-border text-text-tertiary font-bold text-sm hover:text-foreground hover:bg-card-hover transition-all"
+               >
+                 Go Back
+               </button>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   // ── LOADING STATE ──
   if (isLoading && questions.length === 0) {
@@ -142,6 +272,58 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
                 transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                 className="h-full bg-blue-500 w-1/3 rounded-full" 
              />
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (submitting) {
+    return (
+      <div className="fixed inset-0 bg-background flex flex-col items-center justify-center p-6 z-[120]">
+        <motion.div 
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="text-center max-w-md w-full rounded-[3rem] bg-card border border-border p-12 shadow-2xl relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-blue-500/5 animate-pulse" />
+          
+          <div className="relative z-10">
+            <div className="w-20 h-20 rounded-[1.5rem] bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-8 relative">
+               <BrainCircuit className="w-10 h-10 text-blue-500 animate-pulse" />
+            </div>
+
+            <h2 className="text-2xl font-black text-foreground mb-3 tracking-tight">Calculating Cognitive Baseline</h2>
+            <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-6 animate-pulse">Initializing Bayesian Mastery</p>
+            
+            <p className="text-sm text-text-tertiary leading-relaxed px-4 mb-10">
+              Our Bayesian engine is processing your diagnostic responses to model your initial knowledge state. This sets the foundation for your adaptive learning journey.
+            </p>
+
+            <div className="space-y-4">
+               <div className="flex justify-between items-center text-[10px] font-black text-text-muted uppercase tracking-widest">
+                  <span>Knowledge Tracing</span>
+                  <span className="animate-pulse">Active</span>
+               </div>
+               <div className="w-full h-2 bg-foreground/5 rounded-full overflow-hidden p-0.5 border border-border">
+                  <motion.div 
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 2.5, ease: "easeInOut" }}
+                    className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.3)]"
+                  />
+               </div>
+               <div className="flex justify-center gap-1">
+                  {[0, 1, 2, 3].map((i) => (
+                    <motion.div
+                      key={i}
+                      animate={{ opacity: [0.2, 1, 0.2] }}
+                      transition={{ repeat: Infinity, duration: 1, delay: i * 0.1 }}
+                      className="w-1 h-1 rounded-full bg-blue-500/40"
+                    />
+                  ))}
+               </div>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -211,10 +393,53 @@ export default function PreTestClient({ pathTitle, profileSummary, language }: P
               </div>
             </div>
 
-            <button onClick={handleContinue} className="w-full py-5 rounded-2xl bg-foreground text-background font-black text-[11px] uppercase tracking-[0.2em] hover:bg-emerald-600 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl">
-              {t("pretest.startLearning")}
-              <ArrowRight className="w-4 h-4" />
-            </button>
+            {isGeneratingRoadmap || !roadmapReady ? (
+              <div className="mt-8 space-y-3 w-full text-left">
+                <div className="text-[10px] font-black text-text-tertiary mb-6 uppercase tracking-[0.2em] text-center flex items-center justify-center gap-3">
+                  <div className="h-[1px] flex-1 bg-border" />
+                  Mapping Curriculum
+                  <div className="h-[1px] flex-1 bg-border" />
+                </div>
+                
+                <div 
+                  ref={scrollRef}
+                  className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar relative"
+                >
+                  {/* Vertical Scanning Beam */}
+                  {isGeneratingRoadmap && (
+                    <motion.div 
+                      initial={{ top: "-10%" }}
+                      animate={{ top: "110%" }}
+                      transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
+                      className="absolute inset-x-0 h-20 bg-gradient-to-b from-transparent via-blue-500/10 to-transparent z-0 pointer-events-none"
+                    />
+                  )}
+
+                  <AnimatePresence mode="popLayout">
+                    {roadmapObject?.modules?.map((mod, i) => (
+                      <StreamingModuleCard 
+                        key={i}
+                        index={i}
+                        title={mod?.module_title || ""}
+                        isGenerating={isGeneratingRoadmap && i === (roadmapObject.modules?.length ?? 0) - 1}
+                      />
+                    ))}
+                  </AnimatePresence>
+                  
+                  {(!roadmapObject?.modules || roadmapObject.modules.length === 0) && (
+                    <div className="flex flex-col items-center py-10 opacity-40">
+                      <Loader2 className="w-6 h-6 animate-spin mb-3 text-blue-500" />
+                      <p className="text-[10px] font-bold uppercase tracking-widest">Analysing Cognitive Baseline...</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <button onClick={handleContinue} className="w-full py-5 rounded-2xl bg-foreground text-background font-black text-[11px] uppercase tracking-[0.2em] hover:bg-emerald-600 hover:text-white hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 shadow-xl">
+                {t("pretest.startLearning")}
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </motion.div>
       </div>

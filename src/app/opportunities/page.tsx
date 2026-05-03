@@ -350,7 +350,9 @@ export default function OpportunitiesPage() {
               return (
                 <motion.div
                   key={job.id}
-                  ref={el => jobRefs.current[job.id] = el}
+                  ref={(el) => {
+                    jobRefs.current[job.id] = el;
+                  }}
                   onMouseEnter={() => setHoveredJobId(job.id)}
                   onMouseLeave={() => setHoveredJobId(null)}
                   onClick={() => handleSelectJobFromList(job)}

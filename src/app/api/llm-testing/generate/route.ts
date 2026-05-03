@@ -2,6 +2,7 @@ import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import { NextResponse } from "next/server";
+import { GPT5_ROADMAP_PROMPT } from "@/lib/ai/models";
 
 const model = openai("gpt-5.4");
 
@@ -14,6 +15,9 @@ const pathSchema = z.object({
     incomeMax: z.number(),
     weeks: z.number(),
     matchReason: z.string(),
+    nsqf_level: z.string().describe("E.g., '3.0', '3.5', '4.0'. Based on complexity."),
+    notional_hours: z.number().describe("Total estimated learning hours (e.g., 30, 60, 120)"),
+    ncrf_credits: z.number().describe("Calculated as Notional Hours / 30"),
   })).min(3).max(4),
 });
 
@@ -26,23 +30,33 @@ const subtopicSchema = z.object({
   task_type: z.enum(["install", "create", "apply", "practice", "submit", "call"]),
   youtube_search_query: z.string(),
   complexity_branch: z.enum(["beginner", "standard", "advanced"]),
+  nsqf_domain: z.enum([
+    "Professional Theoretical Knowledge",
+    "Professional and Technical Skills/Expertise",
+    "Aptitude, Mind-set, Soft Skills, Employment Readiness & Entrepreneurship Skills",
+    "Broad Learning Outcomes",
+    "Level of Responsibility"
+  ]).describe("Must map exactly to one of the 5 official NSQF 2023 domains."),
+  nos_code: z.string().describe("Realistic National Occupational Standard code (e.g., ELE/N0102)"),
 });
 
 const moduleSchema = z.object({
   module_id: z.number(),
   module_title: z.string(),
+  portfolio_evidence_task: z.string().describe("A specific, verifiable task to prove competence for this module (Proof of Work)."),
   subtopics: z.array(subtopicSchema).min(3).max(5),
 });
 
 const roadmapSchema = z.object({
-  total_duration_weeks: z.number().optional(),
+  total_duration_weeks: z.number().describe("Total estimated weeks (e.g., 4)"),
+  total_notional_hours: z.number().describe("Total notional hours for the entire roadmap"),
   modules: z.array(moduleSchema).min(3).max(5),
 });
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { location, ageGroup, gender, educationLevel, workInterest, experienceLevel, targetIncomeExact, deviceType, languagePreference, confidenceLevel, selectedPathIndex } = body;
+    const { location, ageGroup, gender, educationLevel, workInterest, experienceLevel, targetIncomeExact, deviceType, languagePreference, confidenceLevel, selectedPathIndex, bktBaseline } = body;
 
     const profileContext = JSON.stringify({
       location,
@@ -61,7 +75,7 @@ export async function POST(req: Request) {
     const { object: pathResult } = await generateObject({
       model,
       schema: pathSchema,
-      system: `You are an expert career counselor for India's diverse workforce — covering skilled trades, services, tech, creative, and professional roles.
+      system: `You are an expert career counselor and NCVET Sector Skill Council planner for India's workforce.
 
 CRITICAL RULE: The user has stated their WORK INTEREST in the "workInterest" field. You MUST generate paths that are DIRECTLY CONNECTED to that stated interest. Do NOT default to delivery/logistics unless the user specifically asked for it.
 
@@ -69,15 +83,21 @@ Examples of interest-to-path mapping:
 - Interest: "sales" → Retail Sales Executive, Insurance Agent, Real Estate Associate
 - Interest: "electrical wiring" → Home Electrician, Industrial Wireman, Solar Panel Installer
 - Interest: "cooking" → Restaurant Line Cook, Cloud Kitchen Operator, Catering Business
-- Interest: "bikes" → Two-Wheeler Mechanic, Bike Courier, EV Servicing Technician
+
+NSQF & NCrF COMPLIANCE (CRITICAL):
+1. For each path, determine the appropriate NSQF Level based on the complexity of the role and the user's education. Use half-levels (e.g., 2.5, 3.0, 3.5, 4.0, 4.5).
+   - No formal education / Primary: Levels 1.0 to 2.5 (Routine tasks, supervised)
+   - High School: Levels 3.0 to 4.5 (Skilled worker, independent)
+   - Graduate+: Levels 5.0+ (Specialized, supervisory)
+2. Assign 'notional_hours'. Short micro-credentials should be 30-60 hours. Full certifications can be 120-240 hours.
+3. Calculate 'ncrf_credits' strictly as: (notional_hours / 30).
 
 Constraints:
-1. ALL 3-4 paths MUST relate to the user's stated interest. Never ignore it.
+1. ALL paths MUST relate to the user's stated interest. Never ignore it.
 2. Paths must be realistic for someone in the user's location with their education level.
-3. VERY IMPORTANT: Factor in the user's Age Group and Gender. If they are older, suggest paths with less physical strain. Ensure suggestions are culturally and practically safe/appropriate for their gender in their specific location.
+3. VERY IMPORTANT: Factor in the user's Age Group and Gender for cultural and physical safety.
 4. Income estimates must be realistic monthly INR figures for that location.
-5. Each path must be DISTINCT — do not generate similar-sounding paths.
-6. Generate the response in the language specified in the user's profile context.`,
+5. Generate the response in the language specified in the user's profile context.`,
       prompt: `User Profile Context:\n${profileContext}`,
     });
 
@@ -94,32 +114,13 @@ Constraints:
         estimatedIncomeMax: selectedPath.incomeMax,
       });
 
+      const bktContext = JSON.stringify(bktBaseline || {});
+
       const { object: roadmap } = await generateObject({
         model,
         schema: roadmapSchema,
-        system: `You are an expert curriculum designer focused entirely on practical, actionable skill acquisition.
-Based on the user's chosen path and profile, generate a complete roadmap.
-
-**CORE PRINCIPLES (Non-Negotiable)**
-- Focus on real skill mastery through deliberate practice, not checklists.
-- Prioritise safety, local market demand, self-employment and gig opportunities.
-- Make every roadmap feel like a genuine mini-course that builds confidence and income potential.
-- All content must be in the user's exact preferred language.
-- Every practical task must be 100% possible on the declared Device Type.
-
-**ROADMAP STRUCTURE**
-- Generate 3 to 5 modules total (choose based on trade complexity + user profile).
-- Progression should feel natural: Basics → Core Skills → Hands-on Application → Troubleshooting & Safety → Real-World Application & Earning.
-- Each module: 3–5 subtopics maximum.
-- Total realistic duration: show at the top (2–12 weeks depending on the skill).
-
-**For EVERY Subtopic You MUST Include:**
-- Subtopic Title
-- Key Learning Notes (2–4 clear sentences or bullets): explain the concept simply, why it matters, safety tips, common mistakes.
-- Practical Task (device-appropriate, verifiable, repeatable for deliberate practice).
-- Provide a relevant YouTube search query for each subtopic to help them learn if they get stuck.
-- Complexity should match their current profile.`,
-        prompt: `Generate the complete roadmap (3 to 5 modules) for the following path:\n${pathContext}\n\nUser Profile Context:\n${profileContext}`,
+        system: GPT5_ROADMAP_PROMPT,
+        prompt: `Generate the complete roadmap (3 to 5 modules) for the following path:\n${pathContext}\n\nUser Profile Context:\n${profileContext}\n\nBKT Baseline Context (Diagnostic Results):\n${bktContext}`,
       });
 
       roadmapResult = roadmap;

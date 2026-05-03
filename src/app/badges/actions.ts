@@ -39,7 +39,8 @@ export async function getUserBadgesData() {
   if (activeRoadmap) {
     const modules = activeRoadmap.modules as any[];
     if (modules && modules.length > 0) {
-      if (activeRoadmap.currentModuleIndex >= modules.length / 2) {
+      const currentIndex = activeRoadmap.currentModuleIndex;
+      if (currentIndex !== null && currentIndex !== undefined && currentIndex >= modules.length / 2) {
         halfRoadmapDone = true;
       }
     }

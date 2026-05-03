@@ -9,7 +9,7 @@ import {
 import Link from "next/link";
 import QuizModal from "@/components/QuizModal";
 import MentorChat from "@/components/MentorChat";
-import { checkProactiveTriggers } from "@/app/actions";
+import { checkProactiveTriggers, getYouTubeVideo } from "@/app/actions";
 import { useLanguage } from "@/context/LanguageContext";
 
 type ModuleData = {
@@ -74,12 +74,9 @@ export default function LearnClient({
     async function getGroundedVideo() {
       if (!subtopic.youtube_search_query) return;
       try {
-        const apiKey = "AIzaSyCVtyevZxmJ3UHMRkx1-KdGK5Rf67wiL9U";
-        const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=1&q=${encodeURIComponent(subtopic.youtube_search_query)}&type=video&videoCaption=closedCaption&relevanceLanguage=en&videoDuration=medium&key=${apiKey}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.items?.[0]) {
-          setVideoData({ videoId: data.items[0].id.videoId, title: data.items[0].snippet.title });
+        const data = await getYouTubeVideo(subtopic.youtube_search_query);
+        if (data) {
+          setVideoData({ videoId: data.videoId, title: data.title });
         }
       } catch (err) { console.error("Video fetch error:", err); }
     }

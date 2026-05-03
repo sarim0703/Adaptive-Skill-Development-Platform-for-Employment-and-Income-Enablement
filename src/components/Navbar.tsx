@@ -17,11 +17,11 @@ import {
   User,
   Award,
   Sun,
-  Moon
+  Moon,
+  Network
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useTheme } from "@/context/ThemeContext";
-import LanguageSwitcher from "./LanguageSwitcher";
 import { signOut, useSession } from "next-auth/react";
 import { 
   motion, 
@@ -119,7 +119,6 @@ export default function Navbar() {
 
   const appLinks = [
     { href: "/learn", label: t("nav.learn"), icon: BookOpen },
-    { href: "/analytics", label: t("nav.analytics"), icon: BarChart3 },
     { href: "/opportunities", label: t("nav.jobs"), icon: Briefcase },
     { href: "/badges", label: t("nav.badges"), icon: Award },
   ];
@@ -209,9 +208,18 @@ export default function Navbar() {
         {/* ── Controls Cluster ── */}
         <div className="flex items-center gap-2 px-1">
           
-          <div className="scale-90 hover:scale-110 transition-transform">
-            <LanguageSwitcher />
-          </div>
+          {/* Architecture Showcase Link */}
+          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <Link 
+              href="/architecture" 
+              className="group relative flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/5 border border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/40 transition-all shadow-[0_0_15px_rgba(16,185,129,0.1)] hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]"
+              title="View Platform Architecture"
+            >
+              <Network className="w-4 h-4" />
+              <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">Architecture</span>
+            </Link>
+          </motion.div>
+
 
           {/* Theme Toggle */}
           <motion.button

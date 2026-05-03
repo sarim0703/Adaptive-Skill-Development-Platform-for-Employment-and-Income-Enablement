@@ -25,22 +25,33 @@ export async function POST(req: Request) {
     const { pathId } = await req.json();
 
     // 1. Fetch Context
-    const [path, profile] = await Promise.all([
+    const [path, profile, user] = await Promise.all([
       db.query.pathOptions.findFirst({
         where: (p, { eq, and }) => and(eq(p.id, pathId), eq(p.userId, userId)),
       }),
       db.query.profiles.findFirst({
         where: (p, { eq }) => eq(p.userId, userId),
       }),
+      db.query.userModel.findFirst({
+        where: (u, { eq }) => eq(u.userId, userId),
+      }),
     ]);
 
     if (!path || !profile) return new Response("Missing context", { status: 404 });
 
-    // Mark path as selected immediately
-    await db.update(pathOptions).set({ isSelected: true }).where(eq(pathOptions.id, pathId));
+    // 2. IMMEDIATE STATE STABILIZATION
+    // Mark path as selected and archive old roadmaps BEFORE the stream starts.
+    // This ensures that if the user refreshes mid-stream, they don't see a stale state.
+    await Promise.all([
+      db.update(pathOptions).set({ isSelected: true }).where(and(eq(pathOptions.id, pathId), eq(pathOptions.userId, userId))),
+      db.update(roadmaps)
+        .set({ status: 'archived', archivedAt: new Date(), archiveReason: 'path_switch' })
+        .where(eq(roadmaps.userId, userId))
+    ]);
 
     const pathContext = JSON.stringify(path);
     const profileContext = JSON.stringify(profile);
+    const bktContext = JSON.stringify(user?.knowledgeState || {});
 
     const model = getGPT5ReasoningModel();
 
@@ -49,7 +60,7 @@ export async function POST(req: Request) {
       model,
       schema: roadmapSchema,
       system: GPT5_ROADMAP_PROMPT,
-      prompt: `Generate the complete roadmap (3 to 5 modules) for the following path:\n${pathContext}\n\nUser Profile Context:\n${profileContext}`,
+      prompt: `Generate the complete roadmap (3 to 5 modules) for the following path:\n${pathContext}\n\nUser Profile Context:\n${profileContext}\n\nBKT Baseline Context (Diagnostic Results):\n${bktContext}`,
       onFinish: async ({ object }) => {
         // 3. PERSISTENCE LOGIC (Runs after stream finishes)
         if (!object) return;
@@ -73,11 +84,6 @@ export async function POST(req: Request) {
             })),
           }));
 
-          // Archive old roadmaps
-          await db.update(roadmaps)
-            .set({ status: 'archived', archivedAt: new Date(), archiveReason: 'path_switch' })
-            .where(eq(roadmaps.userId, userId));
-
           // Save new roadmap
           await db.insert(roadmaps).values({
             userId,
@@ -90,12 +96,15 @@ export async function POST(req: Request) {
             status: 'active', // Explicitly set active
           });
 
-          // Ensure user model exists
+          console.log(`[StreamRoadmap] SUCCESS: Roadmap persisted for user ${userId}`);
+
+          // Ensure user model is in a valid state
           const existingModel = await db.query.userModel.findFirst({
             where: (um, { eq }) => eq(um.userId, userId),
           });
           if (!existingModel) {
             await db.insert(userModel).values({ userId });
+            console.log(`[StreamRoadmap] Initialized user model for ${userId}`);
           }
 
           // Force cache revalidation for learning pages
@@ -103,7 +112,7 @@ export async function POST(req: Request) {
           revalidatePath('/path-selection');
           revalidatePath('/');
         } catch (err) {
-          console.error("[StreamRoadmap onFinish Error]", err);
+          console.error("[StreamRoadmap onFinish Error] Persistence failed:", err);
         }
       },
     });

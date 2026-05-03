@@ -131,7 +131,9 @@ export default function JobMap({ jobs, center, selectedJobId, hoveredJobId, onSe
                 key={job.id}
                 position={job.coords}
                 icon={getMarkerIcon(job.source, isHighlighted)}
-                ref={el => markerRefs.current[job.id] = el}
+                ref={(el) => {
+                  markerRefs.current[job.id] = el;
+                }}
                 eventHandlers={{
                   click: () => onSelectJob(job.id),
                 }}

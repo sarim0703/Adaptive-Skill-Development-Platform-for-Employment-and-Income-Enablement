@@ -1,81 +1,71 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Mic, MicOff } from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { Mic, MicOff, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
-type SpeechInputProps = {
+interface SpeechInputProps {
   onResult: (text: string) => void;
-  onInterimResult?: (text: string) => void;
-  language?: string; // e.g. 'en-US', 'hi-IN', 'kn-IN'
+  placeholder?: string;
   className?: string;
-};
+}
 
-// ... (types)
-
-export default function SpeechInput({ onResult, onInterimResult, language = "en-IN", className = "" }: SpeechInputProps) {
+export default function SpeechInput({ 
+  onResult, 
+  placeholder = "Speak now...",
+  className = "w-16 h-16 rounded-full"
+}: SpeechInputProps) {
   const [isListening, setIsListening] = useState(false);
-  const recognitionRef = useRef<any>(null);
-  const [isSupported, setIsSupported] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [showTip, setShowTip] = useState(false);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
+    // Initialize Web Speech API
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      setIsSupported(true);
-      const recog = new SpeechRecognition();
-      recog.continuous = true; 
-      recog.interimResults = true;
-      recog.lang = language;
-
-      recog.onresult = (event: any) => {
-        let interimTranscript = "";
-        let finalTranscript = "";
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
-          } else {
-            interimTranscript += event.results[i][0].transcript;
-          }
-        }
-
-        if (finalTranscript) {
-          onResult(finalTranscript.trim());
-          if (onInterimResult) onInterimResult(""); 
-        } else if (interimTranscript && onInterimResult) {
-          onInterimResult(interimTranscript);
-        }
-      };
-
-      recog.onerror = (event: any) => {
-        console.error("Speech recognition error", event.error);
-        setIsListening(false);
-      };
-
-      recog.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recog;
+    
+    if (!SpeechRecognition) {
+      setError("Speech recognition not supported in this browser.");
+      return;
     }
 
-    // CLEANUP: Important to prevent the "microphone won't turn off" bug
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (event: any) => {
+      const transcript = event.results[0][0].transcript;
+      onResult(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error:", event.error);
+      if (event.error !== "no-speech") {
+        setError(`Error: ${event.error}`);
+      }
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = recognition;
+
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.onresult = null;
-        recognitionRef.current.onerror = null;
-        recognitionRef.current.onend = null;
-        try {
-          recognitionRef.current.abort();
-        } catch (e) {}
+        recognitionRef.current.abort();
       }
     };
-  }, [language, onResult, onInterimResult]);
+  }, [onResult]);
 
   const startListening = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (isListening) return;
     
+    setError(null);
     try {
       recognitionRef.current?.start();
       setIsListening(true);
@@ -87,19 +77,15 @@ export default function SpeechInput({ onResult, onInterimResult, language = "en-
   const stopListening = () => {
     if (!isListening) return;
     try {
-      // abort() is faster than stop() as it kills the connection immediately
-      recognitionRef.current?.abort();
+      recognitionRef.current?.stop();
     } catch (e) {}
     setIsListening(false);
-    if (onInterimResult) onInterimResult(""); // Clear the live preview on release
   };
 
-  if (!isSupported) return null;
-
   return (
-    <div className="relative flex flex-col items-center">
-      {/* Tooltip hint */}
-      <div className={`absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-foreground text-background text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg shadow-xl transition-all duration-300 pointer-events-none ${
+    <div className="flex flex-col items-center gap-4">
+      {/* Tooltip */}
+      <div className={`text-sm font-medium transition-all duration-300 ${
         showTip || isListening ? "opacity-100 -translate-y-2" : "opacity-0 translate-y-0"
       }`}>
         {isListening ? "Listening..." : "Hold to speak"}
@@ -109,26 +95,50 @@ export default function SpeechInput({ onResult, onInterimResult, language = "en-
         type="button"
         onMouseDown={startListening}
         onMouseUp={stopListening}
-        onMouseLeave={stopListening}
+        onMouseLeave={() => {
+          stopListening();
+          setShowTip(false);
+        }}
         onTouchStart={startListening}
         onTouchEnd={stopListening}
         onMouseEnter={() => setShowTip(true)}
-        onMouseLeave={() => setShowTip(false)}
         className={`transition-all flex items-center justify-center relative ${
           isListening 
             ? "bg-rose-500 text-white scale-110 shadow-[0_0_30px_rgba(244,63,94,0.5)]" 
             : "bg-blue-600 text-white hover:bg-blue-500 shadow-xl"
         } ${className}`}
       >
-        {isListening && (
-          <span className="absolute inset-0 rounded-inherit bg-rose-500 animate-ping opacity-20" />
-        )}
         {isListening ? (
-          <MicOff className="w-5 h-5 relative z-10" />
+          <motion.div
+            animate={{ scale: [1, 1.2, 1] }}
+            transition={{ repeat: Infinity, duration: 1.5 }}
+          >
+            <Mic className="w-8 h-8" />
+          </motion.div>
         ) : (
-          <Mic className="w-5 h-5 relative z-10" />
+          <Mic className="w-8 h-8" />
+        )}
+
+        {/* Pulse effect when listening */}
+        {isListening && (
+          <div className="absolute inset-0 rounded-full bg-rose-500 animate-ping opacity-30" />
         )}
       </button>
+
+      {/* Error message */}
+      <AnimatePresence>
+        {error && (
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 10 }}
+            className="flex items-center gap-2 text-rose-500 text-xs mt-2 bg-rose-50 p-2 rounded-lg border border-rose-100"
+          >
+            <AlertCircle className="w-3 h-3" />
+            <span>{error}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

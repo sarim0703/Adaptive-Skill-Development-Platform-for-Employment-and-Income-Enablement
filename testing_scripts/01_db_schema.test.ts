@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
 import { users } from '@/db/schema';

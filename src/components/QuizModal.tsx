@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, CheckCircle2, XCircle, Trophy, Flame, ArrowRight, RotateCcw, Sparkles, BrainCircuit } from "lucide-react";
+import { Loader2, CheckCircle2, XCircle, Trophy, Flame, ArrowRight, RotateCcw, Sparkles, BrainCircuit, Brain } from "lucide-react";
 import { submitQuizResult } from "@/app/actions";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
@@ -46,6 +46,7 @@ export default function QuizModal({
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [isAnalyzingMastery, setIsAnalyzingMastery] = useState(false);
   const [showResults, setShowResults] = useState(false);
   const [resultData, setResultData] = useState<{ score: number; passed: boolean; correct: number; total: number } | null>(null);
   const router = useRouter();
@@ -78,6 +79,7 @@ export default function QuizModal({
 
   const handleSubmit = async () => {
     setSubmitting(true);
+    setIsAnalyzingMastery(true);
     let correctCount = 0;
     questions.forEach((q, idx) => {
       if (answers[idx] === q?.correct_index) correctCount++;
@@ -90,17 +92,28 @@ export default function QuizModal({
       options: q?.options || [],
       correct_index: q?.correct_index || 0,
       explanation: q?.explanation || "",
+      topic_area: q?.topic_area || subtopicTitle,
       difficulty: q?.difficulty || "medium",
     }));
 
-    await submitQuizResult({
-      roadmapId, moduleId, subtopicId, score, passed,
-      attemptNumber, timeSpent, questions: cleanQuestions, userAnswers: answers,
-    });
+    try {
+      await submitQuizResult({
+        roadmapId, moduleId, subtopicId, score, passed,
+        attemptNumber, timeSpent, questions: cleanQuestions, userAnswers: answers,
+      });
 
-    setResultData({ score, passed, correct: correctCount, total: TOTAL_QUESTIONS });
-    setShowResults(true);
-    setSubmitting(false);
+      // Delay slightly for visual effect to show the analysis animation
+      setTimeout(() => {
+        setResultData({ score, passed, correct: correctCount, total: TOTAL_QUESTIONS });
+        setIsAnalyzingMastery(false);
+        setShowResults(true);
+        setSubmitting(false);
+      }, 1500);
+    } catch (error) {
+      console.error("[Quiz] Submission failed", error);
+      setIsAnalyzingMastery(false);
+      setSubmitting(false);
+    }
   };
 
   const handleContinue = () => {
@@ -126,6 +139,67 @@ export default function QuizModal({
           </div>
           <h2 className="text-2xl font-black text-foreground mb-2">Analyzing Mastery...</h2>
           <p className="text-sm text-text-tertiary text-center max-w-xs font-medium">Generating {TOTAL_QUESTIONS} scenario-based questions tailored to your skill level.</p>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (isAnalyzingMastery) {
+    return (
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-3xl flex items-center justify-center z-[110] p-4">
+        <motion.div 
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="w-full max-w-md rounded-[2.5rem] bg-card border border-border p-10 text-center shadow-2xl relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-blue-500/5 animate-pulse" />
+          
+          <div className="relative z-10">
+            <div className="flex justify-center gap-1.5 mb-8">
+               {[0, 1, 2].map((i) => (
+                 <motion.div
+                   key={i}
+                   animate={{ 
+                     scale: [1, 1.2, 1],
+                     opacity: [0.3, 1, 0.3],
+                     y: [0, -10, 0]
+                   }}
+                   transition={{ 
+                     repeat: Infinity, 
+                     duration: 1.5, 
+                     delay: i * 0.2,
+                     ease: "easeInOut"
+                   }}
+                   className="w-3 h-3 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]"
+                 />
+               ))}
+            </div>
+
+            <Brain className="w-12 h-12 text-blue-400 mx-auto mb-6 animate-pulse" />
+            
+            <h3 className="text-xl font-black text-foreground mb-3 tracking-tight">Cognitive Analysis In Progress</h3>
+            <div className="space-y-2">
+              <p className="text-xs font-bold text-blue-500 uppercase tracking-widest animate-pulse">Running Bayesian Engine</p>
+              <p className="text-sm text-text-tertiary leading-relaxed px-4">
+                Processing response patterns to distinguish between luck and true mastery of <span className="text-foreground font-medium">{subtopicTitle}</span>.
+              </p>
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-border">
+               <div className="flex justify-between items-center text-[10px] font-black text-text-muted uppercase tracking-wider mb-2 px-2">
+                  <span>Knowledge Components</span>
+                  <span>Tracing...</span>
+               </div>
+               <div className="w-full h-1.5 bg-foreground/5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: "0%" }}
+                    animate={{ width: "100%" }}
+                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    className="h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.3)]"
+                  />
+               </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     );

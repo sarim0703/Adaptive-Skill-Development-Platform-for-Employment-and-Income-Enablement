@@ -1,13 +1,13 @@
 "use client";
 
-import { CheckCircle2, ArrowRight, Trophy, Sparkles, TrendingUp, Flame, Target, Loader2 } from "lucide-react";
+import { CheckCircle2, ArrowRight, Trophy, Sparkles, TrendingUp, Flame, Target, Loader2, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRouter } from "next/navigation";
 import { recalibrateModuleAction, saveOutcome } from "@/app/actions";
 import OutcomeCard from "@/components/OutcomeCard";
 import { experimental_useObject as useObject } from "@ai-sdk/react";
 import { moduleSchema } from "@/lib/ai/schemas";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 type ModuleCompleteProps = {
   roadmapId: string;
@@ -21,6 +21,13 @@ type ModuleCompleteProps = {
   currentStreak?: number;
   learningGain?: number | null;
 };
+
+// Phased loading messages for the recalibration process
+const LOADING_PHASES = [
+  { message: "Analyzing your mastery data...", icon: "analyze" },
+  { message: "Adapting difficulty to your level...", icon: "adapt" },
+  { message: "Crafting personalized subtopics...", icon: "craft" },
+];
 
 export default function ModuleComplete({
   roadmapId,
@@ -37,22 +44,59 @@ export default function ModuleComplete({
   const { t } = useLanguage();
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState(0);
+  const [moduleReady, setModuleReady] = useState(false);
+  const [recalibrationError, setRecalibrationError] = useState(false);
+  const phaseTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const isPathComplete = !hasNextModule;
   const progressPercent = Math.round((completedSubtopics / totalSubtopics) * 100);
 
-  const { object: streamingModule, submit: startRecalibrate, isLoading: isStreaming } = useObject({
+  const { object: streamingModule, submit: startRecalibrate, isLoading: isStreaming, error: streamError } = useObject({
     api: '/api/roadmap/recalibrate',
     schema: moduleSchema,
     onFinish: () => {
+      // Clear the phase cycling timer
+      if (phaseTimerRef.current) clearInterval(phaseTimerRef.current);
+
+      // Show "Module Ready" state for 2 seconds before navigating
+      // This gives the API's onFinish callback time to persist to DB
+      setModuleReady(true);
       setTimeout(() => {
         router.push("/learn");
         router.refresh();
-      }, 1000);
-    }
+      }, 2000);
+    },
+    onError: () => {
+      if (phaseTimerRef.current) clearInterval(phaseTimerRef.current);
+      setRecalibrationError(true);
+    },
   });
 
+  // Cycle through loading phases every 3 seconds during streaming
+  useEffect(() => {
+    if (isStreaming && !moduleReady) {
+      phaseTimerRef.current = setInterval(() => {
+        setLoadingPhase(prev => Math.min(prev + 1, LOADING_PHASES.length - 1));
+      }, 3000);
+    }
+    return () => {
+      if (phaseTimerRef.current) clearInterval(phaseTimerRef.current);
+    };
+  }, [isStreaming, moduleReady]);
+
+  // Handle stream errors
+  useEffect(() => {
+    if (streamError) {
+      setRecalibrationError(true);
+      if (phaseTimerRef.current) clearInterval(phaseTimerRef.current);
+    }
+  }, [streamError]);
+
   async function handleNextModule() {
+    setRecalibrationError(false);
+    setModuleReady(false);
+    setLoadingPhase(0);
     startRecalibrate({ roadmapId, targetModuleId: lastCompletedModuleId + 1 });
   }
 
@@ -64,6 +108,13 @@ export default function ModuleComplete({
   const ringRadius = 58;
   const ringCircumference = 2 * Math.PI * ringRadius;
   const ringOffset = ringCircumference - (progressPercent / 100) * ringCircumference;
+
+  // Determine loading status text
+  const getLoadingStatus = () => {
+    if (moduleReady) return "Module ready! Redirecting...";
+    if (streamingModule?.module_title) return "Crafting Next Module...";
+    return LOADING_PHASES[loadingPhase]?.message || "Preparing...";
+  };
 
   return (
     <div className="relative min-h-screen bg-background text-foreground flex flex-col items-center justify-center p-6 overflow-hidden transition-colors duration-300">
@@ -154,26 +205,61 @@ export default function ModuleComplete({
             {pathTitle} · {t("learn.module")} {lastCompletedModuleId} / {totalModules}
           </div>
 
-          {/* Next Module Button / Streaming State */}
+          {/* Next Module Button / Streaming State / Error State */}
           {hasNextModule && (
             <div className="space-y-4">
-              {isStreaming || streamingModule ? (
-                <div className="p-6 rounded-xl bg-blue-500/5 border border-blue-500/20 text-left animate-fadeIn">
+              {/* Error State */}
+              {recalibrationError && !isStreaming ? (
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-rose-500/5 border border-rose-500/20 text-left">
+                    <AlertCircle className="w-4 h-4 text-rose-500 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-xs font-bold text-rose-400">Module generation encountered an issue.</p>
+                      <p className="text-[11px] text-rose-400/60 mt-0.5">Your progress is safe. Tap retry to try again.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleNextModule}
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-sm flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all"
+                  >
+                    Retry Generation <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : isStreaming || streamingModule ? (
+                /* Streaming / Module Ready State */
+                <div className={`p-6 rounded-xl text-left transition-all duration-500 ${
+                  moduleReady 
+                    ? 'bg-emerald-500/5 border border-emerald-500/20' 
+                    : 'bg-blue-500/5 border border-blue-500/20'
+                }`}>
                   <div className="flex items-center gap-3 mb-4">
-                    <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
-                    <span className="text-xs font-bold text-blue-500 uppercase tracking-widest">Crafting Next Module...</span>
+                    {moduleReady ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                    ) : (
+                      <Loader2 className="w-4 h-4 text-blue-500 animate-spin" />
+                    )}
+                    <span className={`text-xs font-bold uppercase tracking-widest transition-colors ${
+                      moduleReady ? 'text-emerald-500' : 'text-blue-500'
+                    }`}>
+                      {getLoadingStatus()}
+                    </span>
                   </div>
-                  <h4 className="text-sm font-bold text-foreground mb-2">{streamingModule?.module_title || "..."}</h4>
-                  <div className="space-y-2">
-                    {streamingModule?.subtopics?.map((st: any, idx: number) => (
-                      <div key={idx} className="flex items-center gap-2 text-[11px] text-text-secondary">
-                        <div className="w-1 h-1 rounded-full bg-blue-500/40" />
-                        {st?.title || "..."}
+                  {streamingModule?.module_title && (
+                    <>
+                      <h4 className="text-sm font-bold text-foreground mb-2">{streamingModule.module_title}</h4>
+                      <div className="space-y-2">
+                        {streamingModule.subtopics?.map((st: any, idx: number) => (
+                          <div key={idx} className="flex items-center gap-2 text-[11px] text-text-secondary">
+                            <div className={`w-1.5 h-1.5 rounded-full ${moduleReady ? 'bg-emerald-500/60' : 'bg-blue-500/40'}`} />
+                            {st?.title || "..."}
+                          </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </>
+                  )}
                 </div>
               ) : (
+                /* Default: Generate Next Module Button */
                 <button
                   onClick={handleNextModule}
                   disabled={isLoading}

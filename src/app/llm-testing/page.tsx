@@ -272,172 +272,163 @@ export default function LLMTestingPage() {
 
   // ─── RESULTS PHASE ───
   return (
-    <div style={{ minHeight: "100vh", background: "#0B1120", color: "#E2E8F0", fontFamily: "'Inter', sans-serif" }}>
+    <div className="min-h-screen bg-[#0B1120] text-[#E2E8F0] font-sans">
       {/* Header */}
-      <div style={{ background: "linear-gradient(135deg, #1E3A5F 0%, #0B1120 100%)", borderBottom: "1px solid #1E3A5F", padding: "24px 40px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+      <div className="bg-gradient-to-br from-[#1E3A5F] to-[#0B1120] border-b border-[#1E3A5F] px-10 py-6 sticky top-0 z-50 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
-            <h1 style={{ fontSize: 24, fontWeight: 800, margin: 0, color: "#fff" }}>🧪 LLM Test Results</h1>
-            <p style={{ margin: "4px 0 0", color: "#64748B", fontSize: 13 }}>Generated at {result?.generatedAt ? new Date(result.generatedAt).toLocaleString("en-IN") : "N/A"}</p>
+            <h1 className="text-2xl font-black text-white flex items-center gap-3">
+              <Sparkles className="w-6 h-6 text-blue-400" />
+              LLM Test Intelligence
+            </h1>
+            <p className="text-[#64748B] text-xs font-bold uppercase tracking-widest mt-1">
+              Generated at {result?.generatedAt ? new Date(result.generatedAt).toLocaleString("en-IN") : "N/A"}
+            </p>
           </div>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
-            <button onClick={handleSave} disabled={saving || alreadySaved} style={{
-              padding: "10px 24px",
-              background: alreadySaved ? "#1E293B" : saving ? "#374151" : "linear-gradient(135deg, #059669, #047857)",
-              color: alreadySaved ? "#34D399" : "#fff",
-              border: alreadySaved ? "1px solid #059669" : "none",
-              borderRadius: 12, fontSize: 14, fontWeight: 700,
-              cursor: alreadySaved ? "default" : "pointer",
-              display: "flex", alignItems: "center", gap: 8,
-              opacity: alreadySaved ? 0.8 : 1,
-            }}>
-              <Download style={{ width: 16, height: 16 }} />
-              {alreadySaved ? "✅ Saved" : saving ? "Saving..." : "Save to Excel"}
+          <div className="flex flex-wrap items-center gap-4">
+            <button 
+              onClick={handleSave} 
+              disabled={saving || alreadySaved} 
+              className={`
+                px-6 py-3 rounded-2xl text-sm font-black uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95
+                ${alreadySaved 
+                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20" 
+                  : "bg-blue-600 text-white hover:bg-blue-500 shadow-xl shadow-blue-600/20"}
+                disabled:opacity-50
+              `}
+            >
+              <Download className="w-4 h-4" />
+              {alreadySaved ? "Saved to Excel" : saving ? "Saving Intel..." : "Export to Excel"}
             </button>
-            <button onClick={handleReset} style={{
-              padding: "10px 24px", background: "#1E293B", color: "#94A3B8", border: "1px solid #334155",
-              borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: "pointer",
-            }}>
-              🔄 New Test
+            <button 
+              onClick={handleReset} 
+              className="px-6 py-3 rounded-2xl bg-[#1E293B] text-[#94A3B8] border border-[#334155] text-sm font-black uppercase tracking-widest hover:text-white hover:border-[#475569] transition-all"
+            >
+              New Test
             </button>
-            <div style={{ background: "#1E293B", padding: "8px 16px", borderRadius: 12, fontSize: 13, fontWeight: 700, color: "#34D399" }}>
-              Tests Saved: {testCount}
+            <div className="bg-[#1E293B] px-5 py-3 rounded-2xl text-xs font-black uppercase tracking-widest text-emerald-400 border border-emerald-500/10">
+              Saved Rows: {testCount}
             </div>
           </div>
         </div>
       </div>
 
       {saveStatus && (
-        <div style={{ maxWidth: 1200, margin: "12px auto 0", padding: "0 40px" }}>
-          <div style={{
-            padding: "12px 20px", borderRadius: 12, fontSize: 13, fontWeight: 600,
-            background: saveStatus.startsWith("✅") ? "#052e16" : "#450a0a",
-            color: saveStatus.startsWith("✅") ? "#34D399" : "#F87171",
-            border: saveStatus.startsWith("✅") ? "1px solid #14532d" : "1px solid #7f1d1d",
-          }}>
+        <div className="max-w-7xl mx-auto px-10 mt-6 animate-fadeIn">
+          <div className={`
+            px-6 py-4 rounded-2xl text-sm font-bold border flex items-center gap-3
+            ${saveStatus.startsWith("✅") 
+              ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+              : "bg-rose-500/10 text-rose-400 border-rose-500/20"}
+          `}>
             {saveStatus}
           </div>
         </div>
       )}
 
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "24px 40px" }}>
-        {/* Input Summary */}
-        <div style={cardStyle}>
-          <h3 style={sectionTitle}>Input Profile Summary</h3>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-            {QUESTIONS.map((q) => (
-              <div key={q.id} style={{ background: "#0D1117", borderRadius: 12, padding: 14, border: "1px solid #1E293B" }}>
-                <div style={{ fontSize: 10, fontWeight: 700, color: "#64748B", textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 4 }}>
-                  {STEP_EMOJIS[q.id - 1]} {q.text.split("?")[0].split("your ").pop()}
+      <div className="max-w-7xl mx-auto px-10 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Left Column: Input & Paths (4 cols) */}
+        <div className="lg:col-span-4 space-y-8">
+          {/* Input Summary */}
+          <div className="bg-[#111827] border border-[#1E3A5F] rounded-[2rem] p-8 shadow-2xl">
+            <h3 className="text-[10px] font-black text-[#64748B] uppercase tracking-[0.2em] mb-6">User Context</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {QUESTIONS.map((q) => (
+                <div key={q.id} className="bg-[#0D1117] rounded-2xl p-4 border border-[#1E293B]">
+                  <div className="text-[8px] font-black text-[#64748B] uppercase tracking-widest mb-1 truncate">
+                    {q.text.split("?")[0].split("your ").pop()}
+                  </div>
+                  <div className="text-xs font-bold text-[#E2E8F0] truncate">
+                    {answers[q.id] || "—"}
+                  </div>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "#E2E8F0" }}>
-                  {answers[q.id] || "—"}
+              ))}
+            </div>
+          </div>
+
+          {/* Paths */}
+          <div className="bg-[#111827] border border-[#1E3A5F] rounded-[2rem] p-8 shadow-2xl">
+            <h3 className="text-[10px] font-black text-[#64748B] uppercase tracking-[0.2em] mb-6">Identified Career Paths</h3>
+            <div className="space-y-4">
+              {result?.paths.map((p, i) => (
+                <div key={i} className={`
+                  p-5 rounded-2xl border transition-all
+                  ${i === result.selectedPathIndex 
+                    ? "bg-[#0F2940] border-blue-500 shadow-lg shadow-blue-600/10" 
+                    : "bg-[#0D1117] border-[#1E293B] opacity-60"}
+                `}>
+                  {i === result.selectedPathIndex && (
+                    <div className="text-[8px] font-black text-blue-400 uppercase tracking-widest mb-2">Selected Pathway</div>
+                  )}
+                  <h4 className="text-sm font-black text-white mb-2">{p.title}</h4>
+                  <p className="text-[10px] text-[#94A3B8] leading-relaxed mb-4">{p.summary}</p>
+                  <div className="flex gap-2">
+                    <span className="text-[9px] font-black bg-blue-500/10 text-blue-400 px-2 py-1 rounded-md border border-blue-500/20">₹{p.incomeMin/1000}k-₹{p.incomeMax/1000}k</span>
+                    <span className="text-[9px] font-black bg-slate-500/10 text-slate-400 px-2 py-1 rounded-md border border-slate-500/20">{p.weeks}W</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column: Roadmap & Raw Data (8 cols) */}
+        <div className="lg:col-span-8 space-y-8">
+          {/* Roadmap Modules */}
+          <div className="space-y-6">
+            {result?.roadmap?.modules.map((mod) => (
+              <div key={mod.module_id} className="bg-[#111827] border border-[#1E3A5F] rounded-[2.5rem] p-8 shadow-2xl overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
+                <h3 className="text-[10px] font-black text-[#64748B] uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                  <span className="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-[10px]">M{mod.module_id}</span>
+                  {mod.module_title}
+                </h3>
+                <div className="space-y-4">
+                  {mod.subtopics.map((st, i) => (
+                    <div key={i} className="bg-[#0D1117] border border-[#1E293B] rounded-2xl p-6 group hover:border-[#2D3A5F] transition-all">
+                      <div className="flex gap-4 items-start">
+                        <div className="text-xl opacity-30 group-hover:opacity-100 transition-opacity">{(i+1).toString().padStart(2, '0')}</div>
+                        <div className="flex-1">
+                          <h4 className="text-base font-black text-white mb-2 tracking-tight">{st.title}</h4>
+                          <div className="bg-[#111827] rounded-xl p-4 mb-4 border border-[#1E293B]/50">
+                            <p className="text-xs text-[#94A3B8] font-medium leading-relaxed italic">" {st.practical_task} "</p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
+                            <span className="text-[9px] font-black uppercase tracking-widest bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full border border-blue-500/20">Type: {st.task_type}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full border border-indigo-500/20">{st.complexity_branch}</span>
+                            <span className="text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20">🔍 {st.youtube_search_query}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}
           </div>
-        </div>
 
-        {/* Paths */}
-        {result && (
-          <div style={{ ...cardStyle, marginTop: 24 }}>
-            <h3 style={sectionTitle}>Generated Career Paths ({result.paths.length})</h3>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 16 }}>
-              {result.paths.map((p, i) => (
-                <div key={i} style={{
-                  background: i === result.selectedPathIndex ? "#0F2940" : "#0D1117",
-                  border: i === result.selectedPathIndex ? "2px solid #3B82F6" : "1px solid #1E293B",
-                  borderRadius: 16, padding: 20,
-                }}>
-                  {i === result.selectedPathIndex && (
-                    <div style={{ fontSize: 10, fontWeight: 800, color: "#3B82F6", textTransform: "uppercase", letterSpacing: 2, marginBottom: 8 }}>
-                      ▶ Selected for Roadmap
-                    </div>
-                  )}
-                  <h4 style={{ fontSize: 16, fontWeight: 700, color: "#F1F5F9", margin: "0 0 8px" }}>{p.title}</h4>
-                  <p style={{ fontSize: 13, color: "#94A3B8", margin: "0 0 12px", lineHeight: 1.5 }}>{p.summary}</p>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <span style={tagStyle}>₹{p.incomeMin?.toLocaleString()} - ₹{p.incomeMax?.toLocaleString()}/mo</span>
-                    <span style={tagStyle}>{p.weeks} weeks</span>
-                  </div>
-                  <p style={{ fontSize: 11, color: "#64748B", marginTop: 10, fontStyle: "italic" }}>{p.matchReason}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Roadmap Modules */}
-        {result?.roadmap?.modules.map((mod) => (
-          <div key={mod.module_id} style={{ ...cardStyle, marginTop: 24 }}>
-            <h3 style={sectionTitle}>Module {mod.module_id}: {mod.module_title}</h3>
-            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              {mod.subtopics.map((st, i) => (
-                <div key={i} style={{
-                  background: "#0D1117", border: "1px solid #1E293B", borderRadius: 12, padding: 16,
-                  display: "flex", gap: 16, alignItems: "flex-start",
-                }}>
-                  <div style={{
-                    width: 36, height: 36, borderRadius: 10, background: "#1E3A5F", color: "#3B82F6",
-                    display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 14, flexShrink: 0,
-                  }}>
-                    {i + 1}
-                  </div>
-                  <div style={{ flex: 1 }}>
-                    <h4 style={{ fontSize: 14, fontWeight: 700, color: "#E2E8F0", margin: "0 0 4px" }}>{st.title}</h4>
-                    <p style={{ fontSize: 13, color: "#94A3B8", margin: "0 0 8px" }}>📋 {st.practical_task}</p>
-                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                      <span style={{ ...tagStyle, background: "#1E293B" }}>Type: {st.task_type}</span>
-                      <span style={{ ...tagStyle, background: "#1E293B" }}>Level: {st.complexity_branch}</span>
-                      <span style={{ ...tagStyle, background: "#0F2940", color: "#60A5FA" }}>🔍 {st.youtube_search_query}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-
-        {/* Raw JSON */}
-        {result && (
-          <div style={{ ...cardStyle, marginTop: 24 }}>
-            <h3 style={sectionTitle}>Raw LLM Response (JSON)</h3>
-            <pre style={{
-              background: "#0D1117", border: "1px solid #1E293B", borderRadius: 12, padding: 20,
-              fontSize: 11, color: "#94A3B8", overflow: "auto", maxHeight: 400, whiteSpace: "pre-wrap",
-            }}>
+          {/* Raw JSON */}
+          <div className="bg-[#111827] border border-[#1E3A5F] rounded-[2rem] p-8 shadow-2xl">
+            <h3 className="text-[10px] font-black text-[#64748B] uppercase tracking-[0.2em] mb-6">System Debug Payload</h3>
+            <pre className="bg-[#0D1117] border border-[#1E293B] rounded-2xl p-8 text-[10px] text-[#475569] overflow-auto max-h-[500px] custom-scrollbar leading-relaxed">
               {JSON.stringify(result, null, 2)}
             </pre>
           </div>
-        )}
+        </div>
       </div>
+      
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #1E3A5F; border-radius: 10px; }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn { animation: fadeIn 0.5s ease-out forwards; }
+      `}</style>
     </div>
   );
 }
 
-// ── Styles ──
-const cardStyle: React.CSSProperties = {
-  background: "#111827",
-  border: "1px solid #1E3A5F",
-  borderRadius: 20,
-  padding: 28,
-};
-
-const sectionTitle: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 800,
-  color: "#64748B",
-  textTransform: "uppercase",
-  letterSpacing: 2,
-  marginBottom: 16,
-};
-
-const tagStyle: React.CSSProperties = {
-  fontSize: 11,
-  fontWeight: 600,
-  color: "#94A3B8",
-  background: "#1E3A5F22",
-  padding: "4px 10px",
-  borderRadius: 8,
-  border: "1px solid #1E3A5F",
-};

@@ -2,6 +2,7 @@ import { getUserRoadmap, getUserModel, getUserProfile } from "../actions";
 import LearnClient from "./LearnClient";
 import ModuleComplete from "./ModuleComplete";
 import { redirect } from "next/navigation";
+import { db } from "@/db";
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,23 @@ export default async function LearnPage({ searchParams }: { searchParams: { expl
   ]);
 
   if (!roadmap) {
-    redirect("/path-selection");
+    // If no roadmap exists, check if they have a path selected to determine where to send them
+    const pathOption = await db.query.pathOptions.findFirst({
+      where: (p, { eq, and }) => and(eq(p.userId, roadmap?.userId ?? userProfile?.userId ?? ""), eq(p.isSelected, true)),
+    });
+
+    if (pathOption) {
+      redirect("/pre-test");
+    } else {
+      redirect("/path-selection");
+    }
+  }
+
+  // Diagnostic Guard: If they have a roadmap but somehow missed the BKT initialization (legacy or edge case)
+  if (!userModel?.preTestScore && roadmap.status === 'active') {
+    // Note: We might want to allow legacy users to skip this, 
+    // but for research-grade BKT, we prefer a baseline.
+    // For now, let's just ensure new users who are "stuck" get sent to pre-test.
   }
 
   const exploreId = searchParams.exploreId;

@@ -2,9 +2,10 @@ import { getGPT5ReasoningModel, GPT5_RECALIBRATE_MODULE_PROMPT } from "./models"
 import { generateObject } from "ai";
 import { z } from "zod";
 import { db } from "@/db";
-import { eq } from "drizzle-orm";
-import { roadmaps } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { roadmaps, learningEvents } from "@/db/schema";
 import { moduleSchema } from "./schemas";
+import { buildBKTRecalibrationSummary, type KnowledgeState } from "@/lib/adaptive/bkt-engine";
 
 export async function recalibrateAndGenerateNextModule(userId: string, roadmapId: string, targetModuleId: number) {
   // 1. Fetch necessary context
@@ -22,7 +23,17 @@ export async function recalibrateAndGenerateNextModule(userId: string, roadmapId
 
   if (!roadmap || !profile || !model) throw new Error("Missing data for recalibration");
 
-  // 2. Prepare Context
+  // 2. Prepare Context — structured BKT analysis with subtopic title resolution
+  const knowledgeState = (model.knowledgeState as KnowledgeState) || {};
+  const modules = roadmap.modules as { subtopics?: { subtopic_id: string; title: string }[] }[];
+  const subtopicTitles: Record<string, string> = {};
+  modules.forEach(mod => {
+    mod.subtopics?.forEach(st => {
+      if (st.subtopic_id && st.title) subtopicTitles[st.subtopic_id] = st.title;
+    });
+  });
+  const bktSummary = buildBKTRecalibrationSummary(knowledgeState, subtopicTitles);
+
   const capabilityScore = model.capabilityScore ?? 50;
   const pathContext = JSON.stringify({
     pathTitle: roadmap.pathTitle,
@@ -41,6 +52,8 @@ export async function recalibrateAndGenerateNextModule(userId: string, roadmapId
 Target Module ID to Generate: ${targetModuleId}
 User Capability Score: ${capabilityScore}/100
 
+${bktSummary}
+
 Path Details:
 ${pathContext}
 
@@ -50,15 +63,16 @@ ${profileContext}
   });
 
   // 4. Format the generated module
+  // SAFETY: Force module_id to match targetModuleId regardless of what the AI generated
   const formattedModule = {
-    module_id: object.module_id,
+    module_id: targetModuleId,
     module_title: object.module_title,
     status: 'generated',
     generated_at: new Date().toISOString(),
     unlocks_after_module_id: targetModuleId - 1,
     subtopics: object.subtopics.map((st, idx) => ({
       ...st,
-      status: idx === 0 ? 'active' : 'locked', // First subtopic unlocks
+      status: idx === 0 ? 'active' : 'locked',
       quiz_score: null,
       attempt_count: 0,
       time_spent_seconds: 0,
@@ -66,18 +80,38 @@ ${profileContext}
     })),
   };
 
-  // 5. Replace in Roadmap
-  const updatedModules = (roadmap.modules as unknown[]).map((modUnknown: unknown) => {
-    const mod = modUnknown as { module_id: number };
-    if (mod.module_id === targetModuleId) {
-      return formattedModule;
-    }
-    return mod;
+  // 5. SAFETY: Re-fetch roadmap for latest state before writing
+  const freshRoadmap = await db.query.roadmaps.findFirst({
+    where: (r, { eq, and }) => and(eq(r.id, roadmapId), eq(r.userId, userId)),
   });
 
+  if (!freshRoadmap) throw new Error("Roadmap not found during persistence");
+
+  const currentModules = freshRoadmap.modules as any[];
+  const moduleExists = currentModules.some((mod: any) => mod.module_id === targetModuleId);
+
+  const updatedModules = moduleExists
+    ? currentModules.map((mod: any) => mod.module_id === targetModuleId ? formattedModule : mod)
+    : [...currentModules, formattedModule];
+
+  // SAFETY: User-scoped write to prevent cross-user corruption
   await db.update(roadmaps)
     .set({ modules: updatedModules })
-    .where(eq(roadmaps.id, roadmapId));
+    .where(and(eq(roadmaps.id, roadmapId), eq(roadmaps.userId, userId)));
+
+  // 6. ANALYTICS: Log the recalibration event
+  await db.insert(learningEvents).values({
+    userId,
+    eventType: 'module_recalibrated',
+    data: {
+      roadmapId,
+      targetModuleId,
+      moduleTitle: formattedModule.module_title,
+      subtopicCount: formattedModule.subtopics.length,
+      capabilityScoreAtTime: capabilityScore,
+      generatedAt: formattedModule.generated_at,
+    },
+  });
 
   return formattedModule;
 }

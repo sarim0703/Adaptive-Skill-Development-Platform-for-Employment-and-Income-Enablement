@@ -10,6 +10,36 @@ export interface YouTubeVideo {
   thumbnail: string;
 }
 
+/**
+ * Post-processes the AI-generated query to ensure vocational quality.
+ * Strips noise, appends instructional qualifiers, and enforces negative filters.
+ */
+function refineQuery(query: string): string {
+  let refined = query.trim();
+
+  // 1. Strip redundant LLM-isms or noise words
+  const noiseWords = [/video/gi, /search/gi, /query/gi, /find/gi, /"|'/g];
+  noiseWords.forEach(word => {
+    refined = refined.replace(word, '');
+  });
+
+  // 2. Ensure instructional focus
+  const hasInstructionalFocus = /tutorial|course|lesson|class|training|guide|how to/i.test(refined);
+  if (!hasInstructionalFocus) {
+    refined += " practical tutorial";
+  }
+
+  // 3. Enforce negative filters to remove low-value content
+  const negativeFilters = ["-shorts", "-music", "-vlog", "-gaming", "-review"];
+  negativeFilters.forEach(filter => {
+    if (!refined.includes(filter)) {
+      refined += ` ${filter}`;
+    }
+  });
+
+  return refined.replace(/\s+/g, ' ').trim();
+}
+
 export async function fetchSpecificVideo(query: string, lang: string = 'en'): Promise<YouTubeVideo | null> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   
@@ -23,9 +53,9 @@ export async function fetchSpecificVideo(query: string, lang: string = 'en'): Pr
     url.searchParams.append("part", "snippet");
     url.searchParams.append("maxResults", "1");
     
-    // Append 'tutorial' and '-shorts' to guarantee instructional content and strip out short-form video
-    const finalQuery = query.toLowerCase().includes("tutorial") ? query : `${query} tutorial`;
-    url.searchParams.append("q", finalQuery + " -shorts");
+    // Use the refined query for the final API call
+    const finalQuery = refineQuery(query);
+    url.searchParams.append("q", finalQuery);
     
     url.searchParams.append("type", "video");
     // 'medium' enforces videos between 4 and 20 minutes, perfect for micro-learning

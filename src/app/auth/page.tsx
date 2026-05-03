@@ -6,7 +6,6 @@ import { registerUser, checkUserState } from "../actions";
 import { useRouter } from "next/navigation";
 import { Loader2, Sparkles } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function AuthPage() {
   const { t } = useLanguage();
@@ -74,10 +73,6 @@ export default function AuthPage() {
 
   return (
     <div className="min-h-screen bg-warm-gradient flex flex-col items-center justify-center p-4">
-      {/* Top Switcher */}
-      <div className="fixed top-6 right-6">
-        <LanguageSwitcher />
-      </div>
 
       <div className="w-full max-w-md animate-fadeInUp">
         {/* Logo */}

@@ -28,23 +28,18 @@ export const translations = {
     "paths.select": "Select Path",
     "paths.regenerate": "Regenerate Paths",
 
-    // Learn Dashboard
-    "learn.module": "Module",
+    // Learn Dashboard (Base)
     "learn.lesson": "Lesson",
     "learn.exploration": "Exploration Mode Active",
     "learn.explorationSub": "You are viewing a future lesson. Mastery quizzes are locked until you reach this stage.",
     "learn.returnActive": "Return to Active Task",
-    "learn.whatToDo": "What to do",
     "learn.notes": "Notes",
     "learn.noNotes": "No notes available for this lesson.",
     "learn.pathProgress": "Path Progress",
     "learn.lessons": "lessons",
-    "learn.capability": "Capability",
     "learn.content": "Course Content",
     "learn.modulesCount": "modules",
     "learn.done": "done",
-    "learn.complete": "Complete Lesson",
-    "learn.quickTip": "Quick Tip",
 
     // Landing Page Extras
     "features.engine.title": "Adaptive Engine",
@@ -86,13 +81,13 @@ export const translations = {
     "profile.selectPathDesc": "Please select a learning path to view your profile.",
     "profile.goPathSelection": "Go to Path Selection",
 
-    // Analytics Dashboard
+    // Analytics Dashboard (Consolidated)
     "analytics.research": "Research Analytics",
     "analytics.learning": "Learning Analytics",
     "analytics.analyzing": "Analyzing",
     "analytics.progressIn": "progress in",
     "analytics.cognitive": "Cognitive Level",
-    "analytics.learningGain": "Learning Gain",
+    "analytics.nlg": "Learning Gain",
     "analytics.consistency": "Consistency",
     "analytics.assessments": "Assessments",
     "analytics.bktMastery": "BKT Mastery Over Time",
@@ -109,7 +104,6 @@ export const translations = {
     "analytics.interview": "Interview Invitation",
     "analytics.confidence": "Skill Confidence",
     "analytics.trainingActive": "Training Active",
-    "analytics.methodology": "BKT Analytics Methodology",
     "analytics.integrity": "Integrity",
     "analytics.verified": "Research Verified",
     "analytics.performanceAnalysis": "Performance Analysis",
@@ -117,6 +111,22 @@ export const translations = {
     "analytics.analyzePerformance": "Analyze My Performance",
     "analytics.analyzingPatterns": "Analyzing Patterns...",
     "analytics.failedAnalysis": "Failed to generate analysis. Please try again.",
+    "analytics.title": "Research Analytics Dashboard",
+    "analytics.capability": "Capability",
+    "analytics.streak": "Current Streak",
+    "analytics.quizzes": "Quizzes Taken",
+    "analytics.preVsPost": "Pre vs Post Assessment",
+    "analytics.preTest": "Pre-Test (Baseline)",
+    "analytics.current": "Current Average",
+    "analytics.gain": "Gain",
+    "analytics.zpdTitle": "Knowledge State (ZPD)",
+    "analytics.curveTitle": "Learning Curve",
+    "analytics.masteryTitle": "Knowledge Components Mastery",
+    "analytics.modulesTitle": "Module Completion",
+    "analytics.outcomesTitle": "SDG 8 Outcomes",
+    "analytics.noData": "Not enough data yet.",
+    "analytics.noOutcomes": "No outcomes reported yet.",
+    "analytics.methodology": "Data tracked via Bayesian Knowledge Tracing. Normalized Learning Gain computed via Hake (1998).",
 
     // Jobs (Opportunities)
     "jobs.explorer": "Job Explorer",
@@ -138,9 +148,7 @@ export const translations = {
     "badges.achievements": "Achievements",
     "badges.completed": "Completed",
 
-
-
-
+    // Hero Section
     "hero.badge": "Adaptive Learning Platform",
     "hero.title": "Your career path,",
     "hero.titleHighlight": "intelligently built.",
@@ -150,12 +158,16 @@ export const translations = {
     "hero.trust1": "BKT-powered assessments",
     "hero.trust2": "Adaptive difficulty",
     "hero.trust3": "AI-generated roadmaps",
+
+    // Stats
     "stats.1.title": "Adaptive",
     "stats.1.sub": "Learns from every quiz you take",
     "stats.2.title": "Personalized",
     "stats.2.sub": "A plan built just for you",
     "stats.3.title": "Real Income",
     "stats.3.sub": "Paths to real jobs & gigs",
+
+    // How it Works
     "how.title": "How it works",
     "how.sub": "Three steps to a personalized learning path.",
     "how.step1.badge": "Step 1",
@@ -167,6 +179,8 @@ export const translations = {
     "how.step3.badge": "Step 3",
     "how.step3.title": "Learn with guidance",
     "how.step3.desc": "Complete tasks, pass mastery assessments, and get support from an AI mentor that understands your context.",
+
+    // Mentor
     "mentor.title": "An AI mentor that ",
     "mentor.titleHighlight": "knows your context",
     "mentor.desc": "Unlike generic chatbots, CareerOrbit's mentor reads your live performance data — mastery score, streak, weak areas — and provides targeted guidance.",
@@ -179,9 +193,13 @@ export const translations = {
     "mentor.chat.msg1": "I noticed you've been on this task for a while. Would you like me to break it into smaller steps?",
     "mentor.chat.msg2": "Yes please, I'm confused about Google Maps",
     "mentor.chat.msg3": "Let's start with one step. Open Google Maps and search for the nearest grocery store. Can you do that?",
+    
+    // Call to Action
     "cta.title": "Ready to get started?",
     "cta.sub": "Explore a research-grade adaptive learning experience.",
     "cta.button": "Get Started",
+
+    // Footer
     "footer.text1": "CareerOrbit",
     "footer.text2": "Built for SDG 8 · Decent Work & Economic Growth",
     
@@ -222,7 +240,7 @@ export const translations = {
     "path.readyIn": "Ready in",
     "path.preview": "Curriculum Preview",
     
-    // Learn Dashboard
+    // Learn Dashboard (Consolidated)
     "learn.greeting.morning": "Good morning",
     "learn.greeting.afternoon": "Good afternoon",
     "learn.greeting.evening": "Good evening",
@@ -303,28 +321,7 @@ export const translations = {
     "pretest.syncing": "Syncing Assessment Stream...",
     "pretest.task": "Task",
 
-
-
-    // Analytics Dashboard
-    "analytics.title": "Research Analytics",
-    "analytics.capability": "Capability",
-    "analytics.nlg": "Learning Gain",
-    "analytics.streak": "Current Streak",
-    "analytics.quizzes": "Quizzes Taken",
-    "analytics.preVsPost": "Pre vs Post Assessment",
-    "analytics.preTest": "Pre-Test (Baseline)",
-    "analytics.current": "Current Average",
-    "analytics.gain": "Gain",
-    "analytics.zpdTitle": "Knowledge State (ZPD)",
-    "analytics.curveTitle": "Learning Curve",
-    "analytics.masteryTitle": "Knowledge Components Mastery",
-    "analytics.modulesTitle": "Module Completion",
-    "analytics.outcomesTitle": "SDG 8 Outcomes",
-    "analytics.noData": "Not enough data yet.",
-    "analytics.noOutcomes": "No outcomes reported yet.",
-    "analytics.methodology": "Data tracked via Bayesian Knowledge Tracing. Normalized Learning Gain computed via Hake (1998).",
-
-    // Onboarding Questions (10 Questions — Researcher-Approved)
+    // Onboarding Questions
     "q1.text": "Where are you currently located?",
     "q1.hint": "This helps us find opportunities near you",
     "q2.text": "What is your age group?",
@@ -382,6 +379,7 @@ export const translations = {
     "q10.opt5": "5 — I am an expert / very confident",
   },
   hi: {
+    // Copy mapping from en, translated to hi
     "nav.signIn": "साइन इन करें",
     "nav.learn": "सीखें",
     "nav.analytics": "एनालिटिक्स",
@@ -390,9 +388,8 @@ export const translations = {
     "nav.profile": "प्रोफ़ाइल",
     "nav.signOut": "साइन आउट",
 
-    // Path Selection
     "paths.building": "आपकी यात्रा का निर्माण",
-    "paths.designing": "हमारा AI आपके द्वारा चुने गए करियर पथ के लिए एक व्यावहारिक, चरण-दर-चरण रोडमैप तैयार कर रहा है।",
+    "paths.designing": "हमारा AI आपके द्वारा चुने गए करियर पथ के लिए एक व्यावहारिक, चरण-दर-चरण रोडमैಪ तैयार कर रहा है।",
     "paths.drafting": "मॉड्यूल तैयार किया जा रहा है...",
     "paths.finding": "सबसे अच्छे रास्ते खोजे जा रहे हैं...",
     "paths.mapping": "आपके कौशल को आपके क्षेत्र में करियर के अवसरों से जोड़ना।",
@@ -407,25 +404,18 @@ export const translations = {
     "paths.select": "रास्ता चुनें",
     "paths.regenerate": "रास्ते फिर से बनाएं",
 
-    // Learn Dashboard
-    "learn.module": "मॉड्यूल",
     "learn.lesson": "सबक",
     "learn.exploration": "अन्वेषण मोड सक्रिय",
     "learn.explorationSub": "आप भविष्य का सबक देख रहे हैं। जब तक आप इस स्तर तक नहीं पहुँच जाते, तब तक मास्टरी क्विज़ लॉक रहेंगे।",
     "learn.returnActive": "सक्रिय कार्य पर लौटें",
-    "learn.whatToDo": "क्या करना है",
     "learn.notes": "नोट्स",
     "learn.noNotes": "इस सबक के लिए कोई नोट्स उपलब्ध नहीं हैं।",
     "learn.pathProgress": "पथ प्रगति",
     "learn.lessons": "सबक",
-    "learn.capability": "क्षमता",
     "learn.content": "कोर्स सामग्री",
     "learn.modulesCount": "मॉड्यूल",
     "learn.done": "पूरा हुआ",
-    "learn.complete": "सबक पूरा करें",
-    "learn.quickTip": "त्वरित टिप",
 
-    // Landing Page Extras
     "features.engine.title": "एडेप्टिव इंजन",
     "features.engine.desc": "बेयसियन नॉलेज ट्रेसिंग वास्तविक समय में आपकी दक्षता की निगरानी करता है, कार्य की कठिनाई को गतिशील रूप से समायोजित करता है।",
     "features.market.title": "मार्केट इंटेलिजेंस",
@@ -437,7 +427,6 @@ export const translations = {
     "cta.final.title": "क्या आप सीखना शुरू करने के लिए तैयार हैं?",
     "cta.final.desc": "एडेप्टिव एआई लर्निंग के साथ अपना भविष्य बनाने वाले हजारों अन्य लोगों से जुड़ें।",
 
-    // Profile Page
     "profile.level": "स्तर",
     "profile.localHub": "स्थानीय केंद्र",
     "profile.activeMode": "सक्रिय सीखने का मोड",
@@ -462,16 +451,15 @@ export const translations = {
     "profile.matchedRoles": "मिलान वाली भूमिकाएं",
     "profile.opsInArea": "आपके क्षेत्र में अवसर",
     "profile.notReady": "प्रोफ़ाइल तैयार नहीं है",
-    "profile.selectPathDesc": "अपनी प्रोफ़ೈल देखने के लिए कृपया एक सीखने का रास्ता चुनें।",
+    "profile.selectPathDesc": "अपनी प्रोफ़ाइल देखने के लिए कृपया एक सीखने का रास्ता चुनें।",
     "profile.goPathSelection": "पथ चयन पर जाएं",
 
-    // Analytics Dashboard
     "analytics.research": "अनुसंधान विश्लेषण",
     "analytics.learning": "सीखने का विश्लेषण",
     "analytics.analyzing": "विश्लेषण किया जा रहा है",
     "analytics.progressIn": "प्रगति",
     "analytics.cognitive": "संज्ञानात्मक स्तर",
-    "analytics.learningGain": "सीखने का लाभ",
+    "analytics.nlg": "सीखने का लाभ",
     "analytics.consistency": "निरंतरता",
     "analytics.assessments": "मूल्यांकन",
     "analytics.bktMastery": "समय के साथ बीकेटी महारत",
@@ -488,7 +476,6 @@ export const translations = {
     "analytics.interview": "साक्षात्कार आमंत्रण",
     "analytics.confidence": "कौशल आत्मविश्वास",
     "analytics.trainingActive": "प्रशिक्षण सक्रिय",
-    "analytics.methodology": "बीकेटी विश्लेषिकी पद्धति",
     "analytics.integrity": "अखंडता",
     "analytics.verified": "अनुसंधान सत्यापित",
     "analytics.performanceAnalysis": "प्रदर्शन विश्लेषण",
@@ -496,8 +483,23 @@ export const translations = {
     "analytics.analyzePerformance": "मेरे प्रदर्शन का विश्लेषण करें",
     "analytics.analyzingPatterns": "पैटर्न का विश्लेषण किया जा रहा है...",
     "analytics.failedAnalysis": "विश्लेषण उत्पन्न करने में विफल। कृपया पुन: प्रयास करें।",
+    "analytics.title": "अनुसंधान विश्लेषिकी",
+    "analytics.capability": "क्षमता",
+    "analytics.streak": "वर्तमान स्ट्रीक",
+    "analytics.quizzes": "प्रश्नोत्तरी दी गई",
+    "analytics.preVsPost": "पूर्व बनाम वर्तमान मूल्यांकन",
+    "analytics.preTest": "पूर्व-परीक्षण (बेसलाइन)",
+    "analytics.current": "वर्तमान औसत",
+    "analytics.gain": "वृद्धि",
+    "analytics.zpdTitle": "ज्ञान की स्थिति (ZPD)",
+    "analytics.curveTitle": "सीखने की प्रगति",
+    "analytics.masteryTitle": "ज्ञान घटकों की महारत",
+    "analytics.modulesTitle": "मॉड्यूल पूर्णता",
+    "analytics.outcomesTitle": "SDG 8 परिणाम",
+    "analytics.noData": "अभी पर्याप्त डेटा नहीं है।",
+    "analytics.noOutcomes": "अभी तक कोई परिणाम नहीं।",
+    "analytics.methodology": "बेयसियन ज्ञान ट्रैकिंग (BKT) के माध्यम से ट्रैक किया गया डेटा।",
 
-    // Jobs (Opportunities)
     "jobs.explorer": "जॉब एक्सप्लोरर",
     "jobs.findOps": "अवसर खोजें",
     "jobs.found": "मिले",
@@ -510,15 +512,11 @@ export const translations = {
     "jobs.remote": "रिमोट",
     "jobs.results": "परिणाम",
 
-    // Badges
     "badges.pursuing": "लक्ष्य",
     "badges.unlocked": "खुला हुआ",
     "badges.locked": "बंद",
     "badges.achievements": "उपलब्धियां",
     "badges.completed": "पूरा हुआ",
-
-
-
 
     "hero.badge": "एआई-पावर्ड एडेप्टिव लर्निंग",
     "hero.title": "ऐसे कौशल सीखें जो ",
@@ -529,12 +527,14 @@ export const translations = {
     "hero.trust1": "केवल व्यावहारिक कार्य",
     "hero.trust2": "एआई आपके स्तर के अनुकूल होता है",
     "hero.trust3": "वास्तविक आय परिणाम",
+    
     "stats.1.title": "अनुकूलनीय",
     "stats.1.sub": "आपके हर क्विज़ से सीखता है",
     "stats.2.title": "व्यक्तिगत",
     "stats.2.sub": "सिर्फ आपके लिए बनाई गई योजना",
     "stats.3.title": "वास्तविक आय",
     "stats.3.sub": "असली नौकरियों के रास्ते",
+
     "how.title": "यह कैसे काम करता है",
     "how.sub": "आप जहाँ हैं वहाँ से जहाँ आप होना चाहते हैं वहाँ तक के तीन कदम।",
     "how.step1.badge": "कदम 1",
@@ -546,6 +546,7 @@ export const translations = {
     "how.step3.badge": "कदम 3",
     "how.step3.title": "सीखें, कमाएं, बढ़ें",
     "how.step3.desc": "कार्य पूरे करें, आकलन पास करें, और वास्तविक दुनिया के लिए तैयार हों। यदि आप फंस जाते हैं तो एआई मेंटर हमेशा मौजूद रहता है।",
+
     "mentor.title": "एक एआई मेंटर जो ",
     "mentor.titleHighlight": "आपके संदर्भ को जानता है",
     "mentor.desc": "सामान्य चैटबॉट्स के विपरीत, CareerOrbit का मेंटर आपके लाइव प्रदर्शन डेटा को पढ़ता है और आपको वहीं सलाह देता है जहां आप अभी हैं।",
@@ -558,9 +559,11 @@ export const translations = {
     "mentor.chat.msg1": "अरे! मैंने देखा कि आप 15 मिनट से इस काम पर हैं। यह ठीक है! क्या आप चाहते हैं कि मैं इसे छोटे चरणों में तोड़ दूं? 💪",
     "mentor.chat.msg2": "हाँ कृपया, मैं गूगल मैप्स के बारे में भ्रमित हूँ",
     "mentor.chat.msg3": "कोई बात नहीं! आइए एक स्टॉप से शुरू करते हैं। गूगल मैप्स खोलें और निकटतम किराना स्टोर खोजें। क्या आप ऐसा कर सकते हैं? 🗺️",
+
     "cta.title": "अपनी यात्रा शुरू करने के लिए तैयार हैं?",
     "cta.sub": "वास्तविक आय के लिए वास्तविक कौशल बनाने वाले पूरे भारत के शिक्षार्थियों से जुड़ें।",
     "cta.button": "अभी शुरू करें — मुफ़्त",
+
     "footer.text1": "CareerOrbit — भारत के कार्यबल के लिए अनुकूली शिक्षा",
     "footer.text2": "एसडीजी 8 के लिए निर्मित · सभ्य कार्य और आर्थिक विकास",
     
@@ -580,14 +583,13 @@ export const translations = {
     
     "lang.switch.alert": "भाषा बदलने से आपकी वर्तमान प्रगति रीसेट हो जाएगी और चयनित भाषा में एक नया रोडमैप तैयार होगा। क्या आपको यकीन है?",
 
-    // Onboarding
+    "onboarding.title": "शुरुआत करना",
     "onboarding.step": "चरण",
     "onboarding.of": "का",
     "onboarding.continue": "जारी रखें",
     "onboarding.back": "पीछे",
     "onboarding.finish": "समाप्त",
 
-    // Path Selection
     "path.title": "अपना रास्ता चुनें",
     "path.sub": "हमने आपकी प्रोफ़ाइल के आधार पर आपके लिए ये अवसर खोजे हैं।",
     "path.recommended": "अनुशंसित",
@@ -599,7 +601,6 @@ export const translations = {
     "path.readyIn": "तैयार हो जाओ",
     "path.preview": "पाठ्यक्रम पूर्वावलोकन",
 
-    // Learn Dashboard
     "learn.greeting.morning": "शुभ प्रभात",
     "learn.greeting.afternoon": "नमस्कार",
     "learn.greeting.evening": "शुभ संध्या",
@@ -628,20 +629,17 @@ export const translations = {
     "learn.tip.submit": "जमा करने से पहले अपने काम की दोबारा जाँच करें। गुणवत्ता गति से अधिक मायने रखती।",
     "learn.tip.call": "कॉल करने से पहले आप जो कहना चाहते हैं उसे तैयार करें। आत्मविश्वास तैयारी से आता है।",
     "learn.tip.default": "प्रत्येक कार्य के साथ अपना समय लें। सीखना कोई दौड़ नहीं है — यह एक यात्रा है।",
-
-    // Quiz
+    
     "quiz.preparing": "प्रश्नोत्तरी की तैयारी",
     "quiz.sub": "आपने अभी जो सीखा है उसके आधार पर प्रश्न बना रहे हैं...",
     "quiz.question": "प्रश्न",
     "quiz.submit": "जवाब जमा करें",
     "quiz.next": "अगला प्रश्न",
 
-    // Mentor Proactive Triggers
     "mentor.proactive.repeated_failure": "मैं देख रहा हूँ कि आप इस आकलन पर कड़ी मेहनत कर रहे हैं। चिंता न करें — संघर्ष करना सीखने का हिस्सा है! आइए मैं आपके अगले प्रयास से पहले अवधारणाओं को बेहतर समझने में आपकी मदद करता हूँ।",
     "mentor.proactive.performing_well": "आप अद्भुत कर रहे हैं! 🔥 आप लगातार शानदार प्रदर्शन कर रहे हैं। क्या आप चाहते हैं कि मैं आपको कुछ कठिन चुनौती दूँ?",
     "mentor.proactive.default": "नमस्ते! मैं आपके वर्तमान कार्य में कैसे मदद कर सकता हूँ?",
 
-    // Outcome Card
     "outcome.title": "मॉड्यूल पूरा हुआ! 🎉",
     "outcome.sub": "क्या इस मॉड्यूल ने आपको वास्तविक प्रगति करने में मदद की?",
     "outcome.gig": "मुझे एक गिग या नौकरी मिली!",
@@ -652,7 +650,6 @@ export const translations = {
     "outcome.thanks": "साझा करने के लिए धन्यवाद! 🙏",
     "outcome.thanksSub": "आपकी प्रतिक्रिया हमें सभी के लिए CareerOrbit को बेहतर बनाने में मदद करती है।",
 
-    // Module Completion
     "learn.moduleComplete": "मॉड्यूल पूरा हुआ!",
     "learn.moduleCompleteSub": "ಬढ़िया काम! आपने इस मॉड्यूल के सभी कार्य पूरे कर लिए हैं।",
     "learn.pathComplete": "पथ पूरा हुआ! 🎓",
@@ -661,7 +658,6 @@ export const translations = {
     "learn.subtopicsDone": "कार्य पूरे हुए",
     "learn.noActiveTasks": "अभी कोई सक्रिय कार्य नहीं हैं।",
 
-    // Pre-Test
     "pretest.badge": "नैदानिक मूल्यांकन",
     "pretest.title": "आइए देखें आप कहाँ से शुरू कर रहे हैं",
     "pretest.sub": "यह कोई परीक्षा नहीं है — यह हमें आपकी सीखने की राह को व्यक्तिगत बनाने में मदद करता है।",
@@ -680,28 +676,6 @@ export const translations = {
     "pretest.syncing": "मूल्यांकन स्ट्रीम सिंक हो रहा है...",
     "pretest.task": "कार्य",
 
-
-
-    // Analytics Dashboard
-    "analytics.title": "अनुसंधान विश्लेषिकी (Analytics)",
-    "analytics.capability": "क्षमता",
-    "analytics.nlg": "सीखने में वृद्धि",
-    "analytics.streak": "वर्तमान स्ट्रीक",
-    "analytics.quizzes": "प्रश्नोत्तरी दी गई",
-    "analytics.preVsPost": "पूर्व बनाम वर्तमान मूल्यांकन",
-    "analytics.preTest": "पूर्व-परीक्षण (बेसलाइन)",
-    "analytics.current": "वर्तमान औसत",
-    "analytics.gain": "वृद्धि",
-    "analytics.zpdTitle": "ज्ञान की स्थिति (ZPD)",
-    "analytics.curveTitle": "सीखने की प्रगति",
-    "analytics.masteryTitle": "ज्ञान घटकों की महारत",
-    "analytics.modulesTitle": "मॉड्यूल पूर्णता",
-    "analytics.outcomesTitle": "SDG 8 परिणाम",
-    "analytics.noData": "अभी पर्याप्त डेटा नहीं है।",
-    "analytics.noOutcomes": "अभी तक कोई परिणाम नहीं।",
-    "analytics.methodology": "बेयसियन ज्ञान ट्रैकिंग (BKT) के माध्यम से ट्रैक किया गया डेटा। हेक (1998) के अनुसार सीखने में वृद्धि।",
-
-    // Onboarding Questions (10 Questions)
     "q1.text": "आप वर्तमान में कहाँ स्थित हैं?",
     "q1.hint": "यह हमें आपके पास अवसर खोजने में मदद करता है",
     "q2.text": "आपकी उम्र कितनी है?",
@@ -783,26 +757,20 @@ export const translations = {
     "paths.select": "ಹಾದಿ ಆಯ್ಕೆಮಾಡಿ",
     "paths.regenerate": "ಮಾರ್ಗಗಳನ್ನು ಮರುಸೃಷ್ಟಿಸಿ",
 
-    "learn.module": "ಮಾಡ್ಯೂಲ್",
     "learn.lesson": "ಪಾಠ",
     "learn.exploration": "ಅನ್ವೇಷಣೆ ಮೋಡ್ ಸಕ್ರಿಯವಾಗಿದೆ",
     "learn.explorationSub": "ನೀವು ಭವಿಷ್ಯದ ಪಾಠವನ್ನು ವೀಕ್ಷಿಸುತ್ತಿದ್ದೀರಿ. ನೀವು ಈ ಹಂತವನ್ನು ತಲುಪುವವರೆಗೆ ಮಾಸ್ಟರಿ ರಸಪ್ರಶ್ನೆಗಳನ್ನು ಲಾಕ್ ಮಾಡಲಾಗುತ್ತದೆ.",
     "learn.returnActive": "ಸಕ್ರಿಯ ಕಾರ್ಯಕ್ಕೆ ಹಿಂತಿರುಗಿ",
-    "learn.whatToDo": "ಏನು ಮಾಡಬೇಕು",
     "learn.notes": "ಟಿಪ್ಪಣಿಗಳು",
     "learn.noNotes": "ಈ ಪಾಠಕ್ಕಾಗಿ ಯಾವುದೇ ಟಿಪ್ಪಣಿಗಳು ಲಭ್ಯವಿಲ್ಲ.",
     "learn.pathProgress": "ಮಾರ್ಗದ ಪ್ರಗತಿ",
     "learn.lessons": "ಪಾಠಗಳು",
-    "learn.capability": "ಸಾಮರ್ಥ್ಯ",
     "learn.content": "ಕೋರ್ಸ್ ವಿಷಯ",
     "learn.modulesCount": "ಮಾಡ್ಯೂಲ್‌ಗಳು",
     "learn.done": "ಪೂರ್ಣಗೊಂಡಿದೆ",
-    "learn.complete": "ಪಾಠ ಪೂರ್ಣಗೊಳಿಸಿ",
-    "learn.quickTip": "ತ್ವರಿತ ಟಿಪ್ಪಣಿ",
 
-    // Landing Page Extras
     "features.engine.title": "ಅಡಾಪ್ಟಿವ್ ಇಂಜಿನ್",
-    "features.engine.desc": "ಬೇಸಿಯನ್ ನಾಲೆಡ್ಜ್ ಟ್ರೇಸಿಂಗ್ ನಿಮ್ಮ ಪಾಂಡಿತ್ಯವನ್ನು ನೈಜ-ಸಮಯದಲ್ಲಿ ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುತ್ತದೆ, ಕಾರ್ಯದ ತೊಂದರೆಯನ್ನು ಕ್ರಿಯಾತ್ಮಕವಾಗಿ ಸರಿಹೊಂದಿಸುತ್ತದೆ.",
+    "features.engine.desc": "ಬಯೇಸಿಯನ್ ಜ್ಞಾನ ಟ್ರೇಸಿಂಗ್ ನೈಜ ಸಮಯದಲ್ಲಿ ನಿಮ್ಮ ಪಾಂಡಿತ್ಯವನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡುತ್ತದೆ, ಕಾರ್ಯದ ತೊಂದರೆಯನ್ನು ಕ್ರಿಯಾತ್ಮಕವಾಗಿ ಹೊಂದಿಸುತ್ತದೆ.",
     "features.market.title": "ಮಾರುಕಟ್ಟೆ ಬುದ್ಧಿವಂತಿಕೆ",
     "features.market.desc": "ನಿಮ್ಮ ಪ್ರದೇಶಕ್ಕಾಗಿ ನೈಜ-ಸಮಯದ ಉದ್ಯೋಗ ಬೇಡಿಕೆಯ ಡೇಟಾ.",
     "features.multi.title": "ಬಹುಭಾಷೆ",
@@ -812,7 +780,6 @@ export const translations = {
     "cta.final.title": "ಕಲಿಯಲು ಸಿದ್ಧರಿದ್ದೀರಾ?",
     "cta.final.desc": "ಅಡಾಪ್ಟಿವ್ AI ಕಲಿಕೆಯೊಂದಿಗೆ ತಮ್ಮ ಭವಿಷ್ಯವನ್ನು ನಿರ್ಮಿಸುವ ಸಾವಿರಾರು ಇತರರೊಂದಿಗೆ ಸೇರಿ.",
 
-    // Profile Page
     "profile.level": "ಹಂತ",
     "profile.localHub": "ಸ್ಥಳೀಯ ಹಬ್",
     "profile.activeMode": "ಸಕ್ರಿಯ ಕಲಿಕೆಯ ಮೋಡ್",
@@ -840,13 +807,12 @@ export const translations = {
     "profile.selectPathDesc": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ವೀಕ್ಷಿಸಲು ದಯವಿಟ್ಟು ಕಲಿಕೆಯ ಮಾರ್ಗವನ್ನು ಆಯ್ಕೆಮಾಡಿ.",
     "profile.goPathSelection": "ಮಾರ್ಗ ಆಯ್ಕೆಗೆ ಹೋಗಿ",
 
-    // Analytics Dashboard
     "analytics.research": "ಸಂಶೋಧನಾ ವಿಶ್ಲೇಷಣೆ",
     "analytics.learning": "ಕಲಿಕೆಯ ವಿಶ್ಲೇಷಣೆ",
     "analytics.analyzing": "ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ",
     "analytics.progressIn": "ಪ್ರಗತಿ",
     "analytics.cognitive": "ಸಂಜ್ಞಾನಾತ್ಮಕ ಮಟ್ಟ",
-    "analytics.learningGain": "ಕಲಿಕೆಯ ಲಾಭ",
+    "analytics.nlg": "ಕಲಿಕೆಯ ಲಾಭ",
     "analytics.consistency": "ಸ್ಥಿರತೆ",
     "analytics.assessments": "ಮೌಲ್ಯಮಾಪನಗಳು",
     "analytics.bktMastery": "ಸಮಯದೊಂದಿಗೆ BKT ಪಾಂಡಿತ್ಯ",
@@ -863,7 +829,6 @@ export const translations = {
     "analytics.interview": "ಸಂದರ್ಶನ ಆಹ್ವಾನ",
     "analytics.confidence": "ಕೌಶಲ್ಯದ ಆತ್ಮವಿಶ್ವಾಸ",
     "analytics.trainingActive": "ತರಬೇತಿ ಸಕ್ರಿಯವಾಗಿದೆ",
-    "analytics.methodology": "BKT ಅನಾಲಿಟಿಕ್ಸ್ ವಿಧಾನ",
     "analytics.integrity": "ಸಮಗ್ರತೆ",
     "analytics.verified": "ಸಂಶೋಧನೆ ಪರಿಶೀಲಿಸಲಾಗಿದೆ",
     "analytics.performanceAnalysis": "ಕಾರ್ಯಕ್ಷಮತೆಯ ವಿಶ್ಲೇಷಣೆ",
@@ -871,8 +836,23 @@ export const translations = {
     "analytics.analyzePerformance": "ನನ್ನ ಕಾರ್ಯಕ್ಷಮತೆಯನ್ನು ವಿಶ್ಲೇಷಿಸಿ",
     "analytics.analyzingPatterns": "ಮಾದರಿಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...",
     "analytics.failedAnalysis": "ವಿಶ್ಲೇಷಣೆಯನ್ನು ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.",
+    "analytics.title": "ಸಂಶೋಧನಾ ವಿಶ್ಲೇಷಣೆ",
+    "analytics.capability": "ಸಾಮರ್ಥ್ಯ",
+    "analytics.streak": "ಪ್ರಸ್ತುತ ಸ್ಟ್ರೀಕ್",
+    "analytics.quizzes": "ರಸಪ್ರಶ್ನೆಗಳು",
+    "analytics.preVsPost": "ಪೂರ್ವ ಮತ್ತು ಪ್ರಸ್ತುತ ಮೌಲ್ಯಮಾಪನ",
+    "analytics.preTest": "ಪೂರ್ವ-ಪರೀಕ್ಷೆ (ಬೇಸ್‌ಲೈನ್)",
+    "analytics.current": "ಪ್ರಸ್ತುತ ಸರಾಸರಿ",
+    "analytics.gain": "ಲಾಭ",
+    "analytics.zpdTitle": "ಜ್ಞಾನದ ಸ್ಥಿತಿ (ZPD)",
+    "analytics.curveTitle": "ಕಲಿಕೆಯ ಪ್ರಗತಿ",
+    "analytics.masteryTitle": "ಜ್ಞಾನದ ಅಂಶಗಳ ಕರಗತ",
+    "analytics.modulesTitle": "ಮಾಡ್ಯೂಲ್ ಪೂರ್ಣಗೊಳಿಸುವಿಕೆ",
+    "analytics.outcomesTitle": "SDG 8 ಫಲಿತಾಂಶಗಳು",
+    "analytics.noData": "ಇನ್ನೂ ಸಾಕಷ್ಟು ಡೇಟಾ ಇಲ್ಲ.",
+    "analytics.noOutcomes": "ಇನ್ನೂ ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ.",
+    "analytics.methodology": "ಬೇಸಿಯನ್ ಜ್ಞಾನ ಟ್ರ್ಯಾಕಿಂಗ್ (BKT) ಮೂಲಕ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾದ ಡೇಟಾ.",
 
-    // Jobs (Opportunities)
     "jobs.explorer": "ಜಾಬ್ ಎಕ್ಸ್‌ಪ್ಲೋರರ್",
     "jobs.findOps": "ಅವಕಾಶಗಳನ್ನು ಹುಡುಕಿ",
     "jobs.found": "ಸಿಕ್ಕಿದೆ",
@@ -885,15 +865,11 @@ export const translations = {
     "jobs.remote": "ದೂರಸ್ಥ (Remote)",
     "jobs.results": "ಫಲಿತಾಂಶಗಳು",
 
-    // Badges
     "badges.pursuing": "ಮುಂದುವರಿಸಲಾಗುತ್ತಿದೆ",
     "badges.unlocked": "ಅನ್ಲಾಕ್ ಮಾಡಲಾಗಿದೆ",
     "badges.locked": "ಲಾಕ್ ಮಾಡಲಾಗಿದೆ",
     "badges.achievements": "ಸಾಧನೆಗಳು",
     "badges.completed": "ಪೂರ್ಣಗೊಂಡಿದೆ",
-
-
-
 
     "hero.badge": "ಎಐ-ಚಾಲಿತ ಅಡಾಪ್ಟಿವ್ ಲರ್ನಿಂಗ್",
     "hero.title": "ಕೌಶಲ್ಯಗಳನ್ನು ಕಲಿಯಿರಿ ಅದು ",
@@ -904,12 +880,14 @@ export const translations = {
     "hero.trust1": "ಕೇವಲ ಪ್ರಾಯೋಗಿಕ ಕಾರ್ಯಗಳು",
     "hero.trust2": "ಎಐ ನಿಮ್ಮ ಮಟ್ಟಕ್ಕೆ ಹೊಂದಿಕೊಳ್ಳುತ್ತದೆ",
     "hero.trust3": "ನಿಜವಾದ ಆದಾಯದ ಫಲಿತಾಂಶಗಳು",
+
     "stats.1.title": "ಹೊಂದಿಕೊಳ್ಳುವ",
     "stats.1.sub": "ಪ್ರತಿ ರಸಪ್ರಶ್ನೆಯಿಂದ ಕಲಿಯುತ್ತದೆ",
     "stats.2.title": "ವೈಯಕ್ತಿಕಗೊಳಿಸಿದ",
     "stats.2.sub": "ನಿಮಗಾಗಿ ನಿರ್ಮಿಸಲಾದ ಯೋಜನೆ",
     "stats.3.title": "ನಿಜವಾದ ಆದಾಯ",
     "stats.3.sub": "ನಿಜವಾದ ಉದ್ಯೋಗಗಳಿಗೆ ದಾರಿ",
+
     "how.title": "ಇದು ಹೇಗೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ",
     "how.sub": "ನೀವು ಇರುವಲ್ಲಿಂದ ನೀವು ಇರಬೇಕಾದಲ್ಲಿಗೆ ಮೂರು ಹಂತಗಳು.",
     "how.step1.badge": "ಹಂತ 1",
@@ -921,6 +899,7 @@ export const translations = {
     "how.step3.badge": "ಹಂತ 3",
     "how.step3.title": "ಕಲಿಯಿರಿ, ಸಂಪಾದಿಸಿ, ಬೆಳೆಯಿರಿ",
     "how.step3.desc": "ಕಾರ್ಯಗಳನ್ನು ಪೂರ್ಣಗೊಳಿಸಿ, ಮೌಲ್ಯಮಾಪನಗಳನ್ನು ಪಾಸ್ ಮಾಡಿ ಮತ್ತು ನೈಜ ಜಗತ್ತಿಗೆ ಸಿದ್ಧರಾಗಿ. ಎಐ ಮಾರ್ಗದರ್ಶಕರು ಯಾವಾಗಲೂ ಇರುತ್ತಾರೆ.",
+
     "mentor.title": "ಎಐ ಮಾರ್ಗದರ್ಶಕ ",
     "mentor.titleHighlight": "ನಿಮ್ಮ ಸಂದರ್ಭವನ್ನು ತಿಳಿದಿದ್ದಾನೆ",
     "mentor.desc": "ಸಾಮಾನ್ಯ ಚಾಟ್‌ಬಾಟ್‌ಗಳಿಗಿಂತ ಭಿನ್ನವಾಗಿ, CareerOrbit ನ ಮಾರ್ಗದರ್ಶಕರು ನಿಮ್ಮ ಲೈವ್ ಕಾರ್ಯಕ್ಷಮತೆಯ ಡೇಟಾವನ್ನು ಓದುತ್ತಾರೆ ಮತ್ತು ನೀವು ಈಗ ಎಲ್ಲಿದ್ದೀರೋ ಅಲ್ಲಿಗೆ ನಿರ್ದಿಷ್ಟವಾದ ಸಲಹೆಯನ್ನು ನೀಡುತ್ತಾರೆ.",
@@ -933,9 +912,11 @@ export const translations = {
     "mentor.chat.msg1": "ಹೇ! ನೀವು 15 ನಿಮಿಷಗಳಿಂದ ಈ ಕಾರ್ಯದಲ್ಲಿದ್ದೀರಿ ಎಂದು ನಾನು ಗಮನಿಸಿದ್ದೇನೆ. ಇದು ಸರಿ! ನಾನು ಇದನ್ನು ಸಣ್ಣ ಹಂತಗಳಾಗಿ ವಿಭಜಿಸಬೇಕೆ? 💪",
     "mentor.chat.msg2": "ಹೌದು ದಯವಿಟ್ಟು, ನಾನು ಗೂಗಲ್ ಮ್ಯಾಪ್ಸ್ ಬಗ್ಗೆ ಗೊಂದಲಕ್ಕೊಳಗಾಗಿದ್ದೇನೆ",
     "mentor.chat.msg3": "ಯಾವ ತೊಂದರೆಯಿಲ್ಲ! ಒಂದು ನಿಲ್ದಾಣದಿಂದ ಪ್ರಾರಂಭಿಸೋಣ. ಗೂಗಲ್ ಮ್ಯಾಪ್ಸ್ ತೆರೆಯಿರಿ ಮತ್ತು ಹತ್ತಿರದ ದಿನಸಿ ಅಂಗಡಿಯನ್ನು ಹುಡುಕಿ. ನೀವು ಅದನ್ನು ಮಾಡಬಹುದೇ? 🗺️",
+
     "cta.title": "ನಿಮ್ಮ ಪ್ರಯಾಣವನ್ನು ಪ್ರಾರಂಭಿಸಲು ಸಿದ್ಧರಿದ್ದೀರಾ?",
     "cta.sub": "ನಿಜವಾದ ಆದಾಯಕ್ಕಾಗಿ ನಿಜವಾದ ಕೌಶಲ್ಯಗಳನ್ನು ನಿರ್ಮಿಸುತ್ತಿರುವ ಭಾರತದಾದ್ಯಂತ ಕಲಿಯುವವರೊಂದಿಗೆ ಸೇರಿ.",
     "cta.button": "ಈಗಲೇ ಪ್ರಾರಂಭಿಸಿ — ಉಚಿತ",
+
     "footer.text1": "CareerOrbit — ಭಾರತದ ಕಾರ್ಯಪಡೆಗೆ ಅಡಾಪ್ಟಿವ್ ಲರ್ನಿಂಗ್",
     "footer.text2": "SDG 8 ಗಾಗಿ ನಿರ್ಮಿಸಲಾಗಿದೆ · ಯೋಗ್ಯ ಕೆಲಸ ಮತ್ತು ಆರ್ಥಿಕ ಬೆಳವಣಿಗೆ",
     
@@ -955,14 +936,13 @@ export const translations = {
     
     "lang.switch.alert": "ಭಾಷೆಯನ್ನು ಬದಲಾಯಿಸುವುದರಿಂದ ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಪ್ರಗತಿಯು ಮರುಹೊಂದಿಸಲ್ಪಡುತ್ತದೆ ಮತ್ತು ಆಯ್ಕೆಮಾಡಿದ ಭಾಷೆಯಲ್ಲಿ ಹೊಸ ರೋಡ್‌ಮ್ಯಾಪ್ ಅನ್ನು ರಚಿಸಲಾಗುತ್ತದೆ. ನಿಮಗೆ ಖಚಿತವೇ?",
 
-    // Onboarding
+    "onboarding.title": "ಪ್ರಾರಂಭಿಸುವುದು",
     "onboarding.step": "ಹಂತ",
     "onboarding.of": "ರ",
     "onboarding.continue": "ಮುಂದುವರಿಯಿರಿ",
     "onboarding.back": "ಹಿಂದಕ್ಕೆ",
     "onboarding.finish": "ಮುಕ್ತಾಯ",
 
-    // Path Selection
     "path.title": "ನಿಮ್ಮ ಮಾರ್ಗವನ್ನು ಆರಿಸಿ",
     "path.sub": "ನಿಮ್ಮ ಪ್ರೊಫೈಲ್ ಆಧರಿಸಿ ನಾವು ನಿಮಗಾಗಿ ಈ ಅವಕಾಶಗಳನ್ನು ಕಂಡುಕೊಂಡಿದ್ದೇವೆ.",
     "path.recommended": "ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ",
@@ -974,7 +954,6 @@ export const translations = {
     "path.readyIn": "ಸಿದ್ಧರಾಗಿ",
     "path.preview": "ಪಠ್ಯಕ್ರಮದ ಮುನ್ನೋಟ",
 
-    // Learn Dashboard
     "learn.greeting.morning": "ಶುಭೋದಯ",
     "learn.greeting.afternoon": "ಶುಭ ಮಧ್ಯಾಹ್ನ",
     "learn.greeting.evening": "ಶುಭ ಸಂಜೆ",
@@ -1003,20 +982,17 @@ export const translations = {
     "learn.tip.submit": "ಸಲ್ಲಿಸುವ ಮೊದಲು ನಿಮ್ಮ ಕೆಲಸವನ್ನು ಮತ್ತೊಮ್ಮೆ ಪರೀಕ್ಷಿಸಿ. ಗುಣಮಟ್ಟವು ವೇಗಕ್ಕಿಂತ ಮುಖ್ಯವಾಗಿದೆ.",
     "learn.tip.call": "ಕರೆ ಮಾಡುವ ಮೊದಲು ನೀವು ಏನು ಹೇಳಬೇಕೆಂದು ಸಿದ್ಧಪಡಿಸಿ. ಆತ್ಮವಿಶ್ವಾಸವು ಸಿದ್ಧತೆಯಿಂದ ಬರುತ್ತದೆ.",
     "learn.tip.default": "ಪ್ರತಿಯೊಂದು ಕಾರ್ಯಕ್ಕೂ ನಿಮ್ಮ ಸಮಯ ತೆಗೆದುಕೊಳ್ಳಿ. ಕಲಿಕೆ ಒಂದು ಓಟವಲ್ಲ — ಅದು ಒಂದು ಪ್ರಯಾಣ.",
-
-    // Quiz
+    
     "quiz.preparing": "ರಸಪ್ರಶ್ನೆ ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ",
     "quiz.sub": "ನೀವು ಈಗಷ್ಟೇ ಕಲಿತದ್ದರ ಆಧಾರದ ಮೇಲೆ ಪ್ರಶ್ನೆಗಳನ್ನು ರಚಿಸಲಾಗುತ್ತಿದೆ...",
     "quiz.question": "ಪ್ರಶ್ನೆ",
     "quiz.submit": "ಉತ್ತರಗಳನ್ನು ಸಲ್ಲಿಸಿ",
     "quiz.next": "ಮುಂದಿನ ಪ್ರಶ್ನೆ",
 
-    // Mentor Proactive Triggers
     "mentor.proactive.repeated_failure": "ನೀವು ಈ ಮೌಲ್ಯಮಾಪನದಲ್ಲಿ ಕಷ್ಟಪಟ್ಟು ಪ್ರಯತ್ನಿಸುತ್ತಿದ್ದೀರಿ ಎಂದು ನಾನು ನೋಡುತ್ತೇನೆ. ಚಿಂತಿಸಬೇಡಿ — ಕಷ್ಟಪಡುವುದು ಕಲಿಕೆಯ ಭಾಗ! ನಿಮ್ಮ ಮುಂದಿನ ಪ್ರಯತ್ನದ ಮೊದಲು ಪರಿಕಲ್ಪನೆಗಳನ್ನು ಚೆನ್ನಾಗಿ ಅರ್ಥಮಾಡಿಕೊಳ್ಳಲು ನಾನು ಸಹಾಯ ಮಾಡುತ್ತೇನೆ.",
     "mentor.proactive.performing_well": "ನೀವು ಅದ್ಭುತವಾಗಿ ಮಾಡುತ್ತಿದ್ದೀರಿ! 🔥 ನೀವು ಸತತವಾಗಿ ಉತ್ತಮ ಪ್ರದರ್ಶನ ನೀಡುತ್ತಿದ್ದೀರಿ. ಸ್ವಲ್ಪ ಕಠಿಣ ಸವಾಲು ನೀಡಲೇ?",
     "mentor.proactive.default": "ನಮಸ್ಕಾರ! ನಿಮ್ಮ ಪ್ರಸ್ತುತ ಕಾರ್ಯದಲ್ಲಿ ನಾನು ಹೇಗೆ ಸಹಾಯ ಮಾಡಬಹುದು?",
 
-    // Outcome Card
     "outcome.title": "ಮಾಡ್ಯೂಲ್ ಪೂರ್ಣ! 🎉",
     "outcome.sub": "ಈ ಮಾಡ್ಯೂಲ್ ನಿಮಗೆ ನಿಜವಾದ ಪ್ರಗತಿ ಸಾಧಿಸಲು ಸಹಾಯ ಮಾಡಿದೆಯೇ?",
     "outcome.gig": "ನಮಗೆ ಗಿಗ್ ಅಥವಾ ಕೆಲಸ ಸಿಕ್ಕಿತು!",
@@ -1027,7 +1003,6 @@ export const translations = {
     "outcome.thanks": "ಹಂಚಿಕೊಂಡಿದ್ದಕ್ಕೆ ಧನ್ಯವಾದ! 🙏",
     "outcome.thanksSub": "ನಿಮ್ಮ ಪ್ರತಿಕ್ರಿಯೆ ಎಲ್ಲರಿಗಾಗಿ CareerOrbit ಅನ್ನು ಸುಧಾರಿಸಲು ನಮಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ.",
 
-    // Module Completion
     "learn.moduleComplete": "ಮಾಡ್ಯೂಲ್ ಪೂರ್ಣ!",
     "learn.moduleCompleteSub": "ಅದ್ಭುತ ಕೆಲಸ! ನೀವು ಈ ಮಾಡ್ಯೂಲ್‌ನ ಎಲ್ಲಾ ಕಾರ್ಯಗಳನ್ನು ಮುಗಿಸಿದ್ದೀರಿ.",
     "learn.pathComplete": "ಮಾರ್ಗ ಪೂರ್ಣ! 🎓",
@@ -1036,7 +1011,6 @@ export const translations = {
     "learn.subtopicsDone": "ಕಾರ್ಯಗಳು ಪೂರ್ಣಗೊಂಡವು",
     "learn.noActiveTasks": "ಈಗ ಸಕ್ರಿಯ ಕಾರ್ಯಗಳಿಲ್ಲ.",
 
-    // Pre-Test
     "pretest.badge": "ರೋಗನಿರ್ಣಯ ಮೌಲ್ಯಮಾಪನ",
     "pretest.title": "ನೀವು ಎಲ್ಲಿಂದ ಪ್ರಾರಂಭಿಸುತ್ತಿದ್ದೀರಿ ನೋಡೋಣ",
     "pretest.sub": "ಇದು ಪರೀಕ್ಷೆಯಲ್ಲ — ನಿಮ್ಮ ಕಲಿಕೆಯ ಮಾರ್ಗವನ್ನು ವೈಯಕ್ತಿಕಗೊಳಿಸಲು ಇದು ನಮಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ.",
@@ -1055,28 +1029,6 @@ export const translations = {
     "pretest.syncing": "ಮೌಲ್ಯಮಾಪನ ಸ್ಟ್ರೀಮ್ ಸಿಂಕ್ ಆಗುತ್ತಿದೆ...",
     "pretest.task": "ಕಾರ್ಯ",
 
-
-
-    // Analytics Dashboard
-    "analytics.title": "ಸಂಶೋಧನಾ ವಿಶ್ಲೇಷಣೆ (Analytics)",
-    "analytics.capability": "ಸಾಮರ್ಥ್ಯ",
-    "analytics.nlg": "ಕಲಿಕೆಯ ಲಾಭ",
-    "analytics.streak": "ಪ್ರಸ್ತುತ ಸ್ಟ್ರೀಕ್",
-    "analytics.quizzes": "ರಸಪ್ರಶ್ನೆಗಳು",
-    "analytics.preVsPost": "ಪೂರ್ವ ಮತ್ತು ಪ್ರಸ್ತುತ ಮೌಲ್ಯಮಾಪನ",
-    "analytics.preTest": "ಪೂರ್ವ-ಪರೀಕ್ಷೆ (ಬೇಸ್‌ಲೈನ್)",
-    "analytics.current": "ಪ್ರಸ್ತುತ ಸರಾಸರಿ",
-    "analytics.gain": "ಲಾಭ",
-    "analytics.zpdTitle": "ಜ್ಞಾನದ ಸ್ಥಿತಿ (ZPD)",
-    "analytics.curveTitle": "ಕಲಿಕೆಯ ಪ್ರಗತಿ",
-    "analytics.masteryTitle": "ಜ್ಞಾನದ ಅಂಶಗಳ ಕರಗತ",
-    "analytics.modulesTitle": "ಮಾಡ್ಯೂಲ್ ಪೂರ್ಣಗೊಳಿಸುವಿಕೆ",
-    "analytics.outcomesTitle": "SDG 8 ಫಲಿತಾಂಶಗಳು",
-    "analytics.noData": "ಇನ್ನೂ ಸಾಕಷ್ಟು ಡೇಟಾ ಇಲ್ಲ.",
-    "analytics.noOutcomes": "ಇನ್ನೂ ಯಾವುದೇ ಫಲಿತಾಂಶಗಳಿಲ್ಲ.",
-    "analytics.methodology": "ಬೇಸಿಯನ್ ಜ್ಞಾನ ಟ್ರ್ಯಾಕಿಂಗ್ (BKT) ಮೂಲಕ ಟ್ರ್ಯಾಕ್ ಮಾಡಲಾದ ಡೇಟಾ. ಹ್ಯಾಕ್ (1998) ಮೂಲಕ ಕಲಿಕೆಯ ಲಾಭ.",
-
-    // Onboarding Questions (10 Questions)
     "q1.text": "ನೀವು ಪ್ರಸ್ತುತ ಎಲ್ಲಿದ್ದೀರಿ?",
     "q1.hint": "ಇದು ನಿಮ್ಮ ಹತ್ತಿರದ ಅವಕಾಶಗಳನ್ನು ಹುಡುಕಲು ನಮಗೆ ಸಹಾಯ ಮಾಡುತ್ತದೆ",
     "q2.text": "ನಿಮ್ಮ ವಯಸ್ಸಿನ ಗುಂಪು ಯಾವುದು?",

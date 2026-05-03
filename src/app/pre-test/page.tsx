@@ -9,21 +9,21 @@ export default async function PreTestPage() {
 
   const userId = session.user.id;
 
-  // Check if pre-test already done
-  const model = await db.query.userModel.findFirst({
-    where: (um, { eq }) => eq(um.userId, userId),
+  // If the user already has an active roadmap, they belong on the learning dashboard
+  const activeRoadmap = await db.query.roadmaps.findFirst({
+    where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')),
   });
 
-  if (model && model.preTestScore !== null && model.preTestScore !== undefined) {
+  if (activeRoadmap) {
     redirect("/learn");
   }
 
   // Get path and profile info for generating questions
-  const roadmap = await db.query.roadmaps.findFirst({
-    where: (r, { eq, and }) => and(eq(r.userId, userId), eq(r.status, 'active')),
+  const pathOption = await db.query.pathOptions.findFirst({
+    where: (p, { eq, and }) => and(eq(p.userId, userId), eq(p.isSelected, true)),
   });
 
-  if (!roadmap) redirect("/path-selection");
+  if (!pathOption) redirect("/path-selection");
 
   const profile = await db.query.profiles.findFirst({
     where: (p, { eq }) => eq(p.userId, userId),
@@ -35,7 +35,8 @@ export default async function PreTestPage() {
 
   return (
     <PreTestClient
-      pathTitle={roadmap.pathTitle}
+      pathId={pathOption.id}
+      pathTitle={pathOption.pathTitle}
       profileSummary={profileSummary}
       language={profile?.languagePreference ?? 'english'}
     />

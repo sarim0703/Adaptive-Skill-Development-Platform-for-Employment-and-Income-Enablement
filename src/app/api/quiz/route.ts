@@ -16,6 +16,7 @@ export async function POST(req: Request) {
                    lang.toLowerCase().startsWith('kannada') ? 'kn' : 'en';
 
     // --- PRESENTATION SAFE: JSON FILE CACHE ---
+    const CACHE_VERSION = "v2.0"; // Increment this to force a refresh of all video/transcript data
     const CACHE_FILE = path.join(process.cwd(), "youtube-cache.json");
     
     // Ensure cache file exists
@@ -28,8 +29,8 @@ export async function POST(req: Request) {
     let video;
     let transcript = "";
 
-    if (cacheData[youtubeSearchQuery]) {
-      console.log(`[JSON Cache] Found cached video for: ${youtubeSearchQuery}`);
+    if (cacheData[youtubeSearchQuery] && cacheData[youtubeSearchQuery].version === CACHE_VERSION) {
+      console.log(`[JSON Cache] Found valid v2 cache for: ${youtubeSearchQuery}`);
       const cached = cacheData[youtubeSearchQuery];
       video = {
         videoId: cached.videoId,
@@ -48,6 +49,7 @@ export async function POST(req: Request) {
         // Save to JSON Cache
         try {
           cacheData[youtubeSearchQuery] = {
+            version: CACHE_VERSION,
             videoId: video.videoId,
             title: video.title,
             channelTitle: video.channelTitle,
@@ -68,10 +70,23 @@ export async function POST(req: Request) {
 
     const model = getGPT5InstantModel();
 
+    // BKT-Aware Difficulty Curation: Adjust prompt complexity based on user's current capability
+    const isAdvanced = capabilityScore > 70;
+    const difficultyContext = isAdvanced 
+      ? `### ADVANCED TRACK ENABLED (Capability: ${capabilityScore}/100)
+- The user is an expert. Questions MUST go beyond simple recall of the transcript.
+- Focus on "What if" scenarios, troubleshooting, and professional-grade optimizations.
+- Assume the user has mastered the basics shown in the video; test their ability to apply this to high-stakes or complex environments.`
+      : `### STANDARD TRACK (Capability: ${capabilityScore}/100)
+- Focus on practical application of the concepts shown in the [TRANSCRIPT].
+- Ensure the user understands the core workflow and "how-to" of the subtopic.`;
+
     // Presentation Safe: Dynamic prompt based on transcript availability to prevent hallucination
     const systemPrompt = safeTranscript.length > 0 
       ? `You are a strict, research-grade academic assessor and technical evaluator.
 Your goal is to generate exactly 8 highly analytical, non-generic questions to verify deep mastery of the material.
+
+${difficultyContext}
 
 ### CRITICAL INSTRUCTION: RESEARCH-GRADE ASSESSMENT
 - GENERATE EXACTLY 8 QUESTIONS.
@@ -81,6 +96,7 @@ Your goal is to generate exactly 8 highly analytical, non-generic questions to v
 - FOCUS ON THE "WHY" AND "HOW", not just the "WHAT".
 - ALL QUESTIONS MUST BE IN THE SPECIFIED LANGUAGE: ${lang}
 - MIX DIFFICULTY: Generate 2 easy, 4 medium, and 2 hard questions. Use the "difficulty" field to tag them.
+- TOPIC AREA: Clearly tag each question with a "topic_area" representing the specific micro-skill or concept tested.
 
 ### CONTEXT:
 - Video Title: "${video?.title || subtopicTitle}"
@@ -92,6 +108,8 @@ ${safeTranscript}`
       : `You are a strict, research-grade academic assessor and technical evaluator.
 The user is learning about "${subtopicTitle}" but we do not have a video transcript available.
 
+${difficultyContext}
+
 ### CRITICAL INSTRUCTION: RESEARCH-GRADE CONCEPTUAL QUIZ
 - GENERATE EXACTLY 8 QUESTIONS.
 - Generate a highly analytical, application-level multiple-choice quiz based STRICTLY on the universal, real-world principles of the [Practical Task].
@@ -100,6 +118,7 @@ The user is learning about "${subtopicTitle}" but we do not have a video transcr
 - Ensure the questions are challenging and represent a difficulty level of ${capabilityScore}/100.
 - ALL QUESTIONS MUST BE IN THE SPECIFIED LANGUAGE: ${lang}
 - MIX DIFFICULTY: Generate 2 easy, 4 medium, and 2 hard questions. Use the "difficulty" field to tag them.
+- TOPIC AREA: Clearly tag each question with a "topic_area" representing the specific micro-skill or concept tested.
 
 [Practical Task]:
 ${practicalTask}`;

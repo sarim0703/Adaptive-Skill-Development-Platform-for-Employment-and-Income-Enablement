@@ -207,6 +207,33 @@ export function getZPDStatus(pMastery: number): ZPDStatus {
 }
 
 /**
+ * SAFETY UTILITY: Verifies and repairs a KnowledgeState object.
+ * Useful for ensuring data integrity before persistence or after migrations.
+ */
+export function verifyKnowledgeState(ks: KnowledgeState): KnowledgeState {
+  const verified: KnowledgeState = {};
+  
+  for (const [id, state] of Object.entries(ks || {})) {
+    // Ensure id is a string and state is an object
+    if (!id || typeof state !== 'object' || state === null) continue;
+    
+    // Sanitize mastery probability
+    let mastery = Number(state.pMastery);
+    if (isNaN(mastery)) mastery = 0.10;
+    mastery = Math.max(0, Math.min(1, mastery));
+    
+    verified[id] = {
+      pMastery: mastery,
+      attempts: Math.max(0, Number(state.attempts) || 0),
+      correctCount: Math.max(0, Number(state.correctCount) || 0),
+      lastUpdated: state.lastUpdated || new Date().toISOString(),
+    };
+  }
+  
+  return verified;
+}
+
+/**
  * Returns a human-readable label for ZPD status.
  */
 export function getZPDLabel(status: ZPDStatus): string {
@@ -346,3 +373,106 @@ export function getKnowledgeStateSummary(state: KnowledgeState): {
     avgMastery: Math.round(avgMastery * 100) / 100,
   };
 }
+
+// ─── Recalibration Summary for LLM ────────────────────────────
+
+/**
+ * Builds a structured, human-readable BKT summary for LLM prompts.
+ * 
+ * Instead of passing raw JSON to the AI, this produces a pre-analyzed
+ * breakdown of the learner's knowledge state with ZPD classifications,
+ * enabling the LLM to make informed scaffolding decisions.
+ * 
+ * @param state           Current knowledge state
+ * @param subtopicTitles  Optional mapping of subtopic IDs to human-readable titles
+ * @returns               Formatted string for LLM prompt injection
+ */
+export function buildBKTRecalibrationSummary(
+  state: KnowledgeState,
+  subtopicTitles: Record<string, string> = {}
+): string {
+  const entries = Object.entries(state);
+  if (entries.length === 0) {
+    return 'No prior knowledge data available. Treat learner as a complete beginner (pMastery = 0.10 for all topics).';
+  }
+
+  const summary = getKnowledgeStateSummary(state);
+  const prettifySlug = (slug: string) => slug.replace(/[_-]/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+  // Group KCs by ZPD status for structured output
+  const grouped: Record<ZPDStatus, { name: string; mastery: number; attempts: number }[]> = {
+    'below_zpd': [],
+    'in_zpd': [],
+    'mastered': [],
+  };
+
+  for (const [id, kc] of entries) {
+    const status = getZPDStatus(kc.pMastery);
+    grouped[status].push({
+      name: subtopicTitles[id] || prettifySlug(id),
+      mastery: Math.round(kc.pMastery * 100),
+      attempts: kc.attempts,
+    });
+  }
+
+  // Sort each group by mastery (ascending for weak, descending for strong)
+  grouped['below_zpd'].sort((a, b) => a.mastery - b.mastery);
+  grouped['in_zpd'].sort((a, b) => a.mastery - b.mastery);
+  grouped['mastered'].sort((a, b) => b.mastery - a.mastery);
+
+  let output = `--- BKT KNOWLEDGE STATE ANALYSIS ---
+Overall: ${summary.totalKCs} Knowledge Components tracked | Average Mastery: ${Math.round(summary.avgMastery * 100)}%
+Distribution: ${summary.masteredCount} Mastered | ${summary.inZPDCount} In Learning Zone | ${summary.belowZPDCount} Needs Foundation\n`;
+
+  if (grouped['below_zpd'].length > 0) {
+    output += `\nNEEDS FOUNDATION (pMastery < 30% — REQUIRES HEAVY SCAFFOLDING):\n`;
+    for (const kc of grouped['below_zpd']) {
+      output += `  ⚠ ${kc.name}: ${kc.mastery}% mastery (${kc.attempts} attempts)\n`;
+    }
+  }
+
+  if (grouped['in_zpd'].length > 0) {
+    output += `\nLEARNING ZONE (30-85% — OPTIMAL FOR GROWTH):\n`;
+    for (const kc of grouped['in_zpd']) {
+      output += `  → ${kc.name}: ${kc.mastery}% mastery (${kc.attempts} attempts)\n`;
+    }
+  }
+
+  if (grouped['mastered'].length > 0) {
+    output += `\nMASTERED (> 85% — SKIP BASICS, USE ADVANCED CHALLENGES):\n`;
+    for (const kc of grouped['mastered']) {
+      output += `  ✓ ${kc.name}: ${kc.mastery}% mastery (${kc.attempts} attempts)\n`;
+    }
+  }
+
+  output += `--- END BKT ANALYSIS ---`;
+  return output;
+}
+
+/**
+ * Computes BKT-native Normalized Learning Gain (Hake, 1998).
+ * 
+ * Uses BKT pMastery probabilities directly instead of naive quiz scores:
+ *   NLG = (currentAvgMastery - baselineAvgMastery) / (1.0 - baselineAvgMastery)
+ * 
+ * @param baselineState  The knowledge state from the pre-test initialization
+ * @param currentState   The current knowledge state after learning
+ * @returns  Normalized learning gain as a percentage (0-100), or null if baseline is perfect
+ */
+export function computeBKTLearningGain(
+  baselineState: KnowledgeState,
+  currentState: KnowledgeState
+): number | null {
+  // Only compute gain for KCs that exist in both states
+  const commonKCs = Object.keys(baselineState).filter(k => k in currentState);
+  if (commonKCs.length === 0) return null;
+
+  const baselineAvg = commonKCs.reduce((sum, k) => sum + baselineState[k].pMastery, 0) / commonKCs.length;
+  const currentAvg = commonKCs.reduce((sum, k) => sum + currentState[k].pMastery, 0) / commonKCs.length;
+
+  if (baselineAvg >= 0.99) return null; // Can't improve from near-perfect
+  
+  const gain = ((currentAvg - baselineAvg) / (1.0 - baselineAvg)) * 100;
+  return Math.round(clamp(gain, -100, 100));
+}
+

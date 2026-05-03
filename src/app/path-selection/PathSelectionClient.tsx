@@ -1,12 +1,10 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { generateAndSavePathOptions } from "../actions";
+import { generateAndSavePathOptions, selectPath } from "../actions";
 import { Loader2, RefreshCw, AlertCircle, Sparkles, ChevronRight, BookOpen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
-import { experimental_useObject } from "@ai-sdk/react";
-import { roadmapSchema } from "@/lib/ai/schemas";
 
 type PathOptionType = {
   id: string;
@@ -26,7 +24,6 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
   const [selectingPathId, setSelectingPathId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const hasFetched = useRef(false);
-  const [showPreTestIntro, setShowPreTestIntro] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -55,100 +52,34 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
     await generatePaths();
   }
 
-  const { 
-    object: streamingRoadmap, 
-    submit: startStreaming, 
-    isLoading: isStreamingRoadmap 
-  } = experimental_useObject({
-    api: '/api/roadmap/stream',
-    schema: roadmapSchema,
-    onFinish: () => {
-      // Small delay to ensure DB persistence completes, then show intro
-      setTimeout(() => {
-        setShowPreTestIntro(true);
-      }, 1000);
-    },
-    onError: (err) => {
-      console.error("Streaming error:", err);
-      setSelectingPathId(null);
-      setError("Failed to generate roadmap. Please try again.");
-    }
-  });
-
   async function handleSelect(pathId: string) {
     setSelectingPathId(pathId);
-    startStreaming({ pathId });
+    try {
+      const res = await selectPath(pathId);
+      if (res.success) {
+        router.push("/pre-test");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to select path.");
+      setSelectingPathId(null);
+    }
   }
 
-  // Show the "Generating Roadmap" screen if we are streaming
-  if (isStreamingRoadmap || (selectingPathId && streamingRoadmap)) {
+  // Show transition to Pre-Test
+  if (selectingPathId) {
     return (
       <div className="relative min-h-screen bg-background text-foreground flex flex-col items-center justify-start py-20 px-6 overflow-y-auto">
-        
-        {/* Intro Modal Overlay */}
-        {showPreTestIntro && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-background/80 backdrop-blur-md animate-fadeIn">
-            <div className="max-w-md w-full bg-card border border-border p-10 rounded-[32px] shadow-[0_50px_100px_rgba(0,0,0,0.4)] text-center animate-scaleIn">
-              <div className="w-20 h-20 rounded-3xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-8">
-                <Sparkles className="w-10 h-10 text-blue-500" />
-              </div>
-              <h2 className="text-3xl font-black text-foreground mb-4 tracking-tight">
-                {t("pretest.intro.title")}
-              </h2>
-              <p className="text-text-secondary leading-relaxed mb-10 font-medium">
-                {t("pretest.intro.desc")}
-              </p>
-              <button
-                onClick={() => router.push("/pre-test")}
-                className="w-full py-5 rounded-2xl bg-blue-600 text-white font-bold text-lg hover:bg-blue-500 shadow-[0_20px_40px_rgba(37,99,235,0.3)] active:scale-95 transition-all"
-              >
-                {t("pretest.intro.btn")}
-              </button>
-            </div>
+        <div className="max-w-md w-full bg-card border border-border p-10 rounded-[32px] shadow-[0_50px_100px_rgba(0,0,0,0.4)] text-center animate-scaleIn mt-20">
+          <div className="w-20 h-20 rounded-3xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center mx-auto mb-8 animate-pulse">
+            <Sparkles className="w-10 h-10 text-blue-500" />
           </div>
-        )}
-
-        <div className={`max-w-2xl w-full text-center mb-12 transition-all duration-700 ${showPreTestIntro ? 'blur-xl opacity-20 scale-95' : 'blur-0 opacity-100 scale-100'}`}>
-          <div className="inline-flex mb-6 relative">
-            <div className="w-16 h-16 rounded-full border-4 border-blue-500/20 border-t-blue-500 animate-spin flex items-center justify-center bg-card">
-              <Sparkles className="w-6 h-6 text-blue-500" />
-            </div>
-          </div>
-          <h2 className="text-3xl font-bold mb-4">{t("paths.building")}</h2>
-          <p className="text-text-secondary">{t("paths.designing")}</p>
-
-        </div>
-
-        <div className={`max-w-2xl w-full space-y-6 transition-all duration-700 ${showPreTestIntro ? 'blur-xl opacity-20 scale-95' : 'blur-0 opacity-100 scale-100'}`}>
-          {streamingRoadmap?.modules?.map((mod: any, idx: number) => (
-            <div key={idx} className="p-6 rounded-2xl bg-card border border-border animate-fadeInUp shadow-xl relative overflow-hidden group">
-               <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 opacity-30 group-hover:opacity-100 transition-opacity" />
-               <div className="flex items-center gap-4 mb-4">
-                  <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-xs font-black text-blue-500 border border-blue-500/20">
-                    {idx + 1}
-                  </div>
-                  <h3 className="text-lg font-bold text-foreground">{mod?.module_title || t("paths.drafting")}</h3>
-
-               </div>
-               
-               <div className="space-y-3 pl-12">
-                  {mod?.subtopics?.map((st: any, sIdx: number) => (
-                    <div key={sIdx} className="flex items-start gap-3">
-                      <div className="w-1.5 h-1.5 rounded-full bg-blue-500/40 mt-1.5 flex-shrink-0" />
-                      <p className="text-sm text-text-secondary leading-snug">{st?.title || "..."}</p>
-                    </div>
-                  ))}
-               </div>
-            </div>
-          ))}
-          
-          {/* Animated Placeholder for next module */}
-          {!streamingRoadmap?.modules || streamingRoadmap.modules.length < 3 ? (
-            <div className="p-6 rounded-2xl border border-dashed border-border flex items-center gap-4 opacity-40 animate-pulse">
-               <div className="w-8 h-8 rounded-lg bg-foreground/5" />
-               <div className="h-4 w-48 bg-foreground/5 rounded" />
-            </div>
-          ) : null}
+          <h2 className="text-3xl font-black text-foreground mb-4 tracking-tight">
+            Preparing your Path...
+          </h2>
+          <p className="text-text-secondary leading-relaxed mb-10 font-medium">
+            We are setting up your diagnostic pre-test to evaluate your baseline knowledge.
+          </p>
         </div>
       </div>
     );
@@ -163,12 +94,9 @@ export default function PathSelectionClient({ initialPaths }: { initialPaths: Pa
                <Sparkles className="w-7 h-7 text-blue-500 animate-pulse" />
             </div>
           </div>
-          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-4 text-foreground">
+          <h2 className="text-2xl md:text-3xl font-semibold tracking-tight mb-8 text-foreground">
             {t("paths.finding")}
           </h2>
-          <p className="text-base text-text-secondary mb-8">
-            {t("paths.mapping")}
-          </p>
 
           <div className="w-full bg-foreground/5 rounded-full h-1 overflow-hidden border border-border">
              <div className="h-full bg-blue-500 w-2/3 animate-[loading_3s_ease-in-out_infinite]"></div>

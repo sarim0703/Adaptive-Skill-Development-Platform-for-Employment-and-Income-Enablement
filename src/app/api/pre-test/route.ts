@@ -18,8 +18,8 @@ export async function POST(req: Request) {
 Your job is to create a diagnostic pre-test that measures a learner's BASELINE knowledge before they start learning.
 
 IMPORTANT RULES:
-1. Generate 8 questions spanning the FULL BREADTH of the career path topic.
-2. Mix difficulty: 3 easy, 3 medium, 2 hard questions.
+1. Generate 10 questions spanning the FULL BREADTH of the career path topic.
+2. Mix difficulty: 3 easy, 4 medium, 3 hard questions.
 3. Questions must be PRACTICAL, not academic. Test real-world knowledge.
 4. Each question must have a "topic_area" tag that maps to a specific skill area within the path.
 5. Use topic_area slugs like: "basic-tools", "customer-service", "route-planning", "safety", "digital-skills", "pricing", "quality-check", "communication" etc.

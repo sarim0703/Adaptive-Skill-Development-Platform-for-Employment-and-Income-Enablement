@@ -36,7 +36,7 @@ export const preTestSchema = z.object({
       topic_area: z.string().describe("The skill/knowledge area this question tests"),
       difficulty: z.enum(["easy", "medium", "hard"]).describe("Difficulty level of this question"),
     })
-  ).length(8).describe("Generate exactly 8 diagnostic questions"),
+  ).length(10).describe("Generate exactly 10 diagnostic questions"),
 });
 
 export const quizSchema = z.object({
@@ -46,6 +46,7 @@ export const quizSchema = z.object({
       options: z.array(z.string()).length(4).describe("Exactly 4 options"),
       correct_index: z.number().min(0).max(3).describe("The index (0-3) of the correct option"),
       explanation: z.string().describe("Detailed explanation"),
+      topic_area: z.string().describe("The specific micro-skill or concept this question tests"),
       difficulty: z.enum(["easy", "medium", "hard"]).describe("Difficulty level of this question"),
     })
   ).length(8).describe("Generate exactly 8 research-grade questions"),
