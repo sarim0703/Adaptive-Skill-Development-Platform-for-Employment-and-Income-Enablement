@@ -1,0 +1,33 @@
+# Test Results: Session D (Outline View & Dynamic Generation)
+
+Test scripts for Session D (`07_session_d.test.ts`) covering the AI recalibration engine and path switch archival logic.
+
+## Test Execution Details
+- **Test File:** `testing_scripts/07_session_d.test.ts`
+- **Framework:** Vitest with JSdom
+- **Execution Time:** ~1.0 seconds
+- **Pass Rate:** 7/7 (100% Pass)
+
+---
+
+## 1. Module Recalibration Engine
+
+| Test Case | What It Verifies | Result |
+| :--- | :--- | :--- |
+| `should generate a new module and replace the PENDING_CALIBRATION placeholder` | The AI generates a module with the correct `module_id`, `module_title`, `status: 'generated'`, `generated_at` timestamp, and `unlocks_after_module_id` linking back to the previous module. | ✅ **PASS** |
+| `should format subtopics with correct initial states` | The first subtopic is set to `'active'` (unlocked), while the remaining two are `'locked'`. All subtopics initialize with `attempt_count: 0`, `time_spent_seconds: 0`, and `quiz_score: null`. | ✅ **PASS** |
+| `should persist the recalibrated module into the roadmap JSONB` | Verifies `db.update()` is called with the full 3-module array. Modules 1 & 2 remain untouched. Module 3 is replaced from `PENDING_CALIBRATION` → fully generated with title and 3 subtopics. | ✅ **PASS** |
+| `should throw if roadmap, profile, or userModel is missing` | When the roadmap query returns `null`, the function correctly throws `'Missing data for recalibration'` instead of silently failing. | ✅ **PASS** |
+
+## 2. Path Switch Archival Logic
+
+| Test Case | What It Verifies | Result |
+| :--- | :--- | :--- |
+| `should archive roadmap with correct reason and timestamp` | The archive payload uses `status: 'archived'`, `archiveReason: 'path_switch'`, and `archivedAt` is a valid `Date` instance not in the future. | ✅ **PASS** |
+| `should preserve userModel history across path switches (no reset)` | Confirms that `capabilityScore`, `totalQuizzesTaken`, `currentStreak`, and all other metrics are **not** zeroed out when switching paths — the user's learning history carries over. | ✅ **PASS** |
+| `should correctly differentiate archive reasons` | The platform supports `'path_switch'`, `'completed'`, and `'abandoned'` as valid archive reasons, and never uses `'deleted'` (we archive, never delete). | ✅ **PASS** |
+
+---
+
+> [!TIP]
+> The recalibration engine correctly performs a surgical replacement of a single module inside the JSONB array while leaving all other modules untouched. This is the core mechanism that makes CareerOrbit truly adaptive — the platform refuses to generate content until it has measured the user's real capability.

@@ -1,0 +1,78 @@
+Test ID,Session,Feature,Test Case,Steps to Test,Expected Result,Status,Notes
+T01,Landing,Landing Page,Page loads correctly,"1. Open http://localhost:3000
+2. Wait for page to load","Hero section with 'Learn skills that actually pay' heading, gradient orbs, Sign In button visible",pass ,
+T02,Landing,Landing Page,Navigation to auth,"1. Click 'Sign In' button in nav
+2. OR click 'Start Learning Free' CTA",Redirected to /auth page,pass,
+T03,Landing,Landing Page,Scroll sections visible,1. Scroll down the landing page,"'How it works' 3-step cards, AI Mentor showcase with mock chat, 'Ready to start your journey?' CTA, footer with SDG 8 mention all visible",pass,
+T04,Landing,Landing Page,Mobile responsiveness,"1. Resize browser to mobile width (~375px)
+2. Scroll through entire page","All sections stack vertically, text is readable, no horizontal overflow",pass,
+T05,A,Auth - Register,New user registration,"1. Go to /auth
+2. Click 'Don't have an account? Sign up'
+3. Enter Name, Email, Password
+4. Click 'Create Account'","Green message 'Account created successfully. Please sign in.' appears, form switches to login mode",pass,
+T06,A,Auth - Register,Duplicate email prevention,1. Try registering with the same email again,Error message 'User already exists' shown,pass,
+T07,A,Auth - Login,Successful login,"1. Enter the registered email + password
+2. Click 'Sign In'",Redirected to /onboarding (first time) or /learn (returning user),pass,
+T08,A,Auth - Login,Wrong password,"1. Enter correct email but wrong password
+2. Click 'Sign In'","Error message shown, stays on /auth page",pass,
+T09,A,Auth - Protection,Protected route redirect,1. Open /learn directly without being logged in,Redirected to /auth,pass,
+T10,A,Auth - Protection,Logged-in user redirect,"1. Login successfully
+2. Navigate to /auth again",Redirected to /learn (not shown auth page again),,
+T11,B,Onboarding,Page loads,"1. After first login, land on /onboarding",Multi-step form visible with first question (Location),,
+T12,B,Onboarding,Complete all steps,"1. Answer all 8 onboarding questions one by one
+2. Submit the final step","Profile saved, redirected to /path-selection",,
+T13,B,Onboarding,Question flow,1. Go through questions,"Questions should cover: Location, Education, Time Availability, Skills, Work History, Target Income, Language, Confidence Level",,
+T14,B,Path Selection,AI generates paths,"1. Land on /path-selection after onboarding
+2. Wait for AI to generate paths","3-4 career path cards appear with: title, summary, income range (INR), estimated weeks, match reason, preview weeks",,
+T15,B,Path Selection,Select a path,"1. Click 'Choose This Path' on any card
+2. Wait for roadmap generation","Loading state shown, then redirected to /learn with the first task",,
+T16,C,Learn Dashboard,Page loads with task,"1. After path selection, land on /learn","Shows: path title, capability score (50/100), timer, current subtopic title, practical task, YouTube help link, 'I Did This' button",,
+T17,C,Learn Dashboard,Personalized header,1. Check the header area,Shows '{Name}'s journey from {Location}' text above the path title,,
+T18,C,Learn Dashboard,Timer runs,1. Watch the timer in the top right,Timer counts up in MM:SS format every second,,
+T19,C,Learn Dashboard,YouTube link works,1. Click 'Search YouTube for Help',Opens YouTube in new tab with the subtopic's search query,,
+T20,C,Learn Dashboard,Outline link,1. Click 'Outline' link next to capability score,Navigates to /learn/outline,,
+T21,C,Quiz,Quiz modal opens,1. Click 'I Did This - Test My Understanding',Quiz modal appears with 2 multiple choice questions,,
+T22,C,Quiz,Answer quiz correctly,"1. Answer both questions correctly
+2. Submit","'Passed!' message, score shown, modal closes, page refreshes to next subtopic",,
+T23,C,Quiz,Answer quiz incorrectly,"1. Answer one or both questions wrong
+2. Submit","'Keep Practicing' message, subtopic status changes to 'needs_review', yellow review banner appears on dashboard",,
+T24,C,Quiz,Capability score updates,"1. Complete a quiz (pass or fail)
+2. Check capability score in header","Score increases on pass, decreases on fail (clamped 0-100)",,
+T25,C,Quiz,Streak badge appears,"1. Complete tasks on consecutive days
+2. Check header",🔥 streak badge appears with day count (e.g. '2 day streak'),,
+T26,D,Outline View,Page loads,1. Navigate to /learn/outline,"Full roadmap timeline visible: Module 1 with subtopics, Module 2, and PENDING_CALIBRATION modules",,
+T27,D,Outline View,Subtopic status icons,1. Check each subtopic in the outline,"✅ Green check = complete, 🔵 Blue pulse = active, ⚠️ Amber = needs review, ○ Gray = locked",,
+T28,D,Outline View,Shimmer effect,1. Look at PENDING_CALIBRATION modules,Dashed border card with shimmer animation sweeping across,,
+T29,D,Outline View,Generate Now button,"1. Complete all subtopics in a module
+2. Check the next PENDING_CALIBRATION module",'Generate Now' button appears,,
+T30,D,Outline View,Recalibrate module,"1. Click 'Generate Now' on a pending module
+2. Wait for AI generation","Module transforms from placeholder to fully generated with 3 new subtopics, first one set to 'active'",,
+T31,D,Outline View,Streak and score badges,1. Check the outline header,Capability score pill (e.g. 62/100) and streak badge (if active) visible in top right,,
+T32,D,Path Switch,Banner appears,1. Fail quizzes multiple times until capability score drops below 35,Red 'You seem to be struggling' banner appears with 'Switch Path' button,,
+T33,D,Path Switch,Switch path flow,"1. Click 'Switch Path' on the banner
+2. Select a new path on /path-selection","Old roadmap archived, new roadmap generated, redirected to /learn with fresh tasks",,
+T34,E,AI Mentor,Floating button visible,"1. Go to /learn
+2. Look at bottom-right corner",Indigo floating button with sparkles icon visible,,
+T35,E,AI Mentor,Chat panel opens,1. Click the floating button,"Chat panel slides up (full-screen on mobile, 400px panel on desktop) with 'AI Mentor' header",,
+T36,E,AI Mentor,Send a message,"1. Type 'Help me with this task'
+2. Click send or press Enter","Message appears in chat, AI response streams in with context-aware advice",,
+T37,E,AI Mentor,Context awareness,1. Ask 'What am I working on?',"AI should know your current subtopic, path title, and capability score",,
+T38,E,AI Mentor,Auto-open on stuck,1. Stay on a task for 15+ minutes without completing it,"Chat button starts pulsing/bouncing, then auto-opens with empathetic greeting about being stuck",,
+T39,E,AI Mentor,Close and reopen,"1. Click X to close the chat
+2. Click the floating button again",Chat reopens with previous messages preserved,,
+T40,E,AI Mentor,Mobile responsive,"1. Resize to mobile width
+2. Open the chat",Chat takes full width of screen,,
+T41,F,Outcome Card,Component renders,1. Complete all subtopics in a module,"OutcomeCard should appear with 4 options: gig found, interview, confidence, still learning",,
+T42,F,Outcome Card,Submit feedback,"1. Select an outcome option
+2. Click 'Submit Feedback'","Thank you message shown, outcome saved to database",,
+T43,F,Visual Polish,Needs review badge,"1. Fail a quiz on a subtopic
+2. Check /learn dashboard",Yellow ⚠️ banner: 'Let's review this again' with explanation,,
+T44,F,Visual Polish,Smooth transitions,"1. Navigate between /learn, /learn/outline, /path-selection","Page transitions are smooth, no layout jumps or flash of unstyled content",,
+T45,General,SEO,Page titles,1. Check browser tab title on each page,"Landing: 'CareerOrbit - Adaptive Career...', Auth: same, Learn: same",,
+T46,General,Error Handling,No console errors,"1. Open browser DevTools Console
+2. Navigate through all pages",No red errors in console (warnings are acceptable),,
+T47,General,Database,Data persistence,"1. Complete a few tasks and quizzes
+2. Log out
+3. Log back in","All progress preserved: capability score, completed subtopics, streak count",,
+T48,General,Auth,Session persistence,"1. Close browser tab
+2. Reopen localhost:3000",Still logged in (session cookie persists),,

@@ -1,0 +1,35 @@
+# CareerOrbit - Implementation Plan (Session C)
+
+This plan outlines the execution of **Session C (Execution View - Core Loop)**. This is the heart of the adaptive engine, where the user actually engages with tasks, takes AI-generated quizzes, and triggers dynamic capability recalculations.
+
+## Proposed Changes
+
+### 1. The Core Loop Engine (User Model)
+We will build the math that powers the adaptive system based exactly on the formulas defined in `03_DATABASE_SCHEMA.md`.
+- **[NEW] `src/lib/adaptive/update-user-model.ts`**: Implements the capability score adjustments, streak calculations, pass/fail penalties, and learning velocity updates based on quiz results.
+- **[MODIFY] `src/app/actions.ts`**: Add `submitQuizResult()` server action which writes to the `quiz_attempt` table and calls the recalculation helper.
+
+### 2. Proactive AI Triggers
+The system must "watch" the user and intervene if necessary.
+- **[NEW] `src/lib/adaptive/triggers.ts`**: Logic to evaluate if a user is `'stuck'`, experiencing `'repeated_failure'`, or `'performing_well'`.
+- **[MODIFY] `src/app/actions.ts`**: Add `checkProactiveTriggers()` server action which logs fired triggers to the `system_event` table.
+
+### 3. AI Quiz Generation
+- **[NEW] `src/app/api/quiz/route.ts`**: An API route using Phi-4 (via Vercel AI SDK) to generate exactly 2 highly contextual Multiple Choice Questions based on the current subtopic and the user's capability score.
+
+### 4. Learn Page & Interactive UI
+- **[NEW] `src/app/learn/page.tsx`**: The main execution environment. It will fetch the *active* roadmap and display only the currently active subtopic. Includes a live `setInterval` timer tracking `time_spent_seconds` and periodic trigger checks.
+- **[NEW] `src/components/QuizModal.tsx`**: A client component modal that fetches the AI quiz, renders the questions, evaluates pass/fail (≥50% required), and transitions the subtopic state appropriately.
+
+## User Review Required
+
+> [!IMPORTANT]
+> The quiz generation uses `gpt-4o-mini` (our proxy for Phi-4) inside an API route to generate strict JSON. I will implement a Zod schema to enforce that the AI returns an array of questions with exactly 4 options and 1 correct index. Do you want me to proceed with this structure?
+
+## Verification Plan
+
+### Automated Tests
+- Build verification (`npm run build`) to ensure there are no strict typing issues with the complex math and JSON parsing.
+
+### Manual Verification
+- We will write a set of testing scripts (Session C Testing) to test the mathematical accuracy of `update-user-model.ts` to ensure capability scores clamp correctly between 0 and 100, and streaks reset appropriately.

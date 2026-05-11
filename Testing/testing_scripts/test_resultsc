@@ -1,0 +1,34 @@
+# Test Results: Session C (Execution View & Core Loop)
+
+I have created and run the test scripts for the Session C Core Loop (`06_core_loop.test.ts`). This verified that the mathematical formulas for capability scoring, average calculations, streak management, and proactive triggers work exactly as designed.
+
+## Test Execution Details
+- **Test File:** `testing_scripts/06_core_loop.test.ts`
+- **Framework:** Vitest with JSdom
+- **Execution Time:** ~1.2 seconds
+- **Pass Rate:** 7/7 (100% Pass)
+
+---
+
+## 1. Adaptive Core Loop - User Model Updates
+
+| Test Case | Expected Outcome | Result |
+| :--- | :--- | :--- |
+| `should increase capability score and calculate averages on pass` | Calculates score delta correctly (+12), adds pass adjustment (+3), updates rolling averages accurately, resets fail count, and increments pass count. | ✅ **PASS** |
+| `should decrease capability score on fail and apply attempt penalty` | Deducts score delta (-8), applies attempt penalty (-5 for 2nd attempt), applies fail adjustment (-3), increments fail streak, and zeroes out pass streak. | ✅ **PASS** |
+| `should clamp capability score between 0 and 100` | Tests if an already high capability score (98) receiving a massive boost (+23) strictly clamps to 100 and never exceeds the boundary. | ✅ **PASS** |
+
+## 2. Adaptive Core Loop - Proactive Triggers
+
+| Test Case | Expected Outcome | Result |
+| :--- | :--- | :--- |
+| `should trigger "repeated_failure" if user fails 2 or more times consecutively` | If the user has a `consecutiveFailCount >= 2`, it correctly returns the `'repeated_failure'` trigger to wake up the mentor. | ✅ **PASS** |
+| `should trigger "stuck" if user spends > 3x average time` | Evaluates live `timeSpentSeconds` against the historical `avgTimePerSubtopic` and fires `'stuck'` if it crosses the threshold. | ✅ **PASS** |
+| `should trigger "performing_well" if user passes 3 times consecutively` | Detects a high streak and correctly fires `'performing_well'` so the mentor can provide positive reinforcement. | ✅ **PASS** |
+| `should return null if no conditions are met` | Safely evaluates average normal behavior and returns `null` so it does not annoy the user unnecessarily. | ✅ **PASS** |
+
+> [!TIP]
+> The capability engine properly isolated mathematical logic from the actual database using strict Drizzle mocks, guaranteeing that the formulas accurately increment and decrement metrics under various realistic user states.
+
+---
+**Status**: The core brain of the platform is mathematically verified and ready.
