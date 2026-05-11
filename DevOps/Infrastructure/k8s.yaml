@@ -1,0 +1,54 @@
+# --- CAREERORBIT KUBERNETES ORCHESTRATION ---
+# Assigned to: Deployment & DevOps Team
+# Environment: Production Cluster (EKS/GKE)
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: career-orbit-deployment
+  namespace: prod
+  labels:
+    app: career-orbit
+    team: devops
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: career-orbit
+  template:
+    metadata:
+      labels:
+        app: career-orbit
+    spec:
+      containers:
+      - name: web-app
+        image: careerorbit/v3.1:latest
+        ports:
+        - containerPort: 3000
+        resources:
+          limits:
+            cpu: "1000m"
+            memory: "1Gi"
+          requests:
+            cpu: "500m"
+            memory: "512Mi"
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: career-orbit-service
+  namespace: prod
+spec:
+  type: LoadBalancer
+  selector:
+    app: career-orbit
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
